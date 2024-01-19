@@ -1,0 +1,18 @@
+.app-grid {
+    display: grid;
+    // grid-template-columns: [container-start] minmax(1.6rem, 1fr) [center-start] repeat(
+    //     8, [col-start] minmax(min-content, 80rem) [col-end]
+    // ) [center-end] minmax(1.6rem, 1fr) [container-end];
+
+    &.with-header {
+        grid-template-rows: 6rem calc(100vh - 12rem) 6rem;
+    }
+}
+
+// .full-stretch {
+//     grid-column: container-start / container-end;
+// }
+
+// .center-stretch {
+//     grid-column: center-start / center-end;
+// }

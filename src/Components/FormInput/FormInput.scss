@@ -1,0 +1,18 @@
+.form-control.hidden {
+    display: none;
+}
+
+.form-input:is(:valid, :placeholder-shown) + .label {
+    padding-block: 0;
+}
+
+.label * {
+    transition: transform 0.25s ease-in-out;
+}
+
+.form-input:is(:valid, :placeholder-shown) + .label * {
+    visibility: hidden;
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-2rem);
+}

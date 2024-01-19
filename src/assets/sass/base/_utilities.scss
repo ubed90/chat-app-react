@@ -1,0 +1,7 @@
+.app-container {
+    width: min(95%, 60rem);
+    height: 100%;
+    margin-inline: auto;
+    display: grid;
+    place-items: center;
+}

@@ -1,0 +1,7 @@
+@use './assets/sass/base/' as base;
+@use './assets/sass//abstracts/' as abstracts;
+@use './assets/sass/layout/' as layout;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
