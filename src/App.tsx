@@ -7,6 +7,8 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 10,
+      retry: 3,
+      retryDelay: 1000
     },
   },
 });
@@ -17,7 +19,7 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { HomeLayout, Login, Register, Error } from './Pages';
+import { HomeLayout, Login, Register, Error, VerfiyEmail, ForgotPassword, ResetPassword } from './Pages';
 import { AuthGuard } from './Components';
 import { store } from './Store';
 
@@ -49,7 +51,26 @@ const router = createBrowserRouter([
     path: '/register',
     element: <Register />,
     errorElement: <Error />,
-    action: registerAction
+    action: registerAction,
+  },
+  {
+    path: '/verify-email',
+    element: <VerfiyEmail />,
+    errorElement: <Error />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPassword />,
+    errorElement: <Error />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPassword />,
+    errorElement: <Error />,
+  },
+  {
+    path: '/*',
+    element: <Error />,
   },
 ]);
 

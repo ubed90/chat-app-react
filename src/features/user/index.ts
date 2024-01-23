@@ -1,20 +1,27 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { IUser, IUserData } from '../../models/user.model';
 import { getThemeFromLocalStorage, getUserFromLocalStorage, Themes } from '../../utils/localStorage';
 import { toast } from 'react-toastify';
+import { loginUserThunk } from './userThunk';
 
 const initialState: IUser = {
   user: getUserFromLocalStorage(),
   theme: getThemeFromLocalStorage(),
 };
 
+// * Async Thunks
+export const loginUserAPI = createAsyncThunk(
+  'user/login',
+  loginUserThunk
+)
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    loginUser: (state, { payload }: PayloadAction<{ user: IUserData, token: string }>) => {
-      const { token, user } = payload;
-      state.user = { ...user, token: token ? token : state.user?.token };
+    loginUser: (state, { payload }: PayloadAction<{ user: IUserData }>) => {
+      const { user } = payload;
+      state.user = { ...user };
       userSlice.caseReducers.performActionOnLocalStorage(state, {
         payload: { action: 'SAVE', key: 'user' },
       });
@@ -51,6 +58,14 @@ const userSlice = createSlice({
     },
 
   },
+  extraReducers: (builder) => {
+    builder.addCase(loginUserAPI.rejected, (_, { payload }) => {
+      toast.error(`${payload}`)
+    }).addCase(loginUserAPI.fulfilled, (state, { payload }) => {
+      state.user = payload.user;
+      toast.success('Login Successfull 🚀')
+    })
+  }
 });
 
 export const { loginUser, logoutUser, toggleTheme } = userSlice.actions;
