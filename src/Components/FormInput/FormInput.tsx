@@ -47,8 +47,9 @@ const FormInput: React.FC<FormInputProps> = ({
       className={`form-control w-full relative mb-7 ${type === 'hidden' ? 'hidden' : ''}`}
     >
       {!hideLabel && (
-        <label htmlFor={name} className="label text-xl md:text-2xl p-0 pb-1 capitalize">
+        <label htmlFor={name} className="label text-xl md:text-2xl p-0 pb-1 capitalize justify-start gap-x-2">
           {label || name}
+          {required && (<span className='text-red-500'>*</span>)}
         </label>
       )}
       <input

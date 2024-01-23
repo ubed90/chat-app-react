@@ -19,7 +19,7 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { HomeLayout, Login, Register, Error, VerfiyEmail } from './Pages';
+import { HomeLayout, Login, Register, Error, VerfiyEmail, ForgotPassword, ResetPassword } from './Pages';
 import { AuthGuard } from './Components';
 import { store } from './Store';
 
@@ -56,11 +56,21 @@ const router = createBrowserRouter([
   {
     path: '/verify-email',
     element: <VerfiyEmail />,
-    errorElement: <Error />
+    errorElement: <Error />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPassword />,
+    errorElement: <Error />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPassword />,
+    errorElement: <Error />,
   },
   {
     path: '/*',
-    element: <Error />
+    element: <Error />,
   },
 ]);
 

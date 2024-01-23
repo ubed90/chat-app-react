@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
-import customFetch from '../utils/customFetch';
+import customFetch from '../../utils/customFetch';
 import { ImSad2 } from 'react-icons/im';
 import { MdVerified } from 'react-icons/md';
 

@@ -58,9 +58,23 @@ const Login = () => {
             </>
           )}
         </CustomForm>
-        <h4 className="text-xl md:text-2xl text-center mt-7">
-          Don't have an account yet ? <Link className='text-primary underline underline-offset-4' to="/register">Register Now</Link>
-        </h4>
+        <footer className="mt-5 flex flex-col-reverse gap-y-2 md:flex-row w-full justify-between items-center">
+          <h4 className="text-xl md:text-2xl">
+            Don't have an account yet ?{' '}
+            <Link
+              className="text-primary underline underline-offset-4"
+              to="/register"
+            >
+              Register Now
+            </Link>
+          </h4>
+          <Link
+            className="text-xl md:text-2xl text-accent hover:underline underline-offset-4 transition-all"
+            to="/forgot-password"
+          >
+            Forgot Password ?
+          </Link>
+        </footer>
       </section>
     </main>
   );
