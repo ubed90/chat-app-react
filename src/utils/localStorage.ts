@@ -18,7 +18,7 @@ const getThemeFromLocalStorage = (): string => {
 const getUserFromLocalStorage = (): IUserData | null => {
   const user = localStorage.getItem('user');
 
-  if(!user || !JSON.parse(user).token) return null;
+  if(!user) return null;
 
   return JSON.parse(user);
 };
