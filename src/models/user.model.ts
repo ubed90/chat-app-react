@@ -8,5 +8,6 @@ export type IUserData = {
   email: string;
   name: string;
   username: string;
+  profilePicture?: string;
   token?: string;
-}
+};

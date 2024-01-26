@@ -1,4 +1,6 @@
 .app-grid {
+    width: 100%;
+    height: 100%;
     display: grid;
     // grid-template-columns: [container-start] minmax(1.6rem, 1fr) [center-start] repeat(
     //     8, [col-start] minmax(min-content, 80rem) [col-end]

@@ -1,6 +1,12 @@
+import { Footer, Header } from "../Components"
+
 const HomeLayout = () => {
   return (
-    <div>HomeLayout</div>
+    <main className="app-grid with-header">
+      <Header />
+      <div className="main-content"></div>
+      <Footer />
+    </main>
   )
 }
 
