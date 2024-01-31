@@ -1,5 +1,7 @@
 import './App.scss';
 
+// TODO Make Login, Register, Profile Pages Lazy Load
+
 // * RQ
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -19,13 +21,16 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { HomeLayout, Login, Register, Error, VerfiyEmail, ForgotPassword, ResetPassword } from './Pages';
-import { AuthGuard } from './Components';
+import { HomeLayout, Login, Register, Error, VerfiyEmail, ForgotPassword, ResetPassword, ChatsContainer, Chat, NoChatSelected, Profile } from './Pages';
+import { AuthGuard, ErrorElement } from './Components';
 import { store } from './Store';
 
 // * Actions
 import { loginAction } from './Pages/Auth/Login';
 import { registerAction } from './Pages/Auth/Register';
+
+// * Loader
+// import { chatsLoader } from "./Pages/ChatsContainer/ChatsContainer";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +45,31 @@ const router = createBrowserRouter([
       </AuthGuard>
     ),
     errorElement: <Error />,
+    children: [
+      {
+        path: '',
+        element: <ChatsContainer />,
+        errorElement: <ErrorElement />,
+        // loader: chatsLoader(queryClient),
+        children: [
+          {
+            path: '',
+            element: <NoChatSelected />,
+            errorElement: <ErrorElement />
+          },
+          {
+            path: ':id',
+            element: <Chat />,
+            errorElement: <ErrorElement />
+          }
+        ]
+      }
+    ]
+  },
+  {
+    path: 'profile',
+    element: <AuthGuard><Profile /></AuthGuard>,
+    errorElement: <Error />
   },
   {
     path: '/login',
@@ -78,7 +108,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router}></RouterProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 }

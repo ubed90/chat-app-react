@@ -3,10 +3,12 @@ import { useDispatch } from "react-redux";
 
 // * Reducers
 import userReducer from "./features/user";
+import chatReducer from './features/chat';
 
 export const store = configureStore({
     reducer: {
-        user: userReducer
+        user: userReducer,
+        chat: chatReducer
     }
 })
 

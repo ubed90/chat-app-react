@@ -31,7 +31,7 @@ ORDER: Base + typography > general layout + grid > page layout > components
   }
 
   @if $breakpoint == lg-phone {
-    @media only screen and (min-width: 40.625em) {
+    @media only screen and (min-width: 40em) {
       @content;
     } //650px
   }
@@ -41,25 +41,25 @@ ORDER: Base + typography > general layout + grid > page layout > components
     //   @content;
     // } //900px
 
-    @media only screen and (min-width: 53.75em) {
+    @media only screen and (min-width: 48em) {
       @content;
     } //860px
   }
 
   @if $breakpoint == tab-land {
-    @media only screen and (min-width: 68.75em) {
+    @media only screen and (min-width: 64em) {
       @content;
     } //1200px = 75em 1100px = 68.75em
   }
 
   @if $breakpoint == sm-desktop {
-    @media only screen and (min-width: 90em) {
+    @media only screen and (min-width: 77.5em) {
       @content;
     } //1500px
   }
 
   @if $breakpoint == big-desktop {
-    @media only screen and (min-width: 112.5em) {
+    @media only screen and (min-width: 96.25em) {
       @content;
     } //1800
   }

@@ -4,7 +4,7 @@ export type IUser = {
 }
 
 export type IUserData = {
-  id: string;
+  _id: string;
   email: string;
   name: string;
   username: string;

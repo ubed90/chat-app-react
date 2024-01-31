@@ -1,0 +1,17 @@
+.local-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    
+    &-info {
+        display: grid;
+        grid-template-columns: min-content auto;
+        grid-template-rows: repeat(2, min-content);
+        align-items: center;
+        gap: 0 1rem;
+
+        &-profile-image {
+            grid-row: 1 / -1;
+        }
+    }
+}
