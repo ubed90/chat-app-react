@@ -1,0 +1,51 @@
+.chat-menu {
+    bottom: 3rem;
+
+    &.bottom-left {
+        left: 2rem;
+    }
+
+    &.bottom-right {
+        right: 2rem;
+    }
+
+    clip-path: circle(20px at 85.8% 85.8%);
+
+    transition: all 0.4s cubic-bezier(0.83, 0, 0.17, 1);
+
+    &.open {
+        clip-path: circle(400% at 0 0);
+    }
+
+    &.open &-item:last-child {
+        > * {
+            transform: rotate(135deg);
+        }
+    }
+
+    &-item {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 1rem;
+        align-items: center;
+
+        &:not(:first-child) {
+            margin-top: 1rem;
+        }
+
+        button {
+            justify-self: end;
+        }
+
+        p {
+            text-align: right;
+        }
+
+        &:last-child {
+            > * {
+                transition: 0.3s ease-in-out;
+                grid-column: 1 / -1;
+            }
+        }
+    }
+}

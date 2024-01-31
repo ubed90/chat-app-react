@@ -25,6 +25,7 @@ const userSlice = createSlice({
       userSlice.caseReducers.performActionOnLocalStorage(state, {
         payload: { action: 'SAVE', key: 'user' },
       });
+      toast.success('Login Successful 🚀');
     },
     performActionOnLocalStorage: (
       state,
@@ -63,7 +64,6 @@ const userSlice = createSlice({
       toast.error(`${payload}`)
     }).addCase(loginUserAPI.fulfilled, (state, { payload }) => {
       state.user = payload.user;
-      toast.success('Login Successfull 🚀')
     })
   }
 });

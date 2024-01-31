@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 // * Checkg for the State of Whether the form is being submitted or not
 import { useNavigation } from 'react-router-dom';
@@ -11,16 +11,18 @@ interface CustomBtnProps {
   loadingText?: string;
   type?: 'submit' | 'button' | 'reset';
   isDisabled?: boolean;
+  icon?: ReactNode
 }
 
 const CustomBtn: React.FC<CustomBtnProps> = ({
   clickHandler = () => {},
-  text = 'Submit',
+  text,
   classes,
   isLoading = false,
   loadingText = 'Sending...',
   type = 'button',
-  isDisabled = false
+  isDisabled = false,
+  icon
 }) => {
   const navigation = useNavigation();
 
@@ -41,6 +43,7 @@ const CustomBtn: React.FC<CustomBtnProps> = ({
       ) : (
         text
       )}
+      {icon && icon}
     </button>
   );
 };

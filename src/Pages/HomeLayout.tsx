@@ -1,6 +1,13 @@
+import { Outlet } from "react-router-dom"
+import { Header } from "../Components"
+
 const HomeLayout = () => {
   return (
-    <div>HomeLayout</div>
+    <main className="app-grid with-header">
+      <Header />
+      <Outlet />
+      {/* <Footer /> */}
+    </main>
   )
 }
 

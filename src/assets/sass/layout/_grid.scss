@@ -1,11 +1,18 @@
 .app-grid {
+    width: min(100%, 153.6rem);
+    margin-inline: auto;
+    height: 100%;
     display: grid;
     // grid-template-columns: [container-start] minmax(1.6rem, 1fr) [center-start] repeat(
     //     8, [col-start] minmax(min-content, 80rem) [col-end]
     // ) [center-end] minmax(1.6rem, 1fr) [container-end];
 
     &.with-header {
-        grid-template-rows: 6rem calc(100vh - 12rem) 6rem;
+        grid-template-rows: 6rem calc(100vh - 6rem);
+        
+        @supports (height: 100dvh) {
+            grid-template-rows: 6rem calc(100dvh - 6rem);
+        }
     }
 }
 

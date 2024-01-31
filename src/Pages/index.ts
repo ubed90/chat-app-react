@@ -5,3 +5,7 @@ export { default as Register } from './Auth/Register';
 export { default as VerfiyEmail } from './Auth/VerifyEmail';
 export { default as ForgotPassword } from './Auth/ForgotPassword';
 export { default as ResetPassword } from './Auth/ResetPassword';
+export { default as ChatsContainer } from './ChatsContainer/ChatsContainer';
+export { default as NoChatSelected } from './NoChatSelected';
+export { default as Chat } from './Chat/Chat';
+export { default as Profile } from './Profile';

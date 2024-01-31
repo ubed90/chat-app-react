@@ -1,0 +1,45 @@
+@use '../../assets/sass/abstracts/' as *;
+
+.chats-container {
+
+    display: flex;
+
+    &-right {
+        flex: 1;
+    }
+
+    &-left {
+        flex-basis: 30rem;
+    }
+
+    @include respond(tab-land) {
+        &-left {
+            flex-basis: 40rem;
+        }
+    }
+}
+
+.chats-parent {
+    width: 100%;
+    height: 100%;
+    overflow: hidden auto;
+
+    &-mobile-layout {
+        width: 100%;
+        height: 100%;
+
+        display: grid;
+        grid-template-columns: repeat(2, 100%);
+        transition: transform 300ms ease-in-out;
+
+        .left,
+        .right {
+            width: 100%;
+            height: 100%;
+        }
+
+        &.openChat {
+            transform: translateX(-100%);
+        }
+    }
+}

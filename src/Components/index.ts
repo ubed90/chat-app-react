@@ -3,3 +3,10 @@ export { default as AuthGuard } from './AuthGuard';
 export { default as FormInput } from './FormInput/FormInput'
 export { default as CustomBtn } from './CustomBtn';
 export { default as CustomForm } from './CustomForm/CustomForm';
+export { default as ChatListItem } from './ChatListItem/ChatListItem';
+export { default as Header } from './Header/Header';
+export { default as ChatBubble } from './ChatBubble';
+export { default as ChatHeader } from './ChatHeader/ChatHeader';
+export { default as ChatFooter } from './ChatFooter/ChatFooter';
+export { default as ChatMenu } from './ChatMenu/ChatMenu';
+export { default as Footer } from './Footer';
