@@ -48,7 +48,10 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
     document.getElementById(`modal-root_${id}`) || createPortalRoot(id)
   );
 
-  const isTransitioning = useMountTransition({ isMounted: isOpen, mountDelay: 500 });
+  const isTransitioning = useMountTransition({
+    isMounted: isOpen,
+    mountDelay: 500,
+  });
 
   //* Append portal root on mount
   // * Delete Portal root on unmount as well
@@ -61,7 +64,7 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
 
     return () => {
       bodyEl.style.overflow = '';
-      bodyEl.removeChild(portalRoolEL)
+      bodyEl.removeChild(portalRoolEL);
     };
   }, [portalExists]);
 
@@ -81,7 +84,7 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
   // * Enable Drawer to get closed with Escape
   useEffect(() => {
     const onKeyPress = (event: globalThis.KeyboardEvent) => {
-      console.log(event);
+      // console.log(event);
       if (event.key === 'Escape') {
         onClose();
       }
@@ -99,10 +102,16 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
   return ReactDOM.createPortal(
     <section
       aria-hidden={isOpen ? 'false' : 'true'}
-      className={`custom-modal ${isTransitioning ? 'in' : ''} ${isOpen ? 'open' : ''}`}
+      className={`custom-modal ${isTransitioning ? 'in' : ''} ${
+        isOpen ? 'open' : ''
+      }`}
     >
       <div onClick={onClose} className="custom-modal-backdrop"></div>
-      <div className={`custom-modal-content border-[1px] border-accent rounded-xl p-4 ${className && className}`}>
+      <div
+        className={`custom-modal-content border-[1px] border-white rounded-xl p-4 ${
+          className && className
+        }`}
+      >
         {children}
       </div>
     </section>,
@@ -110,13 +119,16 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
   );
 };
 
-const ModalHeader: React.FC<{ onClose?(): void } & PropsWithChildren> = ({ children, onClose }) => {
+const ModalHeader: React.FC<{ onClose?(): void } & PropsWithChildren> = ({
+  children,
+  onClose,
+}) => {
   return (
-    <header className="custom-modal-header w-full flex justify-between items-center pb-4 border-b-[1px] border-b-accent border-opacity-30">
-      <h2 className="text-2xl md:text-4xl">{children}</h2>
+    <header className="custom-modal-header w-full flex justify-between items-center pb-4 border-b-[1px] border-b-white border-opacity-30">
+      <h2 className="text-4xl text-white">{children}</h2>
       <CustomBtn
         type="button"
-        classes="btn-outline btn-accent rounded-lg"
+        classes="btn-outline btn-white border-white text-white hover:bg-white hover:text-black hover:border-transparent rounded-lg"
         icon={<IoClose className="text-4xl" />}
         clickHandler={onClose && onClose}
       />
@@ -124,18 +136,32 @@ const ModalHeader: React.FC<{ onClose?(): void } & PropsWithChildren> = ({ child
   );
 };
 
-const ModalBody: React.FC<{ className?: string } & PropsWithChildren> = ({ className, children }) => {
-  return <div className={`custom-modal-body ${className && className}`}>{children}</div>;
-}
+const ModalBody: React.FC<{ className?: string } & PropsWithChildren> = ({
+  className,
+  children,
+}) => {
+  return (
+    <div className={`custom-modal-body ${className && className}`}>
+      {children}
+    </div>
+  );
+};
 
-const ModalFooter: React.FC<{ className?: string } & PropsWithChildren> = ({ className, children }) => {
-  return <footer className={`custom-modal-footer ${className && className}`}>{children}</footer>;
-}
+const ModalFooter: React.FC<{ className?: string } & PropsWithChildren> = ({
+  className,
+  children,
+}) => {
+  return (
+    <footer className={`custom-modal-footer ${className && className}`}>
+      {children}
+    </footer>
+  );
+};
 
-Modal.Header = ModalHeader
+Modal.Header = ModalHeader;
 
-Modal.Body = ModalBody
+Modal.Body = ModalBody;
 
-Modal.Footer = ModalFooter
+Modal.Footer = ModalFooter;
 
 export default Modal;

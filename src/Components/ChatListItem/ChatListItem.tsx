@@ -59,22 +59,30 @@ const ChatListItem: React.FC<IChat> = (chat) => {
           </div>
         </div>
       )}
-      <h4 className="text-2xl lg:text-3xl text-accent font-bold capitalize local-chat-name truncate">
+      <h4
+        className={`text-2xl lg:text-3xl text-accent font-bold capitalize local-chat-name truncate ${
+          chat?.lastMessage ? '' : 'row-span-2'
+        }`}
+      >
         {chat.isGroupChat
           ? chat.name
           : getOtherUserDetails(user!, chat.users).name}
       </h4>
-      <p className="text-lg lg:text-xl capitalize local-chat-lastmessage truncate">
-        <span className="font-bold">
-          {chat.lastMessage.sender._id === user?._id
-            ? 'You'
-            : chat.lastMessage.sender.name}
-        </span>
-        : {chat.lastMessage.content}
-      </p>
-      <p className="text-sm local-chat-time">
-        {dayjs(chat.lastMessage.createdAt).format('hh:mm a')}
-      </p>
+      {chat?.lastMessage && (
+        <p className="text-lg lg:text-xl capitalize local-chat-lastmessage truncate">
+          <span className="font-bold">
+            {chat.lastMessage.sender._id === user?._id
+              ? 'You'
+              : chat.lastMessage.sender.name}
+          </span>
+          : {chat.lastMessage.content}
+        </p>
+      )}
+      {chat?.lastMessage && (
+        <p className="text-sm local-chat-time">
+          {dayjs(chat.lastMessage.createdAt).format('hh:mm a')}
+        </p>
+      )}
     </li>
   );
 }

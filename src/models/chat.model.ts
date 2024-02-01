@@ -11,3 +11,9 @@ export type IChat = {
 }
 
 export type IChatResponse = { status: string; message: string; chats: IChat[] };
+
+export type IChatCreation = {
+  status: string;
+  message: string;
+  chat: IChat;
+};

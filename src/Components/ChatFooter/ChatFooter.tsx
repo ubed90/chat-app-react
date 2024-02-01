@@ -8,7 +8,10 @@ import { Themes } from '../../utils/localStorage';
 import { toast } from 'react-toastify';
 
 type ChatFooterProps = {
-  sendMessage: (content: string) => void;
+  sendMessage: (props: {
+    content: string;
+    setContent: React.Dispatch<React.SetStateAction<string>>;
+  }) => void;
   isPending: boolean;
 };
 
@@ -21,7 +24,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
     
     if(!content) return toast.warning('Message cannot be empty.')
 
-    sendMessage(content);
+    sendMessage({ content, setContent });
   }
 
   return (
