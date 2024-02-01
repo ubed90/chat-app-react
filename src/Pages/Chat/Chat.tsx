@@ -12,11 +12,11 @@ import {
 import { ChatBubble, ChatFooter, ChatHeader } from '../../Components';
 import { useSelector } from 'react-redux';
 import './Chat.scss';
-import { AxiosResponse } from 'axios';
-import { IChatResponse } from '../../models/chat.model';
+import { IChat } from '../../models/chat.model';
 import { toast } from 'react-toastify';
 import { MdOutlineError } from 'react-icons/md';
 import { FaArrowsRotate } from 'react-icons/fa6';
+import { IoChatboxEllipses } from 'react-icons/io5';
 
 const Chat = () => {
   // * User and Selected chat to seklectively show only List or Chat as per Mobile / Desktop layout
@@ -46,23 +46,47 @@ const Chat = () => {
   });
   
   // * Original Send Message function which are passing to our child
-  const handleNewMessage = (content: string) => {
-    sendMessage({
-      content
-    }, {
-      onSuccess: ({ data }) => {
-        queryClient.setQueryData(['chat', selectedChat?._id], (oldMessages: IMessage[]) => {
-          const newMessages = [data.newMessage, ...oldMessages]
-          return newMessages
-        })
+  const handleNewMessage = ({ content, setContent }: {
+    content: string,
+    setContent: React.Dispatch<React.SetStateAction<string>>
+  }) => {
+    sendMessage(
+      {
+        content,
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onError: (error: any) => {
-        console.log(error);
-        return toast.error(error.response.data.message || error.message)
+      {
+        onSuccess: ({ data }) => {
+          queryClient.setQueryData(
+            ['chat', selectedChat?._id],
+            (oldMessages: IMessage[]) => {
+              const newMessages = [data.newMessage, ...oldMessages];
+              return newMessages;
+            }
+          );
+          queryClient.setQueryData(
+            ['all-chats'],
+            (chats: IChat[]) => {
+              const newChats: IChat[] = structuredClone(chats);
+
+              const chat = newChats.find(chat => chat._id === data.newMessage.chat)
+
+              if(!chat) return newChats;
+
+              chat['lastMessage'] = data.newMessage
+
+              return newChats
+            }
+          )
+          setContent('');
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onError: (error: any) => {
+          console.log(error);
+          return toast.error(error.response.data.message || error.message);
+        },
       }
-    })
-  }
+    );
+  };
 
   // * Query to fetch data dynamically whem Single Chat is Loaded
   const {
@@ -93,9 +117,9 @@ const Chat = () => {
     // * Reading chats from cache
     const data = queryClient.getQueryData([
       'all-chats',
-    ]) as AxiosResponse<IChatResponse>;
+    ]) as IChat[];
     if (data) {
-      const chats = data.data.chats;
+      const chats = data;
 
       if (!chats || chats.length === 0) {
         return <Navigate to="/chats" />;
@@ -145,8 +169,13 @@ const Chat = () => {
   return (
     <div className="chat-body">
       <ChatHeader />
-      <section className="messages p-4">
-        {messages!.length <= 0 && <p>No Messages Here.</p>}
+      <section className={`messages p-4 ${messages?.length === 0 && 'justify-center items-center'}`}>
+        {messages!.length <= 0 && (
+          <div className="flex flex-col items-center">
+            <IoChatboxEllipses className="text-6xl text-accent opacity-30" />
+            <p className="text-3xl opacity-30">No Messages Here.</p>
+          </div>
+        )}
         {messages?.map((message) => (
           <ChatBubble
             key={message._id}
@@ -155,10 +184,7 @@ const Chat = () => {
           />
         ))}
       </section>
-      <ChatFooter 
-        sendMessage={handleNewMessage}
-        isPending={isPending}
-      />
+      <ChatFooter sendMessage={handleNewMessage} isPending={isPending} />
     </div>
   );
 };

@@ -55,31 +55,43 @@ const router = createBrowserRouter([
           {
             path: '',
             element: <NoChatSelected />,
-            errorElement: <ErrorElement />
+            errorElement: <ErrorElement />,
           },
           {
             path: ':id',
             element: <Chat />,
-            errorElement: <ErrorElement />
-          }
-        ]
-      }
-    ]
+            errorElement: <ErrorElement />,
+          },
+        ],
+      },
+    ],
   },
   {
     path: 'profile',
-    element: <AuthGuard><Profile /></AuthGuard>,
-    errorElement: <Error />
+    lazy: async () => {
+      const profileComponent = await import('./Pages/Profile')
+
+      return { Component: profileComponent.default }
+    },
+    errorElement: <Error />,
   },
   {
     path: '/login',
-    element: <Login />,
+    lazy: async () => {
+      const loginComponent = await import('./Pages/Auth/Login');
+
+      return { Component: loginComponent.default };
+    },
     errorElement: <Error />,
     action: loginAction(store),
   },
   {
     path: '/register',
-    element: <Register />,
+    lazy: async () => {
+      const registerComponent = await import('./Pages/Auth/Register');
+
+      return { Component: registerComponent.default };
+    },
     errorElement: <Error />,
     action: registerAction,
   },

@@ -11,3 +11,10 @@ export type IUserData = {
   profilePicture?: string;
   token?: string;
 };
+
+
+export interface IUsersResponse {
+  status: string;
+  message: string;
+  users: IUserData[];
+}

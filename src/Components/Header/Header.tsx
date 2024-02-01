@@ -135,7 +135,9 @@ const Header = () => {
                   className="inline-flex justify-between items-center"
                 >
                   {/* this hidden checkbox controls the state */}
-                  <span>{theme === Themes.LIGHT ? 'Dark Mode' : 'Light Mode'}</span>
+                  <span className="!text-xl sm:!text-2xl rounded-xl">
+                    {theme === Themes.LIGHT ? 'Dark Mode' : 'Light Mode'}
+                  </span>
                   {/* sun icon */}
                   {theme === Themes.LIGHT && (
                     <svg
@@ -160,7 +162,10 @@ const Header = () => {
                 </label>
               </li>
               <li>
-                <button onClick={handleLogout} className="!text-xl sm:!text-2xl bg-red-400 text-white font-bold sm:bg-transparent sm:text-current hover:bg-red-400 hover:text-black rounded-xl">
+                <button
+                  onClick={handleLogout}
+                  className="!text-xl sm:!text-2xl bg-red-400 text-white font-bold sm:bg-transparent sm:text-current hover:bg-red-400 hover:text-black rounded-xl"
+                >
                   Logout
                 </button>
               </li>

@@ -3,7 +3,6 @@ import {
   QueryObserverResult,
   useQuery,
 } from '@tanstack/react-query';
-import { AxiosResponse } from 'axios';
 import { IChat, IChatResponse } from '../../models/chat.model';
 import { PropsWithChildren, createContext, useContext } from 'react';
 import customFetch from '../../utils/customFetch';
@@ -12,7 +11,11 @@ import { Navigate } from 'react-router-dom';
 
 const chatsQuery = {
   queryKey: ['all-chats'],
-  queryFn: () => customFetch.get<IChatResponse>('/chats'),
+  queryFn: async () => {
+    const { data } = await customFetch.get<IChatResponse>('/chats');
+
+    return data.chats;
+  },
 };
 
 type ChatsContext = {
@@ -21,16 +24,9 @@ type ChatsContext = {
   isError: boolean;
   error: Error | null;
   isRefetching: boolean;
-  fetchChats?: (options?: RefetchOptions | undefined) => Promise<
-    QueryObserverResult<
-      AxiosResponse<
-        IChatResponse,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        any
-      >,
-      Error
-    >
-  >;
+  fetchChats?: (
+    options?: RefetchOptions | undefined
+  ) => Promise<QueryObserverResult<IChat[], Error>>;
 };
 
 const ChatsContext = createContext<ChatsContext>({
@@ -61,7 +57,7 @@ export const ChatsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <ChatsContext.Provider
       value={{
-        chats: data?.data.chats || [],
+        chats: data || [],
         error,
         isError,
         isLoading,
