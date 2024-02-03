@@ -48,12 +48,12 @@ const CustomSelect: React.FC<{
               'border-[1px] border-white border-opacity-50',
               isDisabled ? 'border-opacity-50' : '',
               'p-2',
-              isFocused ? 'border-opacity-100' : ''
+              isFocused ? '!border-opacity-100' : ''
             ),
           dropdownIndicator: ({ isFocused }) =>
             classNames(
               'text-white opacity-50',
-              isFocused && 'opacity-100',
+              isFocused && '!opacity-100',
               'p-2'
             ),
           group: () => classNames('py-2'),
@@ -71,7 +71,7 @@ const CustomSelect: React.FC<{
             classNames(
               'bg-white bg-opacity-50',
               isDisabled && 'bg-opacity-50',
-              isFocused ? 'bg-opacity-100' : '',
+              isFocused ? '!bg-opacity-100' : '',
               'my-2'
             ),
           input: () => classNames('m-0.5', 'py-0.5', 'text-white'),
@@ -116,7 +116,7 @@ const CustomSelect: React.FC<{
             ),
           placeholder: ({ isFocused }) => {
             return classNames('text-white opacity-50', 'mx-0.5', {
-              'opacity-100': isFocused,
+              '!opacity-100': isFocused,
             });
           },
           singleValue: ({ isDisabled }) =>
@@ -148,12 +148,12 @@ const CustomSelect: React.FC<{
             'border-[1px] border-white border-opacity-50',
             isDisabled ? 'border-opacity-50' : '',
             'p-2',
-            isFocused ? 'border-opacity-100' : ''
+            isFocused ? '!border-opacity-100' : ''
           ),
         dropdownIndicator: ({ isFocused }) =>
           classNames(
             'text-white opacity-50',
-            isFocused && 'opacity-100',
+            isFocused && '!opacity-100',
             'p-2'
           ),
         group: () => classNames('py-2'),
@@ -171,7 +171,7 @@ const CustomSelect: React.FC<{
           classNames(
             'bg-white bg-opacity-50',
             isDisabled && 'bg-opacity-50',
-            isFocused ? 'bg-opacity-100' : '',
+            isFocused ? '!bg-opacity-100' : '',
             'my-2'
           ),
         input: () => classNames('m-0.5', 'py-0.5', 'text-white'),

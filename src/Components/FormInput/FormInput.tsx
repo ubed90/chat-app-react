@@ -14,7 +14,8 @@ type FormInputProps = {
   value?: string;
   hideLabel?: boolean;
   customClasses?: string;
-  handleChange?(key: string, value: string): void;
+  handleChange?(handleChangeProps: { key: string; value: string }): void;
+  marginRequired?: boolean;
 };
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -30,7 +31,8 @@ const FormInput: React.FC<FormInputProps> = ({
   customClasses = '',
   required = false,
   hideLabel = false,
-  handleChange = () => {}
+  handleChange = () => {},
+  marginRequired = true
 }) => {
   const ref = useRef<HTMLInputElement | null>(null);
 
@@ -44,12 +46,17 @@ const FormInput: React.FC<FormInputProps> = ({
 
   return (
     <div
-      className={`form-control w-full relative mb-7 ${type === 'hidden' ? 'hidden' : ''}`}
+      className={`form-control w-full relative md:col-span-full ${marginRequired && 'mb-7'} ${
+        type === 'hidden' ? 'hidden' : ''
+      }`}
     >
       {!hideLabel && (
-        <label htmlFor={name} className="label text-xl md:text-2xl p-0 pb-1 capitalize justify-start gap-x-2">
+        <label
+          htmlFor={name}
+          className="label text-2xl p-0 pb-1 capitalize justify-start gap-x-2"
+        >
           {label || name}
-          {required && (<span className='text-red-500'>*</span>)}
+          {required && <span className="text-red-500">*</span>}
         </label>
       )}
       <input
@@ -62,8 +69,10 @@ const FormInput: React.FC<FormInputProps> = ({
         defaultValue={defaultValue}
         value={value}
         required={required}
-        onChange={(event) => handleChange(event.target.name, event.target.value)}
-        autoComplete='off'
+        onChange={(event) =>
+          handleChange({ key: event.target.name, value: event.target.value })
+        }
+        autoComplete="off"
       />
       {type === 'email' && (
         <div className="label p-0 py-1 absolute -bottom-9 left-4">

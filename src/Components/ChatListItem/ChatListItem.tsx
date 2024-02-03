@@ -27,7 +27,7 @@ const ChatListItem: React.FC<IChat> = (chat) => {
       className="local-chat p-4 border-b-[1px] border-accent border-opacity-20 cursor-pointer hover:bg-primary hover:bg-opacity-10 transition-all duration-300"
     >
       {chat.isGroupChat ? (
-        <div className="local-chat-profile-image avatar-group -space-x-16 rtl:space-x-reverse">
+        <div className="local-chat-profile-image avatar-group -space-x-14 rtl:space-x-reverse">
           {chat.users.slice(0, 3).map((user, index) => (
             <div
               className={`avatar ${user?.profilePicture ? '' : 'placeholder'}`}
