@@ -1,63 +1,16 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RiChatNewFill } from 'react-icons/ri';
 import Modal from './Modal/Modal';
-// import { OptionsOrGroups, GroupBase } from 'react-select';
-import customFetch from '../utils/customFetch';
-import { IUserData, IUsersResponse } from '../models/user.model';
+import { IUserData } from '../models/user.model';
 import CustomSelect from './CustomSelect';
 import { ImCross } from 'react-icons/im';
 import { IoIosAdd } from 'react-icons/io';
 import { CustomBtn } from '.';
-import createChatHOC from './createChatHOC';
+import createChatHOC, { CreateChatProps, loadOptions } from './createChatHOC';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const loadOptions = (searchType: { label: string; value: string }) => (
-  inputValue: string,
-  callback: any
-): void => {
-  customFetch
-    .get<IUsersResponse>('/chats/users', {
-      params: {
-        type: searchType.value,
-        search: inputValue,
-      },
-    })
-    .then(({ data }) => {
-      const users = data.users.map((user) => {
-        return {
-          ...user,
-          label: user[searchType.value as keyof IUserData] || user.name,
-          value: user._id,
-        };
-      });
-
-      callback(users);
-    });
-};
-
-type ChatCreationVariables = {
+export type ChatCreationVariables = {
   receiverId: string;
-};
-
-type CreateChatProps<T> = {
-  searchTypes: {
-    label: string;
-    value: string;
-  }[];
-  isOpen: boolean;
-  handleToggle: () => void;
-  searchType: {
-    label: string;
-    value: string;
-  };
-  loadOptionsDebounced: (...args: any[]) => void;
-  handleSelect: (data: T) => void;
-  handleSearchType: (searchType: { label: string; value: string }) => void;
-  handleCancel: () => void;
-  handleAddChat: () => void;
-  isPending: boolean;
-  name: string;
-  handleName: (value: string) => void;
 };
 
 const CreateChat: React.FC<CreateChatProps<IUserData>> = ({
@@ -130,7 +83,6 @@ const CreateChat: React.FC<CreateChatProps<IUserData>> = ({
   );
 };
 
-export default createChatHOC<IUserData, ChatCreationVariables>({
-  createGroup: false,
+export default createChatHOC<IUserData>({
   loadOptions,
 })(CreateChat);

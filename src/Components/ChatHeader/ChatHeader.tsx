@@ -31,43 +31,39 @@ const ChatHeader = () => {
       </button>
       <div className="local-chat-header-info">
         {selectedChat?.isGroupChat ? (
-          <div className="local-chat-header-info-profile-image avatar-group -space-x-16 rtl:space-x-reverse">
-            <div className="avatar">
-              <div className="w-16">
-                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+          <div className="local-chat-profile-image avatar-group -space-x-16 rtl:space-x-reverse">
+            {selectedChat?.users.slice(0, 3).map((user, index) => (
+              <div
+                className={`avatar ${
+                  user?.profilePicture ? '' : 'placeholder'
+                }`}
+                key={index}
+              >
+                <div className="w-16 bg-neutral text-neutral-content">
+                  {user?.profilePicture ? (
+                    <img src={user.profilePicture} alt={user.name} />
+                  ) : (
+                    <span className="uppercase">
+                      {user.name.substring(0, 2)}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="avatar">
-              <div className="w-16">
-                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+            ))}
+            {selectedChat?.users.length > 3 && (
+              <div className="avatar placeholder">
+                <div className="w-16 bg-neutral text-neutral-content rounded-full">
+                  <span className="text-xl">+{selectedChat?.users.length - 3}</span>
+                </div>
               </div>
-            </div>
-            <div className="avatar">
-              <div className="w-16">
-                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-              </div>
-            </div>
-            <div className="avatar placeholder">
-              <div className="w-16 bg-neutral text-neutral-content">
-                <span>+{selectedChat.users.length}</span>
-              </div>
-            </div>
+            )}
           </div>
         ) : (
-          <div
-            className={`local-chat-profile-image avatar ${
-              otherUser.profilePicture ? '' : 'placeholder'
-            }`}
-          >
+          <div className="local-chat-profile-image avatar placeholder">
             <div className="w-16 rounded-full bg-neutral text-neutral-content">
-              {otherUser.profilePicture && (
-                <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-              )}
-              {!otherUser.profilePicture && (
-                <span className="text-2xl tracking-widest font-bold uppercase">
-                  {otherUser.name.substring(0, 2)}
-                </span>
-              )}
+              <span className="text-2xl uppercase">
+                {getOtherUserDetails(user!, selectedChat!.users).name.substring(0, 2)}
+              </span>
             </div>
           </div>
         )}
