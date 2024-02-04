@@ -10,7 +10,7 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 10,
       retry: 3,
-      retryDelay: 1000
+      retryDelay: 1000,
     },
   },
 });
@@ -21,7 +21,16 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { HomeLayout, Login, Register, Error, VerfiyEmail, ForgotPassword, ResetPassword, ChatsContainer, Chat, NoChatSelected, Profile } from './Pages';
+import {
+  HomeLayout,
+  Error,
+  VerfiyEmail,
+  ForgotPassword,
+  ResetPassword,
+  ChatsContainer,
+  Chat,
+  NoChatSelected,
+} from './Pages';
 import { AuthGuard, ErrorElement } from './Components';
 import { store } from './Store';
 
@@ -64,16 +73,16 @@ const router = createBrowserRouter([
           },
         ],
       },
-    ],
-  },
-  {
-    path: 'profile',
-    lazy: async () => {
-      const profileComponent = await import('./Pages/Profile')
+      {
+        path: 'profile',
+        lazy: async () => {
+          const profileComponent = await import('./Pages/Profile/Profile');
 
-      return { Component: profileComponent.default }
-    },
-    errorElement: <Error />,
+          return { Component: profileComponent.default };
+        },
+        errorElement: <Error />,
+      },
+    ],
   },
   {
     path: '/login',
@@ -120,7 +129,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router}></RouterProvider>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

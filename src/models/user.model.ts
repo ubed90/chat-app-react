@@ -9,6 +9,7 @@ export type IUserData = {
   name: string;
   username: string;
   profilePicture?: string;
+  phoneNumber?: string;
   token?: string;
 };
 

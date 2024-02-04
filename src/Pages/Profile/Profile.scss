@@ -1,0 +1,8 @@
+.profile {
+    width: min(90%, 50rem);
+
+    &-card {
+        display: grid;
+        grid-template-rows: 11rem min-content min-content;
+    }
+}
