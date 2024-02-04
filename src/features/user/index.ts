@@ -57,7 +57,13 @@ const userSlice = createSlice({
             }
         })
     },
-
+    updateUser: (state, { payload }: PayloadAction<{ user:IUserData }>) => {
+      const { user } = payload;
+      state.user = { ...user };
+      userSlice.caseReducers.performActionOnLocalStorage(state, {
+        payload: { action: 'SAVE', key: 'user' },
+      });
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(loginUserAPI.rejected, (_, { payload }) => {
@@ -68,6 +74,6 @@ const userSlice = createSlice({
   }
 });
 
-export const { loginUser, logoutUser, toggleTheme } = userSlice.actions;
+export const { loginUser, logoutUser, toggleTheme, updateUser } = userSlice.actions;
 
 export default userSlice.reducer;

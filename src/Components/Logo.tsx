@@ -2,12 +2,13 @@ import { useSelector } from 'react-redux';
 import logo from '../assets/chatsup_logo.png';
 import { RootState } from '../Store';
 import { Themes } from '../utils/localStorage';
+import { Link } from 'react-router-dom';
 
 const Logo = () => {
   const { theme } = useSelector((state: RootState) => state.user)
 
   return (
-    <div className="logo inline-flex items-center btn btn-ghost min-h-[initial] h-[initial] rounded-lg px-0 py-2">
+    <Link to='/chats' className="logo inline-flex items-center btn btn-ghost min-h-[initial] h-[initial] rounded-lg px-0 py-2">
       <img
         src={logo}
         alt="logo"
@@ -21,7 +22,7 @@ const Logo = () => {
         Chats
         <span className="text-3xl md:text-4xl font-bold italic">UP</span>
       </h1>
-    </div>
+    </Link>
   );
 };
 

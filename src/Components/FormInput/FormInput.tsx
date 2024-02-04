@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { InputHTMLAttributes, useRef } from 'react';
 import './FormInput.scss';
 
 type FormInputProps = {
@@ -18,7 +18,7 @@ type FormInputProps = {
   marginRequired?: boolean;
 };
 
-const FormInput: React.FC<FormInputProps> = ({
+const FormInput: React.FC<FormInputProps & InputHTMLAttributes<HTMLInputElement>> = ({
   name,
   type = 'text',
   defaultValue,
@@ -32,7 +32,8 @@ const FormInput: React.FC<FormInputProps> = ({
   required = false,
   hideLabel = false,
   handleChange = () => {},
-  marginRequired = true
+  marginRequired = true,
+  ...rest
 }) => {
   const ref = useRef<HTMLInputElement | null>(null);
 
@@ -73,6 +74,7 @@ const FormInput: React.FC<FormInputProps> = ({
           handleChange({ key: event.target.name, value: event.target.value })
         }
         autoComplete="off"
+        {...rest}
       />
       {type === 'email' && (
         <div className="label p-0 py-1 absolute -bottom-9 left-4">
