@@ -8,7 +8,8 @@ export type IUserData = {
   email: string;
   name: string;
   username: string;
-  profilePicture?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  profilePicture?: any;
   phoneNumber?: string;
   token?: string;
 };

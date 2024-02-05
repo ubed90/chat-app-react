@@ -125,7 +125,7 @@ const ModalHeader: React.FC<{ onClose?(): void } & PropsWithChildren> = ({
 }) => {
   return (
     <header className="custom-modal-header w-full flex justify-between items-center pb-4 border-b-[1px] border-b-white border-opacity-30">
-      <h2 className="text-4xl text-white">{children}</h2>
+      <h2 className="text-4xl text-white truncate">{children}</h2>
       <CustomBtn
         type="button"
         classes="btn-outline btn-white border-white text-white hover:bg-white hover:text-black hover:border-transparent rounded-lg"

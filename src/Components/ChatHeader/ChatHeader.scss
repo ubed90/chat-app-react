@@ -1,17 +1,51 @@
+@use '../../assets/sass/abstracts/' as *;
+
 .local-chat-header {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    
+    gap: calc(16 * 0.2vw);
+
     &-info {
         display: grid;
         grid-template-columns: min-content auto;
         grid-template-rows: repeat(2, min-content);
         align-items: center;
         gap: 0 1rem;
+        z-index: 1;
 
         &-profile-image {
             grid-row: 1 / -1;
+        }
+
+        &-status {
+            justify-self: start;
+        }
+    }
+
+    &-dropdown::after {
+        content: '';
+        position: absolute;
+        inset: -1rem -0.5rem;
+    }
+}
+
+.profile-modal-cta {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+
+    button:last-child {
+        grid-column: 1 / -1;
+        order: -1;
+    }
+
+    @include respond(lg-phone) {
+        margin-top: 1.6rem;
+        grid-template-columns: repeat(3, 15rem);
+        justify-content: center;
+
+        button:last-child {
+            grid-column: unset;
+            order: unset;
         }
     }
 }
