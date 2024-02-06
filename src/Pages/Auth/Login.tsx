@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Store } from '@reduxjs/toolkit';
 import { CustomForm, FormInput } from '../../Components';
 import { RootState } from '../../Store';
@@ -42,18 +43,25 @@ const Login = () => {
                 placeholder="Enter your email"
                 type="email"
                 label="Email"
+                //@ts-expect-error
+                // Custom Prop size is conflicting with Input Intrinsic Attr
+                // TODO: Need to change the name of the prop size
                 size="input-md md:input-lg"
                 borderRadius="rounded-full"
                 required
+                autoComplete='off'
               />
               <FormInput
                 name="password"
                 placeholder="Enter password"
                 type="password"
                 label="Password"
+                //@ts-expect-error
+                // Custom Prop size is conflicting with Input Intrinsic Attr
                 size="input-md md:input-lg"
                 borderRadius="rounded-full"
                 required
+                autoComplete='off'
               />
             </>
           )}

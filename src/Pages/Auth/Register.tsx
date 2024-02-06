@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionFunction, Link, useActionData } from 'react-router-dom';
 import { CustomForm, FormInput } from '../../Components';
@@ -6,29 +7,30 @@ import { toast } from 'react-toastify';
 import customFetch from '../../utils/customFetch';
 import { ImCheckboxChecked } from 'react-icons/im';
 
-
 // * Register Action
-export const registerAction: ActionFunction =
-  async ({ request }) => {
-    const formData = await request.formData();
-    const data = Object.fromEntries(formData);
+export const registerAction: ActionFunction = async ({ request }) => {
+  const formData = await request.formData();
+  const data = Object.fromEntries(formData);
 
-    try {
-      const { data: response } = await customFetch.post<{ status: string, message: string }>('/auth/register', data);
+  try {
+    const { data: response } = await customFetch.post<{
+      status: string;
+      message: string;
+    }>('/auth/register', data);
 
-      if(response.status !== 'success') {
-        toast.warning(response.message);
-        return { isError: true };
-      }
-
-      console.log(response);
-      return { isError: false, message: response.message };
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error.response.data.message);
+    if (response.status !== 'success') {
+      toast.warning(response.message);
       return { isError: true };
     }
-  };
+
+    console.log(response);
+    return { isError: false, message: response.message };
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error.response.data.message);
+    return { isError: true };
+  }
+};
 
 // * Register Custom Validion
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/g;
@@ -65,8 +67,9 @@ const customValidator = ({ formValues }: ValidatorProps) => {
 };
 
 const Register = () => {
-  const data = useActionData() as { isError: boolean, message?: string } || { isError: true }
-  
+  const data = (useActionData() as { isError: boolean; message?: string }) || {
+    isError: true,
+  };
 
   return (
     <main className="app-container">
@@ -87,6 +90,9 @@ const Register = () => {
                   placeholder="eg. John Doe"
                   type="text"
                   label="name"
+                  //@ts-expect-error
+                  // Custom Prop size is conflicting with Input Intrinsic Attr
+                  // TODO: Need to change the name of the prop size
                   size="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
@@ -96,6 +102,9 @@ const Register = () => {
                   placeholder="eg. johndoe@email.com"
                   type="email"
                   label="Email"
+                  //@ts-expect-error
+                  // Custom Prop size is conflicting with Input Intrinsic Attr
+                  // TODO: Need to change the name of the prop size
                   size="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
@@ -105,6 +114,9 @@ const Register = () => {
                   placeholder="eg. johnDoe123"
                   type="text"
                   label="Username"
+                  //@ts-expect-error
+                  // Custom Prop size is conflicting with Input Intrinsic Attr
+                  // TODO: Need to change the name of the prop size
                   size="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
@@ -114,6 +126,9 @@ const Register = () => {
                   placeholder="Enter password"
                   type="password"
                   label="Password"
+                  //@ts-expect-error
+                  // Custom Prop size is conflicting with Input Intrinsic Attr
+                  // TODO: Need to change the name of the prop size
                   size="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
@@ -124,6 +139,9 @@ const Register = () => {
                   placeholder="Re-Enter your password"
                   type="password"
                   label="Confirm Password"
+                  //@ts-expect-error
+                  // Custom Prop size is conflicting with Input Intrinsic Attr
+                  // TODO: Need to change the name of the prop size
                   size="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
@@ -134,7 +152,7 @@ const Register = () => {
           </CustomForm>
         ) : (
           <h6 className="text-xl md:text-2xl text-primary flex items-stretch justify-center gap-x-4">
-            <ImCheckboxChecked className='text-4xl md:text-6xl' />
+            <ImCheckboxChecked className="text-4xl md:text-6xl" />
             {data?.message}
           </h6>
         )}
