@@ -89,7 +89,7 @@ const EditGroupName: React.FC<EditGroupNameProps> = ({ onSuccess }) => {
         className='btn btn-accent text-xl rounded-lg md:w-52 md:text-2xl'
         icon={<IoSave className='text-2xl' />}
         isLoading={isPending}
-        isDisabled={isPending}
+        isDisabled={isPending || !groupName || groupName === selectedChat?.name}
         clickHandler={handleSubmit}
       />
     </section>

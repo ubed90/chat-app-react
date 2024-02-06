@@ -99,10 +99,10 @@ const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) 
         <CustomBtn 
             type="button"
             text="Remove"
-            classes="btn btn-error text-xl rounded-xl"
+            classes="btn-error text-xl rounded-xl"
             icon={<IoRemoveCircle className="text-2xl" />}
             isLoading={isPending}
-            isDisabled={isPending}
+            isDisabled={isPending || !selectedUser}
             clickHandler={handleRemove}
         />
     </section>

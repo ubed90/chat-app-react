@@ -20,6 +20,7 @@ import { CiText } from 'react-icons/ci';
 import EditGroupName from '../Group/EditGroupName';
 import ViewParticipants from '../Group/ViewParticipants';
 import RemoveUserFromGroup from '../Group/RemoveUserFromGroup';
+import AddUserToGroup from '../Group/AddUserToGroup';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
@@ -48,9 +49,11 @@ const ChatHeader = () => {
     handleToggle();
   };
 
+  // TODO: Remove the Redundant Code Available using HOC / RP / Custom Hooks
+
   const CTA = {
     EDIT: <EditGroupName onSuccess={onSuccess} />,
-    ADD: <div>ADD USer</div>,
+    ADD: <AddUserToGroup onSuccess={onSuccess}/>,
     REMOVE: <RemoveUserFromGroup onSuccess={onSuccess} />,
     VIEW: <ViewParticipants />,
   };
