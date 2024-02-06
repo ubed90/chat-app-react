@@ -5,11 +5,12 @@ import { getOtherUserDetails } from '../utils/getOtherUser';
 
 type ProfilePictureProps = {
     width?: string;
+    placeholderSize?: string
 }
 
 const ProfilePicture: React.FC<
   ProfilePictureProps & HTMLAttributes<HTMLDivElement>
-> = ({ width = 'w-16', className, ...rest }) => {
+> = ({ width = 'w-16', placeholderSize = 'text-2xl', className, ...rest }) => {
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
   const otherUser = getOtherUserDetails(user!, selectedChat!.users);
@@ -48,9 +49,14 @@ const ProfilePicture: React.FC<
           )}
         </div>
       ) : (
-        <div {...rest} className="local-chat-profile-image avatar placeholder">
-          <div className="w-16 rounded-full bg-neutral text-neutral-content">
-            <span className="text-2xl uppercase">
+        <div
+          {...rest}
+          className={`local-chat-profile-image avatar placeholder ${className}`}
+        >
+          <div
+            className={`rounded-full bg-neutral text-neutral-content ${width}`}
+          >
+            <span className={`uppercase ${placeholderSize}`}>
               {otherUser.name.substring(0, 2)}
             </span>
           </div>

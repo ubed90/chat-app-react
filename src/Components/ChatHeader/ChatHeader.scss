@@ -29,23 +29,17 @@
     }
 }
 
-.profile-modal-cta {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-
-    button:last-child {
-        grid-column: 1 / -1;
-        order: -1;
-    }
-
-    @include respond(lg-phone) {
-        margin-top: 1.6rem;
-        grid-template-columns: repeat(3, 15rem);
+.profile-modal {
+    &-cta {
+        display: flex;
+        flex-wrap: wrap-reverse;
+        gap: 1rem;
         justify-content: center;
 
-        button:last-child {
-            grid-column: unset;
-            order: unset;
+        button {
+            flex: 1;
+            min-width: 15rem;
+            max-width: 35rem;
         }
     }
 }
