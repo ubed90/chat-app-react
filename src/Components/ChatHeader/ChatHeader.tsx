@@ -21,6 +21,10 @@ import EditGroupName from '../Group/EditGroupName';
 import ViewParticipants from '../Group/ViewParticipants';
 import RemoveUserFromGroup from '../Group/RemoveUserFromGroup';
 import AddUserToGroup from '../Group/AddUserToGroup';
+import { useMutation } from '@tanstack/react-query';
+import customFetch from '../../utils/customFetch';
+import { toast } from 'react-toastify';
+import { useChatsContext } from '../../Pages/ChatsContainer/ChatsContext';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
@@ -50,6 +54,7 @@ const ChatHeader = () => {
   };
 
   // TODO: Remove the Redundant Code Available using HOC / RP / Custom Hooks
+  // TODO: Clean Up ChatHeader.tsx
 
   const CTA = {
     EDIT: <EditGroupName onSuccess={onSuccess} />,
@@ -62,6 +67,69 @@ const ChatHeader = () => {
     dispatch(setSelectedChat(undefined));
     return navigate('..');
   };
+
+  // * Mutation For Deleting Chat
+  const { mutate: deleteChat, isPending: isChatDeleting } = useMutation({
+    mutationKey: ['delete-chat'],
+    mutationFn: (chatId: string) => customFetch.delete<{ status: string, message: string }>('/chats', {
+      data: { chatId }
+    })
+  })
+
+  // * Mutation for Leaving Group
+  const { mutate: leaveGroup, isPending: isLeavingGroup } = useMutation({
+    mutationKey: ['leave-group'],
+    mutationFn: (chatId: string) =>
+      customFetch.delete<{ status: string; message: string }>('/chats/group', {
+        data: { chatId },
+      }),
+  });
+
+  // * Refetch for fetching chats again after Exit / Delete
+  const { fetchChats } = useChatsContext()
+
+  // * Handle Exit / Delete Group / Chat
+  const handleExit = () => {
+    if(!confirm(`Are you sure you want to delete this chat ?`)) return;
+    
+    if(selectedChat?.isGroupChat) {
+      leaveGroup(selectedChat?._id as string, {
+        onSuccess({ data }) {
+          if (data.status !== 'success') {
+            toast.error(data.message);
+            return;
+          }
+
+          dispatch(setSelectedChat(undefined));
+          navigate('..');
+          fetchChats && fetchChats();
+          toast.success(data.message + '🚀');
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onError(error: any) {
+          toast.error(error?.response?.data?.message || error.message);
+        },
+      });
+    } else {
+      deleteChat(selectedChat?._id as string, {
+        onSuccess({ data }) {
+          if(data.status !== 'success') {
+            toast.error(data.message)
+            return;
+          }
+
+          dispatch(setSelectedChat(undefined));
+          navigate('..');
+          fetchChats && fetchChats();
+          toast.success(data.message + '🚀');
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onError(error: any) {
+          toast.error(error?.response?.data?.message || error.message);
+        },
+      })
+    }
+  }
 
   return (
     <header className="local-chat-header px-4 border-b-[1px] border-b-accent">
@@ -220,13 +288,25 @@ const ChatHeader = () => {
             </>
           </li>
           <li>
-            <button className="btn btn-ghost content-center rounded-xl text-xl text-red-400 gap-3 justify-start">
-              {selectedChat?.isGroupChat ? (
+            <button
+              disabled={isChatDeleting || isLeavingGroup}
+              onClick={handleExit}
+              className="btn btn-ghost content-center rounded-xl text-xl text-red-400 gap-3 justify-start"
+            >
+              {(isChatDeleting || isLeavingGroup) && (
+                <span className="loading loading-spinner loading-sm"></span>
+              )}
+              {!isChatDeleting &&
+              !isLeavingGroup &&
+              selectedChat?.isGroupChat ? (
                 <BiExit className="text-3xl" />
               ) : (
                 <MdDelete className="text-3xl" />
               )}
-              {selectedChat?.isGroupChat ? 'Exit Group' : 'Delete Chat'}
+              {(isChatDeleting || isLeavingGroup) && 'Deleting...'}
+              {!isChatDeleting && !isLeavingGroup && selectedChat?.isGroupChat
+                ? 'Exit Group'
+                : 'Delete Chat'}
             </button>
           </li>
         </ul>

@@ -26,12 +26,20 @@ const Chats = () => {
 
   return (
     <>
-      <ul className="chats-list md:border-r-[1px] md:border-r-primary md:border-opacity-30">
-        {chats.map((chat) => (
-          <ChatListItem {...chat} key={chat._id} />
-        ))}
+      <ul
+        className={`chats-list md:border-r-[1px] md:border-r-primary md:border-opacity-30 ${
+          chats.length === 0 && 'place-items-center auto-rows-auto'
+        }`}
+      >
+        {chats.length > 0 &&
+          chats.map((chat) => <ChatListItem {...chat} key={chat._id} />)}
+        {chats.length === 0 && (
+          <li className="text-2xl md:text-3xl text-accent opacity-30 text-center">
+            Click on below <span className='text-3xl md:text-5xl'>+</span> icon to start a new chat.
+          </li>
+        )}
       </ul>
-      <ChatMenu position='bottom-right' />
+      <ChatMenu position="bottom-right" />
     </>
   );
 }

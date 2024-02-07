@@ -22,7 +22,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
           <div className="w-10 rounded-full">
             <img
               alt={message.sender.name}
-              src={message.sender?.profilePicture}
+              src={message.sender?.profilePicture?.url}
             />
           </div>
         ) : (
