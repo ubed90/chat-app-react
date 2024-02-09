@@ -1,30 +1,32 @@
-import React from 'react'
-import { IChat } from '../../models/chat.model'
-import { useSelector } from 'react-redux'
-import { RootState, useAppDispatch } from '../../Store'
-import { getOtherUserDetails } from '../../utils/getOtherUser'
-import dayjs from 'dayjs'
-import './/ChatListItem.scss'
-import { useNavigate } from 'react-router-dom'
-import { setSelectedChat } from '../../features/chat'
+import React from 'react';
+import { IChat } from '../../models/chat.model';
+import { useSelector } from 'react-redux';
+import { RootState, useAppDispatch } from '../../Store';
+import { getOtherUserDetails } from '../../utils/getOtherUser';
+import dayjs from 'dayjs';
+import './/ChatListItem.scss';
+import { useNavigate } from 'react-router-dom';
+import { setSelectedChat } from '../../features/chat';
 
 const ChatListItem: React.FC<IChat> = (chat) => {
-    const { user } = useSelector((state: RootState) => state.user);
+  const { user } = useSelector((state: RootState) => state.user);
+  const { selectedChat } = useSelector((state: RootState) => state.chat);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const dispatch = useAppDispatch()
-    
-    const handleChatSelect = () => {
-      dispatch(setSelectedChat(chat));
-      return navigate(chat._id as string, { relative: 'path' })
-    }
-    
+  const dispatch = useAppDispatch();
+
+  const handleChatSelect = () => {
+    dispatch(setSelectedChat(chat));
+    return navigate(chat._id as string, { relative: 'path' });
+  };
 
   return (
     <li
       onClick={handleChatSelect}
-      className="local-chat p-4 border-b-[1px] border-accent border-opacity-20 cursor-pointer hover:bg-primary hover:bg-opacity-10 transition-all duration-300"
+      className={`local-chat p-4 border-b-[1px] border-accent border-opacity-20 cursor-pointer hover:bg-accent hover:bg-opacity-10 transition-all duration-300 ${
+        selectedChat?._id === chat._id && 'bg-accent bg-opacity-20'
+      }`}
     >
       {chat.isGroupChat ? (
         <div className="local-chat-profile-image avatar-group -space-x-14 rtl:space-x-reverse">
@@ -85,6 +87,6 @@ const ChatListItem: React.FC<IChat> = (chat) => {
       )}
     </li>
   );
-}
+};
 
-export default ChatListItem
+export default ChatListItem;
