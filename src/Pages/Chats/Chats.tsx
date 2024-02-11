@@ -1,6 +1,6 @@
 import './Chats.scss'
 import { ChatListItem, ChatMenu } from '../../Components';
-import { useChatsContext } from '../ChatsContainer/ChatsContext';
+import { useChatsContext } from '../../Context/ChatsContext';
 
 const Chats = () => {
   const { chats, isLoading, isRefetching } = useChatsContext();

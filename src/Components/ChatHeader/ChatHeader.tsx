@@ -24,7 +24,7 @@ import AddUserToGroup from '../Group/AddUserToGroup';
 import { useMutation } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import { toast } from 'react-toastify';
-import { useChatsContext } from '../../Pages/ChatsContainer/ChatsContext';
+import { useChatsContext } from '../../Context/ChatsContext';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
@@ -119,7 +119,7 @@ const ChatHeader = () => {
           }
 
           dispatch(setSelectedChat(undefined));
-          navigate('..');
+          navigate('/chats');
           fetchChats && fetchChats();
           toast.success(data.message + '🚀');
         },

@@ -7,13 +7,45 @@ import { Themes } from '../../utils/localStorage';
 import { logoutUser, toggleTheme } from '../../features/user';
 import customFetch from '../../utils/customFetch';
 import { toast } from 'react-toastify';
+import { IMessage } from '../../models/message.model';
+import { NotificationData, deleteNotification, setSelectedChat } from '../../features/chat';
+import { useQueryClient } from '@tanstack/react-query';
+import { IChat } from '../../models/chat.model';
 
 const Header = () => {
     const { user, theme } = useSelector((state: RootState) => state.user);
-
+    const { notification } = useSelector((state: RootState) => state.chat)
+    
     const dispatch = useAppDispatch();
 
     const navigate = useNavigate();
+    
+    const queryClient = useQueryClient();
+
+    const handleNotifyClick = (key: string, notification: NotificationData) => {
+      switch (notification.action) {
+        case 'NEW_CHAT':
+        case 'NEW_MESSAGE': {
+          queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+            const newChats: IChat[] = structuredClone(chats);
+
+            const existingChat = newChats.find(
+              (chat) => chat._id === key
+            );
+
+            if (!existingChat) return chats;
+
+            existingChat.notify = undefined;
+
+            dispatch(setSelectedChat(existingChat));
+
+            return newChats;
+          });
+          dispatch(deleteNotification({ key }))
+          return navigate(`/chats/${key}`)
+        }
+      }
+    }
     
 
     const handleLogout = async () => {
@@ -29,7 +61,7 @@ const Header = () => {
     }
 
   return (
-    <header>
+    <header className="border-b border-base-300">
       <nav className="navbar bg-neutral min-h-0 h-full px-4 py-4 sm:px-6">
         <section className="navbar-start">
           <Logo />
@@ -90,16 +122,52 @@ const Header = () => {
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
-                <span className="badge badge-xs badge-success rounded-full indicator-item"></span>
+                {notification && Object.keys(notification).length > 0 && (
+                  <span className="badge badge-success indicator-item text-base rounded-full">
+                    {Object.keys(notification).length}
+                  </span>
+                )}
               </div>
             </button>
             <ul
               tabIndex={0}
-              className="mt-7 z-[1] shadow menu menu-lg dropdown-content bg-neutral rounded-xl w-max"
+              className="mt-5 z-[1] shadow menu menu-lg dropdown-content bg-neutral rounded-xl w-max"
             >
-              <li className="text-white text-lg sm:text-xl p-2 sm:p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-slate-600">
-                You have 0 notifications.
-              </li>
+              {notification &&
+                Object.keys(notification).length > 0 &&
+                Object.keys(notification).map((key) => {
+                  const notify = notification[key];
+
+                  const isMessageNotification =
+                    notify.action === 'NEW_MESSAGE' &&
+                    Array.isArray(notify.value);
+
+                  return isMessageNotification ? (
+                    <li
+                      key={key}
+                      className="text-white text-lg sm:text-xl p-2 sm:p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-slate-600"
+                      onClick={() => handleNotifyClick(key, notify)}
+                    >
+                      You got{' '}
+                      {notify.value.length > 1 ? notify.value.length : 'a'} new
+                      message{notify.value.length > 1 ? 's' : ''} from{' '}
+                      {(notify.value[0] as IMessage).sender.name}
+                    </li>
+                  ) : (
+                    <li
+                      key={key}
+                      className="text-white text-lg sm:text-xl p-2 sm:p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-slate-600"
+                      onClick={() => handleNotifyClick(key, notify)}
+                    >
+                      {notify.value as string}
+                    </li>
+                  );
+                })}
+              {!notification || (notification && Object.keys(notification).length === 0) && (
+                <li className="text-white text-lg sm:text-xl p-2 sm:p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-slate-600">
+                  You have 0 notifications.
+                </li>
+              )}
             </ul>
           </div>
           <details className="dropdown dropdown-end">
@@ -123,7 +191,7 @@ const Header = () => {
               <li>
                 <NavLink
                   to="profile"
-                  relative='path'
+                  relative="path"
                   className="justify-between !text-xl sm:!text-2xl rounded-xl"
                 >
                   Profile

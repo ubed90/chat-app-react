@@ -1,14 +1,18 @@
 import { Outlet } from "react-router-dom"
 import { Header } from "../Components"
+import SocketProvider from "../Context/SocketContext"
+import Landing from "./Landing";
 
 const HomeLayout = () => {
   return (
-    <main className="app-grid with-header">
-      <Header />
-      <Outlet />
-      {/* <Footer /> */}
-    </main>
-  )
+    <SocketProvider>
+      <Landing>
+        <Header />
+        <Outlet />
+        {/* <Footer /> */}
+      </Landing>
+    </SocketProvider>
+  );
 }
 
 export default HomeLayout
