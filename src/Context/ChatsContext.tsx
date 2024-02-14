@@ -3,9 +3,9 @@ import {
   QueryObserverResult,
   useQuery,
 } from '@tanstack/react-query';
-import { IChat, IChatResponse } from '../../models/chat.model';
+import { IChat, IChatResponse } from '../models/chat.model';
 import { PropsWithChildren, createContext, useContext } from 'react';
-import customFetch from '../../utils/customFetch';
+import customFetch from '../utils/customFetch';
 import { toast } from 'react-toastify';
 import { Navigate } from 'react-router-dom';
 

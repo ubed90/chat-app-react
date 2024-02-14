@@ -17,6 +17,8 @@ type RemoveUserFromGroupProps = {
 
 const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) => {
     const { selectedChat } = useSelector((state: RootState) => state.chat);
+
+    const adminId = useSelector((state: RootState) => state.user.user?._id);
     
     const [selectedUser, setselectedUser] = useState<IUserData | null>(null)
 
@@ -30,13 +32,15 @@ const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) 
     // * QueryCLient to update the cache with the latest updated group details
     const queryClient = useQueryClient();
 
-    const users = selectedChat?.users.map(user => {
+    const users = selectedChat?.users
+      .filter((user) => user._id !== adminId)
+      .map((user) => {
         return {
-            ...user,
-            label: user.name,
-            value: user._id
-        }
-    })
+          ...user,
+          label: user.name,
+          value: user._id,
+        };
+      });
 
     // * Remove User From Group Mutation
     const { mutate: removeUserFromGroup, isPending } = useMutation({
@@ -45,9 +49,7 @@ const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) 
             data: { userId }
         })
     })
-
-    // TODO: Need to Avoid the Group Admin Entry to be visible in the List to be Removed or add a Badge;
-
+    
     // * Helper Function
     const handleRemove = () => {
         if (!selectedUser) {
@@ -60,15 +62,13 @@ const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) 
             if (data.status !== 'success') return;
 
             queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
-              console.log(chats);
-
               const newChats: IChat[] = structuredClone(chats);
 
               const chat = newChats.find((chat) => chat._id === data.chat._id);
 
               if (!chat) return newChats;
 
-              chat['users'] = data.chat.users;
+              chat.users = data.chat.users;
 
               dispatch(setSelectedChat(chat));
 
@@ -83,8 +83,6 @@ const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) 
             return toast.error(error?.response?.data?.message || error.message);
           },
         });
-
-        onSuccess && onSuccess();
     }
     
 

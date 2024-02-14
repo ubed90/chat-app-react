@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const debounce = (fn: any, delay = 300) => {
     let timeoutID: NodeJS.Timeout;
-    console.log("Debouncedd");
     
     return (...args: any[]) => {
         clearTimeout(timeoutID);

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { RootState, useAppDispatch } from '../../Store';
 import { setSelectedChat } from '../../features/chat';
 import { Navigate, useParams } from 'react-router-dom';
@@ -17,13 +17,13 @@ import { toast } from 'react-toastify';
 import { MdOutlineError } from 'react-icons/md';
 import { FaArrowsRotate } from 'react-icons/fa6';
 import { IoChatboxEllipses } from 'react-icons/io5';
+import { useSocket } from '../../Context/SocketContext';
+import { JOIN_CHAT_EVENT, STOP_TYPING_EVENT, TYPING_EVENT } from '../../utils/EventsMap';
 
 const Chat = () => {
   // * User and Selected chat to seklectively show only List or Chat as per Mobile / Desktop layout
-  const {
-    user: { user },
-    chat: { selectedChat },
-  } = useSelector((state: RootState) => state);
+  const { user } = useSelector((state: RootState) => state.user);
+  const { selectedChat } = useSelector((state: RootState) => state.chat);
   const dispatch = useAppDispatch();
 
   // * Only use is to clean the selected chat state when component is unmounted
@@ -66,13 +66,15 @@ const Chat = () => {
           queryClient.setQueryData(
             ['all-chats'],
             (chats: IChat[]) => {
-              const newChats: IChat[] = structuredClone(chats);
+              let newChats: IChat[] = structuredClone(chats);
 
               const chat = newChats.find(chat => chat._id === data.newMessage.chat)
 
               if(!chat) return newChats;
 
               chat['lastMessage'] = data.newMessage
+
+              newChats = [chat, ...newChats.filter(ch => ch._id !== chat._id)]
 
               return newChats
             }
@@ -105,12 +107,34 @@ const Chat = () => {
     },
   });
 
+  // * Socket to join the current Chat room
+  const { socket } = useSocket()
+
+  // * Local Typing state for Instances when both the user are online, active and Typing
+  const [isTyping, setIsTyping] = useState(false)
+
+  const handleTyping = (value: boolean) => setIsTyping(value);
+
   // * To clean the selected Chat when the component is unmounted
   useEffect(() => {
+    if(!socket) return;
+
+    socket.on(TYPING_EVENT, () => handleTyping(true))
+
+
+    socket.on(STOP_TYPING_EVENT, () => handleTyping(false));
+
+
     return () => {
       dispatch(setSelectedChat(undefined));
     };
-  }, [dispatch]);
+  }, [dispatch, socket]);
+
+  useEffect(() => {
+    if(!socket) return;
+
+    socket.emit(JOIN_CHAT_EVENT, selectedChat?._id)
+  }, [selectedChat?._id, socket])
 
   // * We are using this hack to set the selected chat dynamically when the user does a refresh on single chat page 
   if (id && !selectedChat) {
@@ -169,17 +193,30 @@ const Chat = () => {
   return (
     <div className="chat-body">
       <ChatHeader />
-      <section className={`messages p-4 ${messages?.length === 0 && 'justify-center items-center'}`}>
+      <section
+        className={`messages p-4 relative ${
+          messages?.length === 0 && 'justify-center items-center'
+        }`}
+      >
         {messages!.length <= 0 && (
           <div className="flex flex-col items-center">
             <IoChatboxEllipses className="text-6xl text-accent opacity-30" />
             <p className="text-3xl opacity-30">No Messages Here.</p>
           </div>
         )}
+        {isTyping && (
+          <div
+            className={`bg-primary bg-opacity-25 backdrop-blur-lg px-3 grid place-items-center rounded-full w-max ${
+              messages!.length <= 0 && 'absolute bottom-2 left-4'
+            }`}
+          >
+            <span className="loading loading-dots loading-lg text-accent"></span>
+          </div>
+        )}
         {messages?.map((message) => (
           <ChatBubble
             key={message._id}
-            alignRight={user?._id === message.sender._id}
+            sentByYou={user?._id === message.sender._id}
             message={message}
           />
         ))}
@@ -190,3 +227,5 @@ const Chat = () => {
 };
 
 export default Chat;
+
+// TODO: Need to implement New Message scroll to bottom Functionality

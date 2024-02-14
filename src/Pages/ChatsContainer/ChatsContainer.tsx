@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom"
 import Chats from "../Chats/Chats"
 import "./ChatsContainer.scss";
-import { ChatsProvider } from "./ChatsContext"
+import { ChatsProvider } from "../../Context/ChatsContext"
 import useWindowSize from "../../utils/hooks/useWindowSize"
 import MobileLayout from "./MobileLayout"
 

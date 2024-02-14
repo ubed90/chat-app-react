@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import debounce from '../utils/debounce';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { useChatsContext } from '../Pages/ChatsContainer/ChatsContext';
+import { useChatsContext } from '../Context/ChatsContext';
 import { useAppDispatch } from '../Store';
 import { IChatCreation } from '../models/chat.model';
 import customFetch from '../utils/customFetch';

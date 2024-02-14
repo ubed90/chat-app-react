@@ -1,30 +1,51 @@
-import React from 'react'
-import { IChat } from '../../models/chat.model'
-import { useSelector } from 'react-redux'
-import { RootState, useAppDispatch } from '../../Store'
-import { getOtherUserDetails } from '../../utils/getOtherUser'
-import dayjs from 'dayjs'
-import './/ChatListItem.scss'
-import { useNavigate } from 'react-router-dom'
-import { setSelectedChat } from '../../features/chat'
+import React from 'react';
+import { IChat } from '../../models/chat.model';
+import { useSelector } from 'react-redux';
+import { RootState, useAppDispatch } from '../../Store';
+import { getOtherUserDetails } from '../../utils/getOtherUser';
+import dayjs from 'dayjs';
+import './/ChatListItem.scss';
+import { useNavigate } from 'react-router-dom';
+import { deleteNotification, setSelectedChat } from '../../features/chat';
+import { useQueryClient } from '@tanstack/react-query';
 
 const ChatListItem: React.FC<IChat> = (chat) => {
-    const { user } = useSelector((state: RootState) => state.user);
+  const { user } = useSelector((state: RootState) => state.user);
+  const { selectedChat } = useSelector((state: RootState) => state.chat);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const dispatch = useAppDispatch()
-    
-    const handleChatSelect = () => {
-      dispatch(setSelectedChat(chat));
-      return navigate(chat._id as string, { relative: 'path' })
+  const dispatch = useAppDispatch();
+
+  const queryClient = useQueryClient();
+
+  const handleChatSelect = () => {
+    if(chat?.notify) {
+      dispatch(deleteNotification({ key: chat._id as string }));
+      queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+        const newChats: IChat[] = structuredClone(chats);
+
+        const existingChat = newChats.find(
+          (prevChat) => prevChat._id === chat._id
+        );
+
+        if (!existingChat) return chats;
+
+        existingChat.notify = undefined;
+
+        return newChats;
+      });
     }
-    
+    dispatch(setSelectedChat(chat));
+    return navigate(chat._id as string, { relative: 'path' });
+  };
 
   return (
     <li
       onClick={handleChatSelect}
-      className="local-chat p-4 border-b-[1px] border-accent border-opacity-20 cursor-pointer hover:bg-primary hover:bg-opacity-10 transition-all duration-300"
+      className={`local-chat p-4 border-b-[1px] border-accent border-opacity-20 cursor-pointer hover:bg-accent hover:bg-opacity-10 transition-all duration-300 ${
+        selectedChat?._id === chat._id && 'bg-success bg-opacity-50'
+      } ${chat.notify ? 'notify' : ''}`}
     >
       {chat.isGroupChat ? (
         <div className="local-chat-profile-image avatar-group -space-x-14 rtl:space-x-reverse">
@@ -78,6 +99,9 @@ const ChatListItem: React.FC<IChat> = (chat) => {
           : {chat.lastMessage.content}
         </p>
       )}
+      {chat?.notify && (
+        <span className={`badge badge-success badge-lg rounded-full justify-self-center ${chat.notify === 'new' && 'row-span-2'}`}>{chat.notify}</span>
+      )}
       {chat?.lastMessage && (
         <p className="text-sm local-chat-time">
           {dayjs(chat.lastMessage.createdAt).format('hh:mm a')}
@@ -85,6 +109,6 @@ const ChatListItem: React.FC<IChat> = (chat) => {
       )}
     </li>
   );
-}
+};
 
-export default ChatListItem
+export default ChatListItem;

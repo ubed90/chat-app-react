@@ -44,8 +44,6 @@ const EditGroupName: React.FC<EditGroupNameProps> = ({ onSuccess }) => {
             if(data.status !== 'success') return;
 
             queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
-                console.log(chats);
-                
               const newChats: IChat[] = structuredClone(chats);
 
               const chat = newChats.find(
