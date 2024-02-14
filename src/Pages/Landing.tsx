@@ -2,9 +2,10 @@ import { PropsWithChildren, useEffect } from "react"
 import { useSocket } from "../Context/SocketContext"
 import { useSelector } from "react-redux";
 import { RootState, store } from "../Store";
-import { CONNECTED_EVENT, DISCONNECT_EVENT, MESSAGE_RECEIVED_EVENT, NEW_CHAT_EVENT } from "../utils/EventsMap";
+import { CONNECTED_EVENT, DELETE_CHAT_EVENT, DISCONNECT_EVENT, MESSAGE_RECEIVED_EVENT, NEW_CHAT_EVENT, REMOVE_FROM_GROUP_EVENT, UPDATE_GROUP_NAME_EVENT } from "../utils/EventsMap";
 import { useQueryClient } from "@tanstack/react-query";
-import { onNewChat, onNewMessage } from "../utils/socketCallbacks";
+import { onDeleteChat, onGroupRename, onNewChat, onNewMessage, onRemove } from "../utils/socketCallbacks";
+import { useNavigate } from "react-router-dom";
 
 const Landing: React.FC<PropsWithChildren> = ({ children }) => {
   const { socket, disconnect } = useSocket();
@@ -12,29 +13,50 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
   // const { selectedChat } = useSelector((state: RootState) => state.chat)
 
   const queryClient = useQueryClient();
+
+  const navigate = useNavigate();
   
   useEffect(() => {
-    if(!socket) return;
+    if (!socket) return;
 
     // * Setup Listeners
 
     // ? CONNECTION ESTABLISHED LISTENER
-    socket.on(CONNECTED_EVENT, () => console.log("USER CONNECTED 🚀", user?._id))
+    socket.on(CONNECTED_EVENT, () =>
+      console.log('USER CONNECTED 🚀', user?._id)
+    );
 
     // ? DISCONNECT EVENT LISTENER
     socket.on(DISCONNECT_EVENT, disconnect);
 
     // ? Listener for New Messages
-    socket.on(MESSAGE_RECEIVED_EVENT, onNewMessage(queryClient, store))
+    socket.on(MESSAGE_RECEIVED_EVENT, onNewMessage(queryClient, store));
 
     // ? Listener for New Chat Event
-    socket.on(NEW_CHAT_EVENT, onNewChat(queryClient, store))
-    
+    socket.on(NEW_CHAT_EVENT, onNewChat(queryClient, store));
+
+    // ? Listener for Delete Chat Event
+    socket.on(DELETE_CHAT_EVENT, onDeleteChat(queryClient, store, navigate));
+
+    // ? Listener for Remove From Group EVent
+    socket.on(REMOVE_FROM_GROUP_EVENT, onRemove(queryClient, store, navigate));
+
+    // ? Listener for Rename Group EVent
+    socket.on(UPDATE_GROUP_NAME_EVENT, onGroupRename(queryClient, store));
 
     return () => {
-      socket.emit(DISCONNECT_EVENT)
+      socket.emit(DISCONNECT_EVENT);
 
-      socket.off(MESSAGE_RECEIVED_EVENT, onNewMessage(queryClient, store))
+      socket.off(REMOVE_FROM_GROUP_EVENT, onGroupRename(queryClient, store));
+
+      socket.off(
+        REMOVE_FROM_GROUP_EVENT,
+        onRemove(queryClient, store, navigate)
+      );
+
+      socket.off(DELETE_CHAT_EVENT, onDeleteChat(queryClient, store, navigate));
+
+      socket.off(MESSAGE_RECEIVED_EVENT, onNewMessage(queryClient, store));
 
       socket.off(NEW_CHAT_EVENT, onNewChat(queryClient, store));
 
@@ -43,8 +65,7 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
       );
 
       socket.off(DISCONNECT_EVENT, disconnect);
-    }
-
+    };
   }, [socket, user])
 
   return (
@@ -54,9 +75,6 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
   )
 }
 
-// TODO: GROUP ADD / REMOVE Event messages;
-// TODO: Disable / Remove Chat from other user List when its deleted from one end;
-// TODO: Disable / Remove Group from other user List when removed;
-// TODO: Notify all users when Group Name is Changed.
-
 export default Landing
+
+// TODO: Need to Implement Attachment upload Func

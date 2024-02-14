@@ -122,7 +122,7 @@ const Chat = () => {
     socket.on(TYPING_EVENT, () => handleTyping(true))
 
 
-    socket.on(STOP_TYPING_EVENT, () => handleTyping(false))
+    socket.on(STOP_TYPING_EVENT, () => handleTyping(false));
 
 
     return () => {
@@ -194,7 +194,7 @@ const Chat = () => {
     <div className="chat-body">
       <ChatHeader />
       <section
-        className={`messages p-4 ${
+        className={`messages p-4 relative ${
           messages?.length === 0 && 'justify-center items-center'
         }`}
       >
@@ -204,21 +204,28 @@ const Chat = () => {
             <p className="text-3xl opacity-30">No Messages Here.</p>
           </div>
         )}
-        {isTyping && <span className="loading loading-dots loading-lg text-accent"></span>}
+        {isTyping && (
+          <div
+            className={`bg-primary bg-opacity-25 backdrop-blur-lg px-3 grid place-items-center rounded-full w-max ${
+              messages!.length <= 0 && 'absolute bottom-2 left-4'
+            }`}
+          >
+            <span className="loading loading-dots loading-lg text-accent"></span>
+          </div>
+        )}
         {messages?.map((message) => (
           <ChatBubble
             key={message._id}
-            alignRight={user?._id === message.sender._id}
+            sentByYou={user?._id === message.sender._id}
             message={message}
           />
         ))}
       </section>
-      <ChatFooter
-        sendMessage={handleNewMessage}
-        isPending={isPending}
-      />
+      <ChatFooter sendMessage={handleNewMessage} isPending={isPending} />
     </div>
   );
 };
 
 export default Chat;
+
+// TODO: Need to implement New Message scroll to bottom Functionality

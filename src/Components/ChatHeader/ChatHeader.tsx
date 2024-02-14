@@ -58,7 +58,7 @@ const ChatHeader = () => {
 
   const CTA = {
     EDIT: <EditGroupName onSuccess={onSuccess} />,
-    ADD: <AddUserToGroup onSuccess={onSuccess}/>,
+    ADD: <AddUserToGroup onSuccess={onSuccess} />,
     REMOVE: <RemoveUserFromGroup onSuccess={onSuccess} />,
     VIEW: <ViewParticipants />,
   };
@@ -71,10 +71,24 @@ const ChatHeader = () => {
   // * Mutation For Deleting Chat
   const { mutate: deleteChat, isPending: isChatDeleting } = useMutation({
     mutationKey: ['delete-chat'],
-    mutationFn: (chatId: string) => customFetch.delete<{ status: string, message: string }>('/chats', {
-      data: { chatId }
-    })
-  })
+    mutationFn: (chatId: string) =>
+      customFetch.delete<{ status: string; message: string }>('/chats', {
+        data: { chatId },
+      }),
+  });
+
+  // * Mutation For Deleting Group Chat
+  const { mutate: deleteGroupChat, isPending: isGroupChatDeleting } =
+    useMutation({
+      mutationKey: ['delete-group-chat'],
+      mutationFn: (groupId: string) =>
+        customFetch.delete<{ status: string; message: string }>(
+          '/chats/group/delete',
+          {
+            data: { groupId },
+          }
+        ),
+    });
 
   // * Mutation for Leaving Group
   const { mutate: leaveGroup, isPending: isLeavingGroup } = useMutation({
@@ -86,14 +100,36 @@ const ChatHeader = () => {
   });
 
   // * Refetch for fetching chats again after Exit / Delete
-  const { fetchChats } = useChatsContext()
+  const { fetchChats } = useChatsContext();
 
-  // * Handle Exit / Delete Group / Chat
+  // * Handle Exit
   const handleExit = () => {
-    if(!confirm(`Are you sure you want to delete this chat ?`)) return;
-    
-    if(selectedChat?.isGroupChat) {
-      leaveGroup(selectedChat?._id as string, {
+    if (!confirm(`Are you sure you want to Leave this group ?`)) return;
+    leaveGroup(selectedChat?._id as string, {
+      onSuccess({ data }) {
+        if (data.status !== 'success') {
+          toast.error(data.message);
+          return;
+        }
+
+        dispatch(setSelectedChat(undefined));
+        navigate('..');
+        fetchChats && fetchChats();
+        toast.success(data.message + '🚀');
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError(error: any) {
+        toast.error(error?.response?.data?.message || error.message);
+      },
+    });
+  };
+
+  // * Handle / Delete Group / Chat
+  const handleDelete = () => {
+    if (!confirm(`Are you sure you want to delete this chat ?`)) return;
+
+    if (selectedChat?.isGroupChat) {
+      deleteGroupChat(selectedChat?._id as string, {
         onSuccess({ data }) {
           if (data.status !== 'success') {
             toast.error(data.message);
@@ -113,8 +149,8 @@ const ChatHeader = () => {
     } else {
       deleteChat(selectedChat?._id as string, {
         onSuccess({ data }) {
-          if(data.status !== 'success') {
-            toast.error(data.message)
+          if (data.status !== 'success') {
+            toast.error(data.message);
             return;
           }
 
@@ -127,7 +163,7 @@ const ChatHeader = () => {
         onError(error: any) {
           toast.error(error?.response?.data?.message || error.message);
         },
-      })
+      });
     }
   }
 
@@ -155,13 +191,13 @@ const ChatHeader = () => {
         </button>
         <ul
           tabIndex={0}
-          className="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-box w-max mt-4"
+          className="dropdown-content z-[1] menu p-2 shadow bg-neutral rounded-xl w-max mt-4 flex flex-col gap-2"
         >
           <li>
             <>
               <button
                 onClick={handleToggle}
-                className="btn btn-ghost content-center rounded-xl text-xl text-accent gap-3"
+                className="btn btn-ghost content-center rounded-xl text-xl text-white gap-3"
               >
                 <CgProfile className="text-3xl" />
                 {selectedChat?.isGroupChat
@@ -287,28 +323,56 @@ const ChatHeader = () => {
               </Modal>
             </>
           </li>
-          <li>
-            <button
-              disabled={isChatDeleting || isLeavingGroup}
-              onClick={handleExit}
-              className="btn btn-ghost content-center rounded-xl text-xl text-red-400 gap-3 justify-start"
-            >
-              {(isChatDeleting || isLeavingGroup) && (
-                <span className="loading loading-spinner loading-sm"></span>
-              )}
-              {!isChatDeleting &&
-              !isLeavingGroup &&
-              selectedChat?.isGroupChat ? (
-                <BiExit className="text-3xl" />
-              ) : (
-                <MdDelete className="text-3xl" />
-              )}
-              {(isChatDeleting || isLeavingGroup) && 'Deleting...'}
-              {!isChatDeleting && !isLeavingGroup && selectedChat?.isGroupChat
-                ? 'Exit Group'
-                : 'Delete Chat'}
-            </button>
-          </li>
+          {selectedChat?.isGroupChat && (
+            <>
+              <li>
+                <button
+                  disabled={isLeavingGroup}
+                  onClick={handleExit}
+                  className="btn btn-ghost content-center rounded-xl text-xl text-red-400 gap-3 justify-start"
+                >
+                  {isLeavingGroup && (
+                    <span className="loading loading-spinner loading-sm"></span>
+                  )}
+                  {!isLeavingGroup && <BiExit className="text-3xl" />}
+                  {isLeavingGroup && 'Leaving...'}
+                  {!isLeavingGroup && 'Exit Group'}
+                </button>
+              </li>
+              <li>
+                <button
+                  disabled={isGroupChatDeleting || user?._id !== selectedChat.admin._id}
+                  onClick={handleDelete}
+                  className="btn btn-error text-white content-center rounded-xl text-xl gap-3 justify-start disabled:text-gray-500"
+                >
+                  {isGroupChatDeleting && (
+                    <span className="loading loading-spinner loading-sm"></span>
+                  )}
+                  {!isGroupChatDeleting && <MdDelete className="text-3xl" />}
+                  {isGroupChatDeleting && 'Deleting...'}
+                  {!isGroupChatDeleting && 'Delete Group'}
+                </button>
+              </li>
+            </>
+          )}
+          {!selectedChat?.isGroupChat && (
+            <li>
+              <button
+                disabled={isChatDeleting}
+                onClick={handleDelete}
+                className="btn btn-ghost content-center rounded-xl text-xl text-red-400 gap-3 justify-start"
+              >
+                {(isChatDeleting) && (
+                  <span className="loading loading-spinner loading-sm"></span>
+                )}
+                {!isChatDeleting && (
+                  <MdDelete className="text-3xl" />
+                )}
+                {(isChatDeleting) && 'Deleting...'}
+                {!isChatDeleting && 'Delete Chat'}
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </header>

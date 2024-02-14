@@ -54,7 +54,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
 
     if (!content) return toast.warning('Message cannot be empty.');
 
-
+    handleLocalTyping(false);
     socket?.emit(STOP_TYPING_EVENT, selectedChat?._id)
     if(timeout.current) clearTimeout(timeout.current);
 
@@ -80,6 +80,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({
           }`}
           value={content}
           onChange={handleChange}
+          autoComplete='off'
         />
         <button
           disabled={isPending}

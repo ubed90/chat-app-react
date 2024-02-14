@@ -1,64 +1,68 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState, useAppDispatch } from '../../Store';
-import avatar from "../../assets/avatar.jpg";
+import avatar from '../../assets/avatar.jpg';
 import Logo from '../Logo';
 import { Themes } from '../../utils/localStorage';
 import { logoutUser, toggleTheme } from '../../features/user';
 import customFetch from '../../utils/customFetch';
 import { toast } from 'react-toastify';
 import { IMessage } from '../../models/message.model';
-import { NotificationData, deleteNotification, setSelectedChat } from '../../features/chat';
+import {
+  NotificationData,
+  deleteNotification,
+  setSelectedChat,
+} from '../../features/chat';
 import { useQueryClient } from '@tanstack/react-query';
 import { IChat } from '../../models/chat.model';
 
 const Header = () => {
-    const { user, theme } = useSelector((state: RootState) => state.user);
-    const { notification } = useSelector((state: RootState) => state.chat)
-    
-    const dispatch = useAppDispatch();
+  const { user, theme } = useSelector((state: RootState) => state.user);
+  const { notification } = useSelector((state: RootState) => state.chat);
 
-    const navigate = useNavigate();
-    
-    const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
 
-    const handleNotifyClick = (key: string, notification: NotificationData) => {
-      switch (notification.action) {
-        case 'NEW_CHAT':
-        case 'NEW_MESSAGE': {
-          queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
-            const newChats: IChat[] = structuredClone(chats);
+  const navigate = useNavigate();
 
-            const existingChat = newChats.find(
-              (chat) => chat._id === key
-            );
+  const queryClient = useQueryClient();
 
-            if (!existingChat) return chats;
+  const handleNotifyClick = async (key: string, notification: NotificationData) => {
+    switch (notification.action) {
+      case 'NEW_CHAT':
+      case 'NEW_MESSAGE': {
+        queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+          const newChats: IChat[] = structuredClone(chats);
 
-            existingChat.notify = undefined;
+          const existingChat = newChats.find((chat) => chat._id === key);
 
-            dispatch(setSelectedChat(existingChat));
+          if (!existingChat) return chats;
 
-            return newChats;
-          });
-          dispatch(deleteNotification({ key }))
-          return navigate(`/chats/${key}`)
+          existingChat.notify = undefined;
+
+          dispatch(setSelectedChat(existingChat));
+
+          return newChats;
+        });
+        dispatch(deleteNotification({ key }));
+        if(notification.isGroupChat) {
+          await queryClient.refetchQueries({ queryKey: ['chat', key] })
         }
+        return navigate(`/chats/${key}`);
       }
     }
-    
+  };
 
-    const handleLogout = async () => {
-      try {
-        await customFetch.post('/auth/logout');
-        dispatch(logoutUser({ msg: 'Logout Successful 🚀' }));
-        return navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await customFetch.post('/auth/logout');
+      dispatch(logoutUser({ msg: 'Logout Successful 🚀' }));
+      return navigate('/login');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.log(error);
-        toast.error(error.response.data.message)
-      }
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.response.data.message);
     }
+  };
 
   return (
     <header className="border-b border-base-300">
@@ -131,16 +135,17 @@ const Header = () => {
             </button>
             <ul
               tabIndex={0}
-              className="mt-5 z-[1] shadow menu menu-lg dropdown-content bg-neutral rounded-xl w-max"
+              className="mt-6 z-[1] shadow menu menu-lg dropdown-content bg-neutral rounded-xl w-max"
             >
               {notification &&
-                Object.keys(notification).length > 0 &&
                 Object.keys(notification).map((key) => {
                   const notify = notification[key];
 
                   const isMessageNotification =
                     notify.action === 'NEW_MESSAGE' &&
                     Array.isArray(notify.value);
+
+                  console.log(notify);
 
                   return isMessageNotification ? (
                     <li
@@ -150,8 +155,7 @@ const Header = () => {
                     >
                       You got{' '}
                       {notify.value.length > 1 ? notify.value.length : 'a'} new
-                      message{notify.value.length > 1 ? 's' : ''} from{' '}
-                      {(notify.value[0] as IMessage).sender.name}
+                      message{notify.value.length > 1 ? 's' : ''} {notify.isGroupChat ? `in ${notify.chatName}` : `from ${(notify.value[0] as IMessage).sender.name}`}
                     </li>
                   ) : (
                     <li
@@ -163,7 +167,7 @@ const Header = () => {
                     </li>
                   );
                 })}
-              {!notification || (notification && Object.keys(notification).length === 0) && (
+              {(!notification || Object.keys(notification).length === 0) && (
                 <li className="text-white text-lg sm:text-xl p-2 sm:p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-slate-600">
                   You have 0 notifications.
                 </li>
@@ -247,6 +251,6 @@ const Header = () => {
       </nav>
     </header>
   );
-}
+};
 
-export default Header
+export default Header;

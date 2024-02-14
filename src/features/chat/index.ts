@@ -7,6 +7,8 @@ type NotificationAction = 'NEW_CHAT' | 'NEW_MESSAGE'
 export type NotificationData = {
   action: NotificationAction;
   value: string | IMessage[];
+  isGroupChat?: boolean;
+  chatName?: string;
 };
 
 type Chat = {

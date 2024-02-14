@@ -4,7 +4,7 @@ export const DISCONNECT_EVENT = 'disconnected';
 
 export const JOIN_CHAT_EVENT = 'joinChat';
 
-export const LEAVE_CHAT_EVENT = 'leaveChat';
+export const DELETE_CHAT_EVENT = 'deleteChat';
 // ? when admin updates a group name
 export const UPDATE_GROUP_NAME_EVENT = 'updateGroupName';
 // ? when new message is received
@@ -17,6 +17,8 @@ export const SOCKET_ERROR_EVENT = 'socketError';
 export const STOP_TYPING_EVENT = 'stopTyping';
 // ? when participant starts typing
 export const TYPING_EVENT = 'typing';
+// ? when admin remove a particpant
+export const REMOVE_FROM_GROUP_EVENT = 'removeFromGroup';
 
 // type CHAT_EVENTS =  {
   // [CONNECTED_EVENT]: () => void,

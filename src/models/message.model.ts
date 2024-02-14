@@ -5,6 +5,7 @@ export type IMessage = {
   content: string;
   chat: string;
   sender: IUserData;
+  isNotification: boolean;
   createdAt?: string;
 };
 
