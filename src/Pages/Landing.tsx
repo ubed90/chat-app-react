@@ -20,7 +20,6 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
     if (!socket) return;
 
     // * Setup Listeners
-
     // ? CONNECTION ESTABLISHED LISTENER
     socket.on(CONNECTED_EVENT, () =>
       console.log('USER CONNECTED 🚀', user?._id)
