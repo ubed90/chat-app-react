@@ -6,6 +6,13 @@ export type IMessage = {
   chat: string;
   sender: IUserData;
   isNotification: boolean;
+  isAttachment: boolean;
+  attachment?: {
+    type: "IMAGE" | "PDF",
+    url?: string,
+    content?: Buffer;
+    file?: File;
+  }
   createdAt?: string;
 };
 
