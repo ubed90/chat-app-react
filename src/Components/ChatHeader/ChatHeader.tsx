@@ -28,7 +28,7 @@ import { useChatsContext } from '../../Context/ChatsContext';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
-const ChatHeader = () => {
+const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
   const otherUser = getOtherUserDetails(user!, selectedChat!.users);
@@ -175,7 +175,9 @@ const ChatHeader = () => {
       >
         <IoMdArrowRoundBack className="text-2xl" />
       </button>
-      <div className="local-chat-header-info">
+      <div
+        className={`local-chat-header-info ${isUserOnline && 'user-online'}`}
+      >
         <ProfilePicture className="-space-x-16" width="w-16" />
         <h4
           title={selectedChat?.isGroupChat ? selectedChat.name : otherUser.name}
@@ -183,7 +185,9 @@ const ChatHeader = () => {
         >
           {selectedChat?.isGroupChat ? selectedChat.name : otherUser.name}
         </h4>
-        <p className="local-chat-header-info-status text-base">Online</p>
+        {isUserOnline && (
+          <p className="local-chat-header-info-status text-base">Online</p>
+        )}
       </div>
       <div className="local-chat-header-dropdown cursor-pointer relative ml-auto dropdown dropdown-end dropdown-hover">
         <button role="button" className="btn btn-ghost rounded-xl btn-lg px-0">
@@ -341,7 +345,9 @@ const ChatHeader = () => {
               </li>
               <li>
                 <button
-                  disabled={isGroupChatDeleting || user?._id !== selectedChat.admin._id}
+                  disabled={
+                    isGroupChatDeleting || user?._id !== selectedChat.admin._id
+                  }
                   onClick={handleDelete}
                   className="btn btn-error text-white content-center rounded-xl text-xl gap-3 justify-start disabled:text-gray-500"
                 >
@@ -362,13 +368,11 @@ const ChatHeader = () => {
                 onClick={handleDelete}
                 className="btn btn-ghost content-center rounded-xl text-xl text-red-400 gap-3 justify-start"
               >
-                {(isChatDeleting) && (
+                {isChatDeleting && (
                   <span className="loading loading-spinner loading-sm"></span>
                 )}
-                {!isChatDeleting && (
-                  <MdDelete className="text-3xl" />
-                )}
-                {(isChatDeleting) && 'Deleting...'}
+                {!isChatDeleting && <MdDelete className="text-3xl" />}
+                {isChatDeleting && 'Deleting...'}
                 {!isChatDeleting && 'Delete Chat'}
               </button>
             </li>

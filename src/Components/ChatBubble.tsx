@@ -33,21 +33,25 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
             <img
               alt={message.sender.name}
               src={message.sender?.profilePicture?.url}
-              className='!object-contain'
+              className="!object-contain"
             />
           </div>
         ) : (
           <div className="avatar placeholder ring-1 ring-primary ring-opacity-50">
             <div className="bg-neutral text-neutral-content rounded-full w-10">
-              <span className="text-xl uppercase">{message.sender.name.substring(0, 2)}</span>
+              <span className="text-xl uppercase">
+                {message.sender.name.substring(0, 2)}
+              </span>
             </div>
           </div>
         )}
       </div>
       <div className="chat-header capitalize text-lg font-bold text-primary">
-        {message.sender.name}
+        {sentByYou ? 'You' : message.sender.name}
       </div>
-      <div className="chat-bubble rounded-xl text-2xl text-justify">{message.content}</div>
+      <div className="chat-bubble rounded-xl text-2xl text-justify">
+        {message.content}
+      </div>
       <div className="chat-footer">
         <time className="text-sm">
           {dayjs(message.createdAt).format('hh:mm a')}
