@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import FileUploader from '../FileUploader';
 import { IMessage } from '../../models/message.model';
 import { IoMdDownload } from 'react-icons/io';
+import { FaCheck } from 'react-icons/fa';
 
 const UploadBubble: React.FC<IMessage> = (message) => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -21,13 +22,17 @@ const UploadBubble: React.FC<IMessage> = (message) => {
       {({ isLoading, percentage, handleDownload }) => {
         return (
           <div
-            className="chat chat-end"
-            onClick={() =>
+            className={`chat ${
+              user?._id === message.sender._id ? 'chat-end' : 'chat-start'
+            }`}
+            onClick={() => {
+              if (user?._id === message.sender._id) return;
+
               handleDownload({
                 type: message.attachment?.type,
                 fileName: message.content,
-              })
-            }
+              });
+            }}
           >
             <div
               className={`chat-image avatar ${
@@ -46,19 +51,23 @@ const UploadBubble: React.FC<IMessage> = (message) => {
                 <div className="avatar placeholder ring-1 ring-primary ring-opacity-50">
                   <div className="bg-neutral text-neutral-content rounded-full w-10">
                     <span className="text-xl uppercase">
-                      {user?.name.substring(0, 2)}
+                      {message.sender.name.substring(0, 2)}
                     </span>
                   </div>
                 </div>
               )}
             </div>
             <div className="chat-header capitalize text-lg font-bold text-primary">
-              {user?.name}
+              {user?._id === message.sender._id ? 'You' : message.sender.name}
             </div>
-            <div className="chat-bubble p-4 upload-bubble rounded-xl text-2xl text-justify flex items-center gap-4">
+            <div
+              className={`chat-bubble p-4 rounded-xl text-2xl text-justify flex items-center gap-4 ${user?._id !== message.sender._id && 'flex-row-reverse'}`}
+            >
               <div
-                className={`radial-progress text-success text-base font-bold cursor-pointer ${
-                  isLoading ? '' : 'text-white'
+                className={`radial-progress text-success text-base font-bold ${
+                  isLoading || user?._id === message.sender._id
+                    ? ''
+                    : 'text-white cursor-pointer'
                 }`}
                 style={{
                   // @ts-expect-error
@@ -71,6 +80,8 @@ const UploadBubble: React.FC<IMessage> = (message) => {
               >
                 {isLoading ? (
                   Math.floor(percentage) + '%'
+                ) : user?._id === message.sender._id ? (
+                  <FaCheck className="text-3xl text-success" />
                 ) : (
                   <IoMdDownload className="text-3xl text-white" />
                 )}

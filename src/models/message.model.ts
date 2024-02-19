@@ -19,7 +19,8 @@ export type IMessage = {
 export type IMessageResponse = {
   status: string,
   message: string,
-  messages: IMessage[]
+  messages: IMessage[],
+  isOnline: boolean;
 }
 
 export type INewMessageResponse = {

@@ -22,8 +22,11 @@ import {
   JOIN_CHAT_EVENT,
   STOP_TYPING_EVENT,
   TYPING_EVENT,
+  USER_CONNECTED,
+  USER_DISCONNECTED,
 } from '../../utils/EventsMap';
 import UploadBubble from '../../Components/UploadBubble/UploadBubble';
+import { getOtherUserDetails } from '../../utils/getOtherUser';
 
 const Chat = () => {
   // * User and Selected chat to seklectively show only List or Chat as per Mobile / Desktop layout
@@ -33,6 +36,13 @@ const Chat = () => {
 
   // * Only use is to clean the selected chat state when component is unmounted
   const { id } = useParams();
+
+  // * Is User Online STate
+  const [isOnline, setIsOnline] = useState<boolean>(false);
+
+  const handleStatus = (status: boolean) => {
+    setIsOnline(status);
+  }
 
   // * Local client instance to set new messages in cache
   const queryClient = useQueryClient();
@@ -109,6 +119,7 @@ const Chat = () => {
       const { data } = await customFetch.get<IMessageResponse>(
         '/message/' + id
       );
+      setIsOnline(data.isOnline);
       return data.messages;
     },
   });
@@ -139,6 +150,32 @@ const Chat = () => {
 
     socket.emit(JOIN_CHAT_EVENT, selectedChat?._id);
   }, [selectedChat?._id, socket]);
+
+  // * To Check for whether other user is online or not
+  useEffect(() => {
+    if(!socket) return;
+
+    socket.on(USER_CONNECTED, (userId: string) => {
+      console.log("EXEC");
+      if (selectedChat?.isGroupChat || !user || !selectedChat?.users) return;
+
+      const otherUser = getOtherUserDetails(user, selectedChat.users);
+
+      if (otherUser._id === userId) {
+        handleStatus(true);
+      }
+    })
+
+    socket.on(USER_DISCONNECTED, (userId: string) => {
+      if (selectedChat?.isGroupChat || !user || !selectedChat?.users) return;
+
+      const otherUser = getOtherUserDetails(user, selectedChat.users);
+
+      if (otherUser._id === userId) {
+        handleStatus(false);
+      }
+    });
+  }, [selectedChat?.isGroupChat, selectedChat?.users, socket, user])
 
   // ! Use Effect to make user wait before leaving the page when it is uploading / Downloading
 
@@ -218,7 +255,7 @@ const Chat = () => {
 
   return (
     <div className="chat-body">
-      <ChatHeader />
+      <ChatHeader isUserOnline={isOnline} />
       <section
         className={`messages p-4 relative ${
           messages?.length === 0 && 'justify-center items-center'

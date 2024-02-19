@@ -19,6 +19,10 @@ export const STOP_TYPING_EVENT = 'stopTyping';
 export const TYPING_EVENT = 'typing';
 // ? when admin remove a particpant
 export const REMOVE_FROM_GROUP_EVENT = 'removeFromGroup';
+// ? when friend gets disconnected
+export const USER_DISCONNECTED = 'userDisconnected';
+// ? when friend gets disconnected
+export const USER_CONNECTED = 'userConnected';
 
 // type CHAT_EVENTS =  {
   // [CONNECTED_EVENT]: () => void,
