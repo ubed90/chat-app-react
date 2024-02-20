@@ -254,7 +254,7 @@ const Chat = () => {
     );
 
   return (
-    <div className="chat-body">
+    <div className="chat-body overflow-hidden">
       <ChatHeader isUserOnline={isOnline} />
       <section
         className={`messages p-4 relative ${
