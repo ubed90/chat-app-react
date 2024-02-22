@@ -5,3 +5,8 @@
     display: grid;
     place-items: center;
 }
+
+// * Styles for React Player video element
+.video-bubble video {
+    object-fit: fill;
+}

@@ -25,7 +25,7 @@ import {
   USER_CONNECTED,
   USER_DISCONNECTED,
 } from '../../utils/EventsMap';
-import UploadBubble from '../../Components/UploadBubble/UploadBubble';
+import UploadBubble from '../../Components/UploadBubble';
 import { getOtherUserDetails } from '../../utils/getOtherUser';
 
 const Chat = () => {
@@ -254,7 +254,7 @@ const Chat = () => {
     );
 
   return (
-    <div className="chat-body">
+    <div className="chat-body overflow-hidden">
       <ChatHeader isUserOnline={isOnline} />
       <section
         className={`messages p-4 relative ${

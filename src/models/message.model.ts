@@ -1,5 +1,7 @@
 import { IUserData } from "./user.model";
 
+export type IMessageTypes = "IMAGE" | "VIDEO" | "PDF" | "AUDIO";
+
 export type IMessage = {
   _id?: string;
   content: string;
@@ -8,7 +10,7 @@ export type IMessage = {
   isNotification: boolean;
   isAttachment: boolean;
   attachment?: {
-    type: "IMAGE" | "PDF",
+    type: IMessageTypes,
     url?: string,
     content?: Buffer;
     file?: File;
