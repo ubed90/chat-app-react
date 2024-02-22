@@ -9,12 +9,17 @@ import axios from 'axios';
 
 type FileUploaderProps = {
   messageId: string;
-  children: (props: {
-    isLoading: boolean;
-    percentage: number;
-    handleDownload: (props: { type: string | undefined, fileName: string }) => void;
-  }) => JSX.Element;
+  children: (props: FileUploaderChildrenArgs) => JSX.Element;
   file?: File | string | Buffer;
+};
+
+export type FileUploaderChildrenArgs = {
+  isLoading: boolean;
+  percentage: number;
+  handleDownload: (props: {
+    type: string | undefined;
+    fileName: string;
+  }) => void;
 };
 
 const FileUploader: React.FC<FileUploaderProps> = ({
@@ -45,7 +50,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({
             if (progressEvent.progress && progressEvent.progress > 0) {
               const uploadPercentage =
                 (progressEvent.progress * 100).toFixed(2);
-                console.log(uploadPercentage);
                 setPercentage(+uploadPercentage)
             }
           },

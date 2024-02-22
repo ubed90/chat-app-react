@@ -25,7 +25,7 @@ import {
   USER_CONNECTED,
   USER_DISCONNECTED,
 } from '../../utils/EventsMap';
-import UploadBubble from '../../Components/UploadBubble/UploadBubble';
+import UploadBubble from '../../Components/UploadBubble';
 import { getOtherUserDetails } from '../../utils/getOtherUser';
 
 const Chat = () => {
