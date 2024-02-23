@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionFunction, Link, useActionData } from 'react-router-dom';
-import { CustomForm, FormInput } from '../../Components';
+import { CustomBtn, CustomForm, FormInput } from '../../Components';
 import { ValidatorProps } from '../../Components/CustomForm/CustomForm';
 import { toast } from 'react-toastify';
 import customFetch from '../../utils/customFetch';
 import { ImCheckboxChecked } from 'react-icons/im';
+import { FcGoogle } from 'react-icons/fc';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { firebaseAuth } from '../../utils/firebase.config';
 
 // * Register Action
 export const registerAction: ActionFunction = async ({ request }) => {
@@ -69,6 +72,17 @@ const customValidator = ({ formValues }: ValidatorProps) => {
 const Register = () => {
   const data = (useActionData() as { isError: boolean; message?: string }) || {
     isError: true,
+  };
+
+  const handleRegisterWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const { user } = await signInWithPopup(firebaseAuth, provider);
+      console.log(user);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -166,6 +180,13 @@ const Register = () => {
           </Link>
         </h4>
       </section>
+      <div className="divider px-20 md:px-40">OR</div>
+      <CustomBtn
+        text="Register using Google"
+        classes="btn-neutral btn-lg self-center text-2xl rounded-xl flex-row-reverse gap-4"
+        icon={<FcGoogle className="text-4xl" />}
+        clickHandler={handleRegisterWithGoogle}
+      />
     </main>
   );
 };
