@@ -2,8 +2,10 @@
     width: min(95%, 60rem);
     height: 100%;
     margin-inline: auto;
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
 }
 
 // * Styles for React Player video element

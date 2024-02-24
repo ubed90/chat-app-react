@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Store } from '@reduxjs/toolkit';
-import { CustomForm, FormInput } from '../../Components';
-import { RootState } from '../../Store';
-import { ActionFunction, Link, useNavigate } from 'react-router-dom';
-import { loginUserAPI } from '../../features/user';
+import { CustomBtn, CustomForm, FormInput } from '../../Components';
+import { RootState, useAppDispatch } from '../../Store';
+import { ActionFunction, Link, Navigate } from 'react-router-dom';
+import { loginUser, loginUserAPI } from '../../features/user';
 import { useSelector } from 'react-redux';
+import { FcGoogle } from "react-icons/fc";
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { firebaseAuth } from '../../utils/firebase.config';
+import { toast } from 'react-toastify';
+import customFetch from '../../utils/customFetch';
+import { IUserData } from '../../models/user.model';
 
 export const loginAction =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,10 +31,26 @@ export const loginAction =
 
 const Login = () => {
   const { user } = useSelector((state: RootState) => state.user)
+  const dispatch = useAppDispatch();
 
-  const navigate = useNavigate();
+  const handleLoginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const { user } = await signInWithPopup(firebaseAuth, provider);
+      const { data } = await customFetch.post<{
+        status: string;
+        user: IUserData;
+        message?: string;
+      }>('/auth/auto-login', { email: user.email });
+      
+      dispatch(loginUser({ user: data.user }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message)
+    }
+  }
 
-  if(user) navigate('/')
+  if(user) return <Navigate to='/chats' />;
 
   return (
     <main className="app-container">
@@ -49,7 +71,7 @@ const Login = () => {
                 size="input-md md:input-lg"
                 borderRadius="rounded-full"
                 required
-                autoComplete='off'
+                autoComplete="off"
               />
               <FormInput
                 name="password"
@@ -61,7 +83,7 @@ const Login = () => {
                 size="input-md md:input-lg"
                 borderRadius="rounded-full"
                 required
-                autoComplete='off'
+                autoComplete="off"
               />
             </>
           )}
@@ -84,6 +106,13 @@ const Login = () => {
           </Link>
         </footer>
       </section>
+      <div className="divider px-20 md:px-40">OR</div>
+      <CustomBtn
+        text="Login with Google"
+        classes="btn-neutral btn-lg self-center text-2xl rounded-xl flex-row-reverse gap-4"
+        icon={<FcGoogle className="text-4xl" />}
+        clickHandler={handleLoginWithGoogle}
+      />
     </main>
   );
 };
