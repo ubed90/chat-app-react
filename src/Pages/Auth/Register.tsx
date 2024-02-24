@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActionFunction, Link, useActionData } from 'react-router-dom';
+import { ActionFunction, Link, Navigate, useActionData } from 'react-router-dom';
 import { CustomBtn, CustomForm, FormInput } from '../../Components';
 import { ValidatorProps } from '../../Components/CustomForm/CustomForm';
 import { toast } from 'react-toastify';
@@ -9,6 +9,10 @@ import { ImCheckboxChecked } from 'react-icons/im';
 import { FcGoogle } from 'react-icons/fc';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { firebaseAuth } from '../../utils/firebase.config';
+import { IUserData } from '../../models/user.model';
+import { RootState, useAppDispatch } from '../../Store';
+import { loginUser } from '../../features/user';
+import { useSelector } from 'react-redux';
 
 // * Register Action
 export const registerAction: ActionFunction = async ({ request }) => {
@@ -25,11 +29,8 @@ export const registerAction: ActionFunction = async ({ request }) => {
       toast.warning(response.message);
       return { isError: true };
     }
-
-    console.log(response);
     return { isError: false, message: response.message };
   } catch (error: any) {
-    console.log(error);
     toast.error(error.response.data.message);
     return { isError: true };
   }
@@ -74,16 +75,34 @@ const Register = () => {
     isError: true,
   };
 
+  const { user } = useSelector((state: RootState) => state.user)
+
+  const dispatch = useAppDispatch();
+
   const handleRegisterWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
       const { user } = await signInWithPopup(firebaseAuth, provider);
-      console.log(user);
+      const { data: response } = await customFetch.post<{
+        status: string;
+        user: IUserData;
+        message?: string;
+      }>('/auth/register', {
+        name: user.displayName,
+        email: user.email,
+        profilePicture: user.photoURL,
+        usingProvider: true,
+      });
+      
+      toast.success(response.message);
+      dispatch(loginUser({ user: response.user }))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error?.response?.data?.message || error.message);
     }
   };
+
+  if(user) return <Navigate to='/chats' />
 
   return (
     <main className="app-container">

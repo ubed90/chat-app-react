@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   RefetchOptions,
   QueryObserverResult,
   useQuery,
 } from '@tanstack/react-query';
 import { IChat, IChatResponse } from '../models/chat.model';
-import { PropsWithChildren, createContext, useContext } from 'react';
+import { PropsWithChildren, createContext, useContext, useEffect } from 'react';
 import customFetch from '../utils/customFetch';
-import { toast } from 'react-toastify';
-import { Navigate } from 'react-router-dom';
+import { useAppDispatch } from '../Store';
+import { logoutUser } from '../features/user';
+import { useNavigate } from 'react-router-dom';
 
 const chatsQuery = {
   queryKey: ['all-chats'],
@@ -47,12 +49,17 @@ export const ChatsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     refetch: fetchChats,
   } = useQuery(chatsQuery);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if(isError && (error as any)?.response?.data?.statusCode === 401) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toast.warning(`${(error as any)?.response?.data?.message || error.message}`);
-    return <Navigate to='/login' />
-  }
+  const navigate = useNavigate();
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if(isError && (error as any)?.response?.data?.statusCode === 401) {
+      // toast.warning((error as any)?.response?.data?.message)
+      dispatch(logoutUser((error as any)?.response?.data?.message));
+      navigate('/login')
+    }
+  }, [dispatch, error, isError, navigate])
 
   return (
     <ChatsContext.Provider

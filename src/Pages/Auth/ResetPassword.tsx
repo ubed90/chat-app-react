@@ -21,7 +21,7 @@ const ResetPassword = () => {
     AxiosError<{ message: string; status?: string }>,
     { password: string; email: string; token: string }
   >({
-    mutationKey: ['forgot-password'],
+    mutationKey: ['reset-password'],
     mutationFn: async ({ password }) => {
       const { data } = await customFetch.post<{
         message: string;

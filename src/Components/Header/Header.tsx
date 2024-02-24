@@ -155,7 +155,10 @@ const Header = () => {
                     >
                       You got{' '}
                       {notify.value.length > 1 ? notify.value.length : 'a'} new
-                      message{notify.value.length > 1 ? 's' : ''} {notify.isGroupChat ? `in ${notify.chatName}` : `from ${(notify.value[0] as IMessage).sender.name}`}
+                      message{notify.value.length > 1 ? 's' : ''}{' '}
+                      {notify.isGroupChat
+                        ? `in ${notify.chatName}`
+                        : `from ${(notify.value[0] as IMessage).sender.name}`}
                     </li>
                   ) : (
                     <li
@@ -196,10 +199,18 @@ const Header = () => {
                 <NavLink
                   to="profile"
                   relative="path"
-                  className="justify-between !text-xl sm:!text-2xl rounded-xl"
+                  className="justify-between !text-xl sm:!text-2xl rounded-xl p-3"
                 >
                   Profile
-                  <span className="badge badge-lg rounded-xl">New</span>
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="change-password"
+                  relative="path"
+                  className="justify-between !text-xl sm:!text-2xl rounded-xl p-3"
+                >
+                  Change Password
                 </NavLink>
               </li>
               {/* <li>
@@ -208,7 +219,7 @@ const Header = () => {
               <li>
                 <button
                   onClick={() => dispatch(toggleTheme())}
-                  className="inline-flex justify-between items-center rounded-xl"
+                  className="inline-flex justify-between items-center rounded-xl p-3"
                 >
                   {/* this hidden checkbox controls the state */}
                   <span className="!text-xl sm:!text-2xl text-white rounded-xl">
@@ -240,7 +251,7 @@ const Header = () => {
               <li>
                 <button
                   onClick={handleLogout}
-                  className="!text-xl sm:!text-2xl bg-red-400 text-white font-bold sm:bg-transparent sm:text-current hover:bg-red-400 hover:text-black rounded-xl"
+                  className="!text-xl sm:!text-2xl bg-red-400 text-white font-bold sm:bg-transparent sm:text-current hover:bg-red-400 hover:text-black rounded-xl p-3"
                 >
                   Logout
                 </button>
