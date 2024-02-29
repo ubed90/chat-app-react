@@ -4,6 +4,10 @@
     display: grid;
     grid-template-rows: 6rem calc(100vh - 6rem - 6rem - 6rem) 6rem;
 
+    @supports(height: 100dvh) {
+        grid-template-rows: 6rem calc(100dvh - 6rem - 6rem - 6rem) 6rem;
+    }
+
     .messages {
         width: 100%;
         height: 100%;

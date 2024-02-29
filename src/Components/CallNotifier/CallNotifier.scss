@@ -1,0 +1,30 @@
+@use '../../assets/sass/base/' as *;
+
+.call-notifier {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    gap: 1rem 1rem;
+    align-items: center;
+
+    &-image {
+        grid-row: 1 / -1;
+    }
+
+    &-info {
+        height: 100%;
+    }
+
+    &-cta {
+        grid-column: 2;
+    }
+
+    .progress-bar {
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        background-color: #ff5861;
+        bottom: 0;
+        left: 0;
+        animation: incoming-call 30s linear forwards;
+    }
+}

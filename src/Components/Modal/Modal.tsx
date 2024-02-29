@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useRef } from 'react';
+import React, { HTMLAttributes, PropsWithChildren, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { CustomBtn } from '..';
 import { IoClose } from 'react-icons/io5';
@@ -13,7 +13,7 @@ type ModalHelperComponents = {
   Body: React.FC<{
     className?: string;
     children?: React.ReactNode;
-  }>;
+  } & HTMLAttributes<HTMLDivElement>>;
   Footer: React.FC<{
     className?: string;
     children?: React.ReactNode;
@@ -32,6 +32,7 @@ type ModalProps = {
   isOpen: boolean;
   onClose(): void;
   className?: string;
+  closeOnBackdrop?: boolean;
 };
 
 const Modal: React.FC<ModalProps & PropsWithChildren> &
@@ -41,6 +42,7 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
   onClose,
   children,
   className,
+  closeOnBackdrop = true
 }) => {
   const bodyRef = useRef<HTMLBodyElement>(document.querySelector('body')!);
   const portalExists = useRef(document.getElementById('modal-root'));
@@ -106,7 +108,11 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
         isOpen ? 'open' : ''
       }`}
     >
-      <div onClick={onClose} className="custom-modal-backdrop"></div>
+      <div onClick={() => {
+        if(!closeOnBackdrop) return;
+
+        onClose();
+      }} className="custom-modal-backdrop"></div>
       <div
         className={`custom-modal-content border-[1px] border-white rounded-xl p-4 ${
           className && className
@@ -136,12 +142,13 @@ const ModalHeader: React.FC<{ onClose?(): void } & PropsWithChildren> = ({
   );
 };
 
-const ModalBody: React.FC<{ className?: string } & PropsWithChildren> = ({
+const ModalBody: React.FC<{ className?: string } & PropsWithChildren & HTMLAttributes<HTMLDivElement>> = ({
   className,
   children,
+  ...rest
 }) => {
   return (
-    <div className={`custom-modal-body ${className && className}`}>
+    <div className={`custom-modal-body ${className && className}`} {...rest}>
       {children}
     </div>
   );

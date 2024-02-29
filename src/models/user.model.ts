@@ -9,7 +9,7 @@ export type IUserData = {
   name: string;
   username: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  profilePicture?: string;
+  profilePicture?: any;
   phoneNumber?: string;
   token?: string;
 };

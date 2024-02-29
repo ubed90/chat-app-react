@@ -9,4 +9,5 @@ export { default as ChatsContainer } from './ChatsContainer/ChatsContainer';
 export { default as NoChatSelected } from './NoChatSelected';
 export { default as Chat } from './Chat/Chat';
 export { default as Profile } from './Profile/Profile';
+export { default as VideoCall } from './VideoCall/VideoCall';
 export { default as ChangePassword } from './Profile/ChangePassword';

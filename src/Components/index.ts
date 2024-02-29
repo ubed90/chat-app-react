@@ -10,3 +10,6 @@ export { default as ChatHeader } from './ChatHeader/ChatHeader';
 export { default as ChatFooter } from './ChatFooter/ChatFooter';
 export { default as ChatMenu } from './ChatMenu/ChatMenu';
 export { default as Footer } from './Footer';
+export { default as Player } from './Player';
+export { default as CallNotifier } from './CallNotifier/CallNotifier';
+export { default as AudioCall } from './AudioCall/AudioCall';

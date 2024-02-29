@@ -14,10 +14,12 @@
     "@tanstack/react-query": "^5.17.12",
     "axios": "^1.6.5",
     "classnames": "^2.5.1",
+    "clone-deep": "^4.0.1",
     "dayjs": "^1.11.10",
     "emoji-picker-react": "^4.7.18",
     "firebase": "^10.8.0",
     "normalize-css": "^2.3.1",
+    "peerjs": "^1.5.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
@@ -33,6 +35,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
     "@tanstack/react-query-devtools": "^5.17.14",
+    "@types/clone-deep": "^4.0.4",
     "@types/node": "^20.11.2",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
@@ -49,6 +52,7 @@
     "sass": "^1.69.7",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vite-plugin-mkcert": "^1.17.4"
   }
 }

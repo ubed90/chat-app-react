@@ -1,0 +1,53 @@
+@use '../../assets/sass/abstracts/' as *; 
+
+.video-call-grid {
+    grid-template-rows: 1fr min-content;
+    background-image: linear-gradient(180deg, hsla(0, 0%, 0%, 0.5), hsla(0, 0%, 0%, 0.5)), url(../../assets/call-bg.jpg);
+
+    .players-grid {
+        position: relative;
+        width: min(90%, 950px);
+        margin-inline: auto;
+
+        display: grid;
+        z-index: 1;
+
+        &:not(.group-chat) {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+        }
+    }
+
+    .player {
+        overflow: hidden;
+
+        video {
+            object-fit: cover;
+        }
+    }
+
+    .players-grid .player:not(.own-stream) {
+        grid-column: 1 / -1;
+        grid-row: 1 / -1;
+        z-index: -1;
+        border-radius: 1.5rem;
+    }
+
+    .players-grid.only-stream .player.own-stream {
+        border-radius: 1.5rem;
+    }
+
+    .players-grid:not(.only-stream) .player.own-stream {
+        border-radius: 0 1.5rem 0 1.5rem;
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        width: 40%;
+        height: 20rem;
+
+        @include respond(tab-port) {
+            width: 35%;
+        }
+    }
+}

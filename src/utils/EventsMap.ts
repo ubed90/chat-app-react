@@ -24,17 +24,28 @@ export const USER_DISCONNECTED = 'userDisconnected';
 // ? when friend gets disconnected
 export const USER_CONNECTED = 'userConnected';
 
-// type CHAT_EVENTS =  {
-  // [CONNECTED_EVENT]: () => void,
-  // [DISCONNECT_EVENT]: () => void,
-  // [JOIN_CHAT_EVENT]: string,
-  // leaveChat: string,
-  // updateGroupName: string,
-  // onMessage: string,
-  // newChat: string,
-  // error: string,
-  // stopTyping: string,
-  // startTyping: string,
-// }
 
-// export default CHAT_EVENTS;
+// ! Call Events
+// ? Call Initialted
+export const CALL_INITIATED = "callInitiated"
+
+// ? Call Request Received
+export const CALL_OFFER_RECEIVED = "callOfferReceived"
+
+// ? Join Call Room
+export const JOIN_CALL_ROOM = 'callJoined';
+
+// ? NEW USER JOINED THE CALL
+export const CALL_CONNECTED = "callConnected"
+
+// ? NEW USER REJECTED THE CALL
+export const CALL_REJECTED = "callRejected"
+
+// ? User Toggle the Audio
+export const TOGGLE_AUDIO = "toggleAudio"
+
+// ? User Toggle the Video
+export const TOGGLE_VIDEO = "toggleVideo"
+
+// ? User Hangsup the Call
+export const USER_HANG_UP = "userHangUp"
