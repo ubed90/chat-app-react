@@ -23,7 +23,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { usePeer } from '../Context/PeerContext';
 import VideoCall from './VideoCall/VideoCall';
-import { CallNotifier } from '../Components';
+import { AudioCall, CallNotifier } from '../Components';
 // import { IUserData } from "../models/user.model";
 // import { usePeer } from "../Context/PeerContext";
 
@@ -39,6 +39,7 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
     incomingCall,
     caller,
     isVideoCall,
+    isAudioCall
   } = usePeer();
 
   const navigate = useNavigate();
@@ -101,10 +102,10 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
     if (!socket) return;
 
     // ? Listener for INCOMING CALL EVENT
-    socket.on(CALL_OFFER_RECEIVED, ({ caller, roomId }) => {
-      console.log('INCOMING CALL REQUEST FROM :: ', caller, roomId);
+    socket.on(CALL_OFFER_RECEIVED, ({ caller, roomId, callType }) => {
+      console.log('INCOMING CALL REQUEST FROM :: ', caller, roomId, callType);
       handleIncomingCall(true);
-      handleCaller({ caller, roomId });
+      handleCaller({ caller, roomId, callType });
     });
 
     return () => {
@@ -113,11 +114,12 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
         console.log('CLEARING CALL OFFER SOCKET :: ', caller, roomId);
       });
     };
-  }, [socket]);
+  }, [handleCaller, handleIncomingCall, socket]);
 
   return (
     <main className="app-grid with-header">
       {children}
+      {isAudioCall && <AudioCall />}
       {isVideoCall && <VideoCall />}
       {incomingCall && caller && <CallNotifier />}
     </main>

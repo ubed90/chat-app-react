@@ -1,8 +1,8 @@
-const askVideoCallPermission = () => {
+const askRequiredPermission = (isVideoCall: boolean) => {
   return navigator.mediaDevices.getUserMedia({
     audio: true,
-    video: true,
+    ...(isVideoCall ? {video: true} : {})
   });
 };
 
-export default askVideoCallPermission;
+export default askRequiredPermission;

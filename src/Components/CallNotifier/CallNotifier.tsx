@@ -7,14 +7,14 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 import { toast } from 'react-toastify'
 import "./CallNotifier.scss";
-import askVideoCallPermission from '../../utils/askCameraPermission';
+import askRequiredPermission from '../../utils/askCameraPermission';
 
 const CallNotifier = () => {
-  const userId = useSelector((state: RootState) => state.user.user?._id);
+  const user = useSelector((state: RootState) => state.user.user);
 
   const { socket } = useSocket();
 
-  const { peer, handlePeer, handleVideoCall, stream, handleStream, caller, handleIncomingCall, handleCaller } =
+  const { peer, handlePeer, handleVideoCall, handleAudioCall, stream, handleStream, caller, handleIncomingCall, handleCaller } =
     usePeer();
 
   const handleDecline = () => {
@@ -24,25 +24,29 @@ const CallNotifier = () => {
     });
     handleIncomingCall(false);
     handleCaller(null);
-    toast.dismiss(userId);
+    toast.dismiss(user?._id);
   }
 
   const handleAccepted = async () => {
     if (!peer) {
-      handlePeer(userId as string);
+      handlePeer(user?._id as string);
     }
 
     if (!stream) {
       try {
-        const mediaStream = await askVideoCallPermission();
+        const mediaStream = await askRequiredPermission(caller?.callType === 'Video');
         handleStream(mediaStream);
         console.log(
           'EVENT EMITETD TO JOIN THE ROOM :: ',
           caller?.roomId,
-          userId
+          user?._id
         );
-        socket?.emit(JOIN_CALL_ROOM, caller?.roomId, userId);
-        handleVideoCall(true);
+        socket?.emit(JOIN_CALL_ROOM, caller?.roomId, user);
+        if(caller?.callType === 'Audio') {
+          handleAudioCall(true)
+        } else {
+          handleVideoCall(true);
+        }
       } catch (error) {
         toast.error('Please allow audio and video permission');
         console.log('CALL REJECTED (PERMISSION DENIED) :: ');
@@ -55,7 +59,7 @@ const CallNotifier = () => {
       }
     }
 
-    toast.dismiss(userId);
+    toast.dismiss(user?._id);
     handleIncomingCall(false);
   }
 
@@ -67,13 +71,13 @@ const CallNotifier = () => {
 
     handleIncomingCall(false);
     handleCaller(null);
-    toast.dismiss(userId);
+    toast.dismiss(user?._id);
   }
 
-  return toast(<Notify user={caller!.caller} callType="Video" handleDecline={handleDecline} handleAccepted={handleAccepted} handleNotAnswered={handleNotAnswered} />, {
+  return toast(<Notify user={caller!.caller} callType={caller?.callType as string} handleDecline={handleDecline} handleAccepted={handleAccepted} handleNotAnswered={handleNotAnswered} />, {
       position: 'bottom-right',
       closeButton: false,
-      toastId: userId,
+      toastId: user?._id,
       autoClose: false,
       theme: 'dark',
       style: {
@@ -90,7 +94,7 @@ const CallNotifier = () => {
 export default CallNotifier;
 
 
-const Notify: React.FC<{ user: IUserData, callType: 'Audio' | 'Video', handleDecline: () => void, handleAccepted: () => void, handleNotAnswered: () => void }> = ({ user, callType, handleDecline, handleAccepted, handleNotAnswered }) => {
+const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () => void, handleAccepted: () => void, handleNotAnswered: () => void }> = ({ user, callType, handleDecline, handleAccepted, handleNotAnswered }) => {
   return (
     <div className="call-notifier">
       <div

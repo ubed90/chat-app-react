@@ -12,10 +12,10 @@ import ProfilePicture from '../ProfilePicture';
 import { CgProfile } from 'react-icons/cg';
 import { BiExit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
-import { AudioCall, CustomBtn } from '..';
+import { CustomBtn } from '..';
 import { IoAddCircle } from 'react-icons/io5';
 import { HiUserRemove } from 'react-icons/hi';
-import { FaRegEye, FaVideo } from 'react-icons/fa';
+import { FaPhone, FaRegEye, FaVideo } from 'react-icons/fa';
 import { CiText } from 'react-icons/ci';
 import EditGroupName from '../Group/EditGroupName';
 import ViewParticipants from '../Group/ViewParticipants';
@@ -26,9 +26,9 @@ import customFetch from '../../utils/customFetch';
 import { toast } from 'react-toastify';
 import { useChatsContext } from '../../Context/ChatsContext';
 import { usePeer } from '../../Context/PeerContext';
-import askVideoCallPermission from '../../utils/askCameraPermission';
 import { useSocket } from '../../Context/SocketContext';
 import { CALL_INITIATED } from '../../utils/EventsMap';
+import askRequiredPermission from '../../utils/askCameraPermission';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
@@ -49,7 +49,15 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
   const { socket } = useSocket();
 
   // * For Video And Audio Call
-  const { handleVideoCall, handleReceiver, handleIsCaller, handlePeer, handleCaller, handleStream } = usePeer();
+  const {
+    handleVideoCall,
+    handleAudioCall,
+    handleReceiver,
+    handleIsCaller,
+    handlePeer,
+    handleCaller,
+    handleStream,
+  } = usePeer();
 
   // * CTA State
   const [ctaState, setCtaState] = useState<CTA_STATE>(null);
@@ -174,7 +182,7 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         },
       });
     }
-  }
+  };
 
   // * Video Call
   const onVideoCall = async () => {
@@ -184,9 +192,9 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     // * Get Media Permissions
     let mediaStream: MediaStream;
     try {
-      mediaStream = await askVideoCallPermission();
+      mediaStream = await askRequiredPermission(true);
       handleStream(mediaStream);
-      // * Min required Entities for Caller to start the stream 
+      // * Min required Entities for Caller to start the stream
       handleVideoCall(true);
     } catch (error) {
       console.log(error);
@@ -201,6 +209,7 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         caller: user,
         receiver: otherUser._id,
         roomId: selectedChat?._id,
+        callType: 'Video',
       });
       console.log('RECEIVED ACK FROM BE :: ', isReceiverOnline);
 
@@ -209,9 +218,9 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         : isReceiverOnline;
 
       if (!isReceiverOnline) {
-        if(mediaStream) {
-          mediaStream.getTracks().forEach(track => track.stop());
-          handleStream(null)
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          handleStream(null);
         }
         handleVideoCall(false);
         return toast.error(otherUser.name + ' is not online');
@@ -231,9 +240,77 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
 
     // * Required Entities for Caller
     handleIsCaller(true);
-    handleCaller({ caller: user!, roomId: selectedChat?._id as string });
+    handleCaller({
+      caller: user!,
+      roomId: selectedChat?._id as string,
+      callType: 'Video',
+    });
     handleReceiver(otherUser);
-  }
+  };
+
+  // * Video Call
+  const onAudioCall = async () => {
+    // * Check IF User online Locally
+    if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+
+    // * Get Media Permissions
+    let mediaStream: MediaStream;
+    try {
+      mediaStream = await askRequiredPermission(false);
+      handleStream(mediaStream);
+      // * Min required Entities for Caller to start the stream
+      handleAudioCall(true);
+    } catch (error) {
+      console.log(error);
+      return toast.error('Please allow audio permission.');
+    }
+
+    // * CHeck If User online in BackEnd MAP
+    try {
+      console.log('CHECK IF USER IS ONLINE IN BE:: ');
+
+      let isReceiverOnline = await socket?.emitWithAck(CALL_INITIATED, {
+        caller: user,
+        receiver: otherUser._id,
+        roomId: selectedChat?._id,
+        callType: 'Audio',
+      });
+      console.log('RECEIVED ACK FROM BE :: ', isReceiverOnline);
+
+      isReceiverOnline = Array.isArray(isReceiverOnline)
+        ? isReceiverOnline[0]
+        : isReceiverOnline;
+
+      if (!isReceiverOnline) {
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          handleStream(null);
+        }
+        handleAudioCall(false);
+        return toast.error(otherUser.name + ' is not online');
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        handleStream(null);
+      }
+      handleAudioCall(false);
+      return toast.error(error);
+    }
+
+    // * Set Peer
+    handlePeer(user?._id as string);
+
+    // * Required Entities for Caller
+    handleIsCaller(true);
+    handleCaller({
+      caller: user!,
+      roomId: selectedChat?._id as string,
+      callType: 'Audio',
+    });
+    handleReceiver(otherUser);
+  };
 
   return (
     <header className="local-chat-header px-4 border-b-[1px] border-b-accent">
@@ -257,7 +334,18 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
           <p className="local-chat-header-info-status text-base">Online</p>
         )}
       </div>
-      <AudioCall />
+      <CustomBtn
+        disabled={selectedChat?.isGroupChat}
+        icon={
+          <FaPhone
+            className={`text-3xl text-accent ${
+              selectedChat?.isGroupChat ? 'text-slate-600' : ''
+            }`}
+          />
+        }
+        clickHandler={onAudioCall}
+        classes="ml-auto mr-3 btn-lg bg-transparent border-none outline-none shadow-none hover:bg-gray-400 rounded-lg px-4 h-[3rem] min-h-[3rem]"
+      />
       <CustomBtn
         disabled={selectedChat?.isGroupChat}
         icon={

@@ -6,6 +6,7 @@ export type PlayerProps = {
   stream: MediaStream;
   muted: boolean;
   playing: boolean;
+  name?: string;
   isCurrentUser?: boolean;
   call?: MediaConnection;
 };
@@ -14,10 +15,12 @@ const usePlayers = () => {
   const [players, setPlayers] = useState<{ [key: string]: PlayerProps }>({});
   const [numOfPlayers, setNumOfPlayers] = useState(0)
 
-  const addPlayer = ({ stream, muted, playing, isCurrentUser, playerId }: PlayerProps & { playerId: string }) => {
+  const addPlayer = ({ stream, muted, playing, isCurrentUser, playerId, name }: PlayerProps & { playerId: string }) => {
+    console.log(name)
+
     setPlayers({
       ...players,
-      [playerId]: { stream, muted, playing, isCurrentUser },
+      [playerId]: { stream, muted, playing, isCurrentUser, name },
     });
     
     setNumOfPlayers(Object.keys(players).length + 1);

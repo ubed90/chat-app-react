@@ -5,7 +5,8 @@ import { IUserData } from '../models/user.model';
 
 type Caller = {
   caller: IUserData,
-  roomId: string
+  roomId: string,
+  callType: 'Audio' | 'Video'
 }
 
 type PeerContext = {
@@ -18,12 +19,14 @@ type PeerContext = {
   handleStream: (stream: MediaStream | null) => void;
   isCaller: boolean;
   handleIsCaller: (isCaller: boolean) => void;
-  isVideoCall: boolean;
-  handleVideoCall(value: boolean): void;
   caller: Caller | null;
   handleCaller: (value: Caller | null) => void;
   receiver: IUserData | null;
   handleReceiver(receiver: IUserData | null): void;
+  isVideoCall: boolean;
+  handleVideoCall(value: boolean): void;
+  isAudioCall: boolean;
+  handleAudioCall(value: boolean): void;
   // isGroupCall: boolean;
   // handleIsGroupCall(isGroupCall: boolean): void;
 };
@@ -38,12 +41,14 @@ const peerContext = createContext<PeerContext>({
   handleIsCaller: () => {},
   stream: null,
   handleStream: () => {},
-  isVideoCall: false,
-  handleVideoCall: () => {},
   receiver: null,
   handleReceiver: () => {},
   caller: null,
   handleCaller: () => {},
+  isVideoCall: false,
+  handleVideoCall: () => {},
+  isAudioCall: false,
+  handleAudioCall: () => {},
   // isGroupCall: false,
   // handleIsGroupCall: () => {},
 });
@@ -52,6 +57,7 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [peer, setPeer] = useState<Peer | null>(null);
   const [isCaller, setIsCaller] = useState(false);
   const [isVideoCall, setIsVideoCall] = useState(false);
+  const [isAudioCall, setIsAudioCall] = useState(false);
   const [receiver, setReceiver] = useState<IUserData | null>(null);
   const [incomingCall, setIncomingCall] = useState(false);
   const [caller, setCaller] = useState<Caller | null>(null);
@@ -69,6 +75,8 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const handleIsCaller = (isCaller: boolean) => setIsCaller(isCaller);
 
   const handleVideoCall = (action: boolean) => setIsVideoCall(action);
+
+  const handleAudioCall = (action: boolean) => setIsAudioCall(action);
 
   const handleReceiver = (receiver: IUserData | null) => setReceiver(receiver);
 
@@ -118,6 +126,8 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
         handleIsCaller,
         isVideoCall,
         handleVideoCall,
+        isAudioCall,
+        handleAudioCall,
         handleReceiver,
         receiver,
         incomingCall,

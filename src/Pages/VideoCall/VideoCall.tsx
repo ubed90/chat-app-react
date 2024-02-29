@@ -49,6 +49,9 @@ const VideoCall = () => {
   const { players, addPlayer, toggleAudio, toggleVideo, removePlayer, numOfPlayers } =
     usePlayers();
 
+    console.log(players);
+    
+
   const {
     peer,
     stream,
@@ -83,9 +86,9 @@ const VideoCall = () => {
   useEffect(() => {
     if(!stream || !userId || isCalling) return;
 
-    addPlayer({ playerId: userId, muted: true, playing: true, stream, isCurrentUser: true })
+    addPlayer({ playerId: userId, muted: true, playing: true, stream, isCurrentUser: true, name: caller?.name as string })
     setIsCalling(true);
-  }, [addPlayer, isCalling, stream, userId])
+  }, [addPlayer, caller?.name, isCalling, stream, userId])
 
   // * Listen for Call Rejected Event Here
   useEffect(() => {
@@ -115,15 +118,16 @@ const VideoCall = () => {
   useEffect(() => {
     if (!socket || !peer || !stream || !isCalling) return;
 
-    const callConnected = (newUser: string) => {
+    const callConnected = (newUser: IUserData) => {
       console.log('USER ACCEPTED THE CALL :: ');
-      const call = peer.call(newUser, stream);
-      console.log('CALLED USER :: ', newUser);
+      const call = peer.call(newUser._id, stream, { metadata: { name: caller?.name } });
+      console.log('CALLED USER :: ', newUser.name);
       call.on('stream', (receiverStream) => {
-        console.log('RECEIVED STREAM FROM USER :: ', newUser, receiverStream);
+        console.log('RECEIVED STREAM FROM USER :: ', newUser._id, receiverStream);
 
         addPlayer({
-          playerId: newUser,
+          playerId: newUser._id,
+          name: newUser.name,
           muted: false,
           playing: true,
           stream: receiverStream,
@@ -137,14 +141,14 @@ const VideoCall = () => {
     return () => {
       socket.on(CALL_CONNECTED, callConnected);
     }
-  }, [socket, peer, isCalling, stream, addPlayer])
+  }, [socket, peer, isCalling, stream, addPlayer, caller?.name])
 
   // * Listen for Incoming call on Peer
   useEffect(() => {
     if(!peer || !isCalling || !stream) return;
 
     const onIncomingCall = (call: MediaConnection) => {
-      const { peer: callerId } = call;
+      const { peer: callerId, metadata } = call;
 
       console.log('GETTING CALL FROM :: ', callerId);
       call.answer(stream);
@@ -159,6 +163,7 @@ const VideoCall = () => {
           playing: true,
           stream: callerStream,
           call,
+          name: metadata.name
         });
       });
     }
