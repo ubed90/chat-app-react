@@ -236,7 +236,7 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     }
 
     // * Set Peer
-    handlePeer(user?._id as string);
+    handlePeer();
 
     // * Required Entities for Caller
     handleIsCaller(true);
@@ -300,7 +300,7 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     }
 
     // * Set Peer
-    handlePeer(user?._id as string);
+    handlePeer();
 
     // * Required Entities for Caller
     handleIsCaller(true);

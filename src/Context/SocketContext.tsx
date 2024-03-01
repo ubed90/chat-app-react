@@ -26,6 +26,7 @@ const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     const disconnect = () => {
       if(socket) {
+        socket.disconnect();
         socket.close();
         setSocket(null);
       }
@@ -34,7 +35,10 @@ const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
     useEffect(() => {
         setSocket(getSocket());
 
-        return disconnect
+        return () => {
+          console.log("Socket Disconnected");
+          disconnect();
+        }
     }, [])
 
     return <socketContext.Provider value={{ socket, disconnect }}>

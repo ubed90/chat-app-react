@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePeer } from '../Context/PeerContext';
 import VideoCall from './VideoCall/VideoCall';
 import { AudioCall, CallNotifier } from '../Components';
+import { IUserData } from '../models/user.model';
 // import { IUserData } from "../models/user.model";
 // import { usePeer } from "../Context/PeerContext";
 
@@ -101,20 +102,22 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     if (!socket) return;
 
-    // ? Listener for INCOMING CALL EVENT
-    socket.on(CALL_OFFER_RECEIVED, ({ caller, roomId, callType }) => {
+    const onIncomingCall = ({ caller, roomId, callType }: { caller: IUserData, roomId: string, callType: "Audio" | 'Video' }) => {
       console.log('INCOMING CALL REQUEST FROM :: ', caller, roomId, callType);
       handleIncomingCall(true);
       handleCaller({ caller, roomId, callType });
-    });
+    };
+
+    // ? Listener for INCOMING CALL EVENT
+    socket.on(CALL_OFFER_RECEIVED, onIncomingCall);
 
     return () => {
       // ? Listener for INCOMING CALL EVENT
-      socket.off(CALL_OFFER_RECEIVED, ({ caller, roomId }) => {
-        console.log('CLEARING CALL OFFER SOCKET :: ', caller, roomId);
-      });
+      console.log("INCOMING CALL SOCKET WENT OFF");
+      
+      socket.off(CALL_OFFER_RECEIVED, onIncomingCall);
     };
-  }, [handleCaller, handleIncomingCall, socket]);
+  }, [socket]);
 
   return (
     <main className="app-grid with-header">
@@ -127,3 +130,8 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 export default Landing;
+
+
+// TODO: Group Audio and Video Calls
+// TODO: Read Unread Messages FUNC
+// TODO: Group Scribilio

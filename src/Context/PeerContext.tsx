@@ -1,7 +1,7 @@
 import Peer from 'peerjs';
-import { PropsWithChildren, createContext, useContext, useRef, useState } from 'react';
-import { useSocket } from './SocketContext';
+import { PropsWithChildren, createContext, useContext, useState } from 'react';
 import { IUserData } from '../models/user.model';
+import { v4 as randomIdGenerator } from "uuid";
 
 type Caller = {
   caller: IUserData,
@@ -11,7 +11,7 @@ type Caller = {
 
 type PeerContext = {
   peer: Peer | null;
-  handlePeer: (userId: string) => void;
+  handlePeer: () => string;
   destroyPeer: () => void;
   incomingCall: boolean;
   handleIncomingCall: (value: boolean) => void;
@@ -33,7 +33,7 @@ type PeerContext = {
 
 const peerContext = createContext<PeerContext>({
   peer: null,
-  handlePeer: () => {},
+  handlePeer: () => '',
   destroyPeer: () => {},
   incomingCall: false,
   handleIncomingCall: () => {},
@@ -68,10 +68,6 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
     setStream(stream);
   };
 
-  const { socket } = useSocket();
-
-  const isPeerCreated = useRef<boolean>(false);
-
   const handleIsCaller = (isCaller: boolean) => setIsCaller(isCaller);
 
   const handleVideoCall = (action: boolean) => setIsVideoCall(action);
@@ -80,30 +76,25 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   const handleReceiver = (receiver: IUserData | null) => setReceiver(receiver);
 
-  // const [isGroupCall, setIsGroupCall] = useState(false);
-  // const handleIsGroupCall = (value: boolean) => setIsGroupCall(value);
+  const handlePeer = () => {
+    if(peer) return peer.id
 
-  const handlePeer = (userId: string) => {
-    if (isPeerCreated.current || !socket) return;
-
-    isPeerCreated.current = true;
-
-    const myPeer = new Peer(userId as string, {
+    const myPeer = new Peer(randomIdGenerator(), {
       debug: 2,
       host: '/',
       path: '/peerjs/video-call',
       port: 3000,
     });
 
-    console.log('PEER CREATED', myPeer.id);
+    console.log('PEER CREATED :: ', myPeer.id);
 
     setPeer(myPeer);
+
+    return myPeer.id;
   };
 
   const destroyPeer = () => {
     console.log("PEER SET TO NULL ::");
-    
-    isPeerCreated.current = false;
     setPeer(null);
   };
 

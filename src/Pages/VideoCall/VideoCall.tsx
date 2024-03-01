@@ -80,7 +80,11 @@ const VideoCall = () => {
     });
     setIsCalling(false);
     handleVideoCall(false);
-  }, [caller, callerWithRoomid?.roomId, handleCaller, handleIsCaller, handleReceiver, handleStream, handleVideoCall, socket, stream]);
+    if(peer) {
+      peer.destroy();
+      destroyPeer();
+    }
+  }, [caller, callerWithRoomid?.roomId, destroyPeer, handleCaller, handleIsCaller, handleReceiver, handleStream, handleVideoCall, peer, socket, stream]);
 
   // * Add Our Own Stream whenever Component Mounts
   useEffect(() => {
@@ -92,14 +96,20 @@ const VideoCall = () => {
 
   // * Listen for Call Rejected Event Here
   useEffect(() => {
-    if(!socket || !stream || !isCalling) return;
+    if(!socket || !isCalling) return;
 
     const handleRejectCallback = (reason: string) => {
       console.log('PEER DESTROYED :: ');
+      if(peer) {
+        peer.destroy();
+        destroyPeer();
+      }
     
       console.log("STREAM DESTROYED :: ");
-      stream.getTracks().forEach(track => track.stop());
-      handleStream(null)
+      if(stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        handleStream(null);
+      }
 
       handleIsCaller(false)
       handleCaller(null);
@@ -112,28 +122,38 @@ const VideoCall = () => {
     return () => {
       socket.off(CALL_REJECTED, handleRejectCallback)
     }
-  }, [destroyPeer, handleCaller, handleIsCaller, handleStream, handleVideoCall, isCalling, socket, stream])
+  }, [destroyPeer, handleCaller, handleIsCaller, handleStream, handleVideoCall, isCalling, peer, socket, stream])
 
   // * Listen for User Joined the room event
   useEffect(() => {
     if (!socket || !peer || !stream || !isCalling) return;
 
-    const callConnected = (newUser: IUserData) => {
-      console.log('USER ACCEPTED THE CALL :: ');
-      const call = peer.call(newUser._id, stream, { metadata: { name: caller?.name } });
-      console.log('CALLED USER :: ', newUser.name);
-      call.on('stream', (receiverStream) => {
-        console.log('RECEIVED STREAM FROM USER :: ', newUser._id, receiverStream);
-
-        addPlayer({
-          playerId: newUser._id,
-          name: newUser.name,
-          muted: false,
-          playing: true,
-          stream: receiverStream,
-          call,
+    const callConnected = ({ user, peerId }: { user: IUserData, peerId: string }) => {
+      console.log('USER ACCEPTED THE CALL :: ', user, peerId);
+      try {
+        const call = peer.call(peerId, stream, {
+          metadata: { id: caller?._id, name: caller?.name },
         });
-      });
+        console.log('CALLED USER :: ', user.name);
+        call.on('stream', (receiverStream) => {
+          console.log(
+            'RECEIVED STREAM FROM USER :: ',
+            user._id,
+            receiverStream
+          );
+
+          addPlayer({
+            playerId: user._id,
+            name: user.name,
+            muted: false,
+            playing: true,
+            stream: receiverStream,
+            call,
+          });
+        });
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     socket.on(CALL_CONNECTED, callConnected);
@@ -141,24 +161,24 @@ const VideoCall = () => {
     return () => {
       socket.on(CALL_CONNECTED, callConnected);
     }
-  }, [socket, peer, isCalling, stream, addPlayer, caller?.name])
+  }, [socket, peer, isCalling, stream, addPlayer, caller?.name, caller?._id])
 
   // * Listen for Incoming call on Peer
   useEffect(() => {
     if(!peer || !isCalling || !stream) return;
 
     const onIncomingCall = (call: MediaConnection) => {
-      const { peer: callerId, metadata } = call;
+      const { metadata } = call;
 
-      console.log('GETTING CALL FROM :: ', callerId);
+      console.log('GETTING CALL FROM :: ', metadata.name);
       call.answer(stream);
-      console.log('ANSWERED CALL FROM :: ', callerId);
+      console.log('ANSWERED CALL FROM :: ', metadata.name);
 
       call.on('stream', (callerStream) => {
-        console.log('RECEIVED STREAM FROM USER :: ', callerId, callerStream);
+        console.log('RECEIVED STREAM FROM USER :: ', metadata.name, callerStream);
 
         addPlayer({
-          playerId: callerId,
+          playerId: metadata.id,
           muted: false,
           playing: true,
           stream: callerStream,

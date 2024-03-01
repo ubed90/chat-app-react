@@ -14,7 +14,7 @@ const CallNotifier = () => {
 
   const { socket } = useSocket();
 
-  const { peer, handlePeer, handleVideoCall, handleAudioCall, stream, handleStream, caller, handleIncomingCall, handleCaller } =
+  const { handlePeer, handleVideoCall, handleAudioCall, stream, handleStream, caller, handleIncomingCall, handleCaller } =
     usePeer();
 
   const handleDecline = () => {
@@ -28,20 +28,17 @@ const CallNotifier = () => {
   }
 
   const handleAccepted = async () => {
-    if (!peer) {
-      handlePeer(user?._id as string);
-    }
-
     if (!stream) {
       try {
         const mediaStream = await askRequiredPermission(caller?.callType === 'Video');
+        const peerId = handlePeer();
         handleStream(mediaStream);
         console.log(
           'EVENT EMITETD TO JOIN THE ROOM :: ',
           caller?.roomId,
           user?._id
         );
-        socket?.emit(JOIN_CALL_ROOM, caller?.roomId, user);
+        socket?.emit(JOIN_CALL_ROOM, { roomId: caller?.roomId, user, peerId });
         if(caller?.callType === 'Audio') {
           handleAudioCall(true)
         } else {
