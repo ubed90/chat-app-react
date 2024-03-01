@@ -13,7 +13,7 @@ import { usePeer } from '../../Context/PeerContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 import usePlayers from '../../utils/hooks/usePlayers';
-import { CustomBtn, Player } from '../../Components';
+import { BlockModal, CustomBtn, Player } from '../../Components';
 
 // * ICcons
 import { IoMdMic } from 'react-icons/io';
@@ -22,6 +22,7 @@ import { IoMdMicOff } from 'react-icons/io';
 import { MdCallEnd } from 'react-icons/md';
 import { IUserData } from '../../models/user.model';
 import { MediaConnection } from 'peerjs';
+import { useBlocker } from 'react-router-dom';
 
 // type CTA_STATES = {
 //   muted: boolean,
@@ -34,6 +35,11 @@ const VideoCall = () => {
 
   const [isCalling, setIsCalling] = useState(false);
 
+  const blockNavigation = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isCalling && currentLocation.pathname !== nextLocation.pathname
+  );
+
   const isGroupChat = useSelector(
     (state: RootState) => state.chat.selectedChat?.isGroupChat
   );
@@ -41,13 +47,8 @@ const VideoCall = () => {
   const userId = useSelector((state: RootState) => state.user.user?._id);
   const caller = useSelector((state: RootState) => state.user.user);
 
-  const {
-    players,
-    addPlayer,
-    toggleAudio,
-    removePlayer,
-    numOfPlayers,
-  } = usePlayers();
+  const { players, addPlayer, toggleAudio, removePlayer, numOfPlayers } =
+    usePlayers();
 
   console.log(players);
 
@@ -83,7 +84,19 @@ const VideoCall = () => {
       peer.destroy();
       destroyPeer();
     }
-  }, [handleIsCaller, stream, handleReceiver, handleCaller, socket, caller, callerWithRoomid?.roomId, handleAudioCall, peer, handleStream, destroyPeer]);
+  }, [
+    handleIsCaller,
+    stream,
+    handleReceiver,
+    handleCaller,
+    socket,
+    caller,
+    callerWithRoomid?.roomId,
+    handleAudioCall,
+    peer,
+    handleStream,
+    destroyPeer,
+  ]);
 
   // * Add Our Own Stream whenever Component Mounts
   useEffect(() => {
@@ -128,7 +141,17 @@ const VideoCall = () => {
     return () => {
       socket.off(CALL_REJECTED, handleRejectCallback);
     };
-  }, [destroyPeer, handleCaller, handleIsCaller, handleStream, handleAudioCall, isCalling, socket, stream, peer]);
+  }, [
+    destroyPeer,
+    handleCaller,
+    handleIsCaller,
+    handleStream,
+    handleAudioCall,
+    isCalling,
+    socket,
+    stream,
+    peer,
+  ]);
 
   // * Listen for User Joined the room event
   useEffect(() => {
@@ -163,6 +186,12 @@ const VideoCall = () => {
             call,
           });
         });
+
+        call?.on('close', () => {
+          console.log('Connection Closed');
+
+          removePlayer(user._id);
+        });
       } catch (error) {
         console.log(error);
       }
@@ -173,7 +202,7 @@ const VideoCall = () => {
     return () => {
       socket.on(CALL_CONNECTED, callConnected);
     };
-  }, [socket, peer, isCalling, stream, addPlayer, caller?.name, caller?._id]);
+  }, [socket, peer, isCalling, stream, addPlayer, caller?.name, caller?._id, removePlayer]);
 
   // * Listen for Incoming call on Peer
   useEffect(() => {
@@ -202,6 +231,12 @@ const VideoCall = () => {
           name: metadata.name,
         });
       });
+
+      call.on('close', () => {
+        console.log('CONNECTION CLOSED :: ');
+
+        removePlayer(metadata.id);
+      });
     };
 
     peer.on('call', onIncomingCall);
@@ -209,7 +244,7 @@ const VideoCall = () => {
     return () => {
       peer.off('call', onIncomingCall);
     };
-  }, [addPlayer, isCalling, peer, stream]);
+  }, [addPlayer, isCalling, peer, removePlayer, stream]);
 
   // * Listen for User Leaving the Room
   useEffect(() => {
@@ -245,11 +280,50 @@ const VideoCall = () => {
     };
   }, [isCalling, socket, toggleAudio]);
 
+  // * Listen for Page Refresh and Notify user has left in the room
+  useEffect(() => {
+    if (!socket || !isCalling || !peer) return;
+
+    const onPageReload = (event: BeforeUnloadEvent) => {
+      const customMessage =
+        'Are you sure you want to leave? Your call will be disconnected.';
+
+      // Set the custom message
+      event.returnValue = customMessage;
+
+      // Return the custom message to display it along with the default browser message
+      return customMessage;
+    };
+
+    window.addEventListener('beforeunload', onPageReload);
+
+    window.addEventListener('pagehide', () => {
+      peer?.destroy();
+      // socket.emit(USER_HANG_UP, { user: 'Kalwa', roomId: 'kela' })
+    });
+
+    return () => {
+      window.removeEventListener('beforeunload', onPageReload);
+      window.removeEventListener('pagehide', () => {});
+    };
+  }, [isCalling, peer, socket]);
+
   const handleToggleAudio = () => {
     // setCtaStates((prev) => ({ ...prev, muted: !prev.muted }));
     toggleAudio(userId as string);
 
     socket?.emit(TOGGLE_AUDIO, { userId, roomId: callerWithRoomid?.roomId });
+  };
+
+  const handleLeave = () => {
+    handleHangUp();
+    blockNavigation.proceed && blockNavigation.proceed();
+  };
+
+  const handleCancel = () => {
+    blockNavigation.state === 'blocked' &&
+      blockNavigation.reset &&
+      blockNavigation.reset();
   };
 
   return (
@@ -303,6 +377,9 @@ const VideoCall = () => {
               icon={<MdCallEnd className="text-2xl text-white" />}
             />
           </Modal.Footer>
+          {blockNavigation.state === 'blocked' && (
+            <BlockModal handleLeave={handleLeave} handleCancel={handleCancel} />
+          )}
         </>
       )}
     </Modal>

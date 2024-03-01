@@ -13,3 +13,5 @@ export { default as Footer } from './Footer';
 export { default as Player } from './Player';
 export { default as CallNotifier } from './CallNotifier/CallNotifier';
 export { default as AudioCall } from './AudioCall/AudioCall';
+export { default as VideoCall } from './VideoCall/VideoCall';
+export { default as BlockModal } from './BlockModal';

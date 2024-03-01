@@ -22,8 +22,7 @@ import {
 } from '../utils/socketCallbacks';
 import { useNavigate } from 'react-router-dom';
 import { usePeer } from '../Context/PeerContext';
-import VideoCall from './VideoCall/VideoCall';
-import { AudioCall, CallNotifier } from '../Components';
+import { AudioCall, VideoCall, CallNotifier } from '../Components';
 import { IUserData } from '../models/user.model';
 // import { IUserData } from "../models/user.model";
 // import { usePeer } from "../Context/PeerContext";
