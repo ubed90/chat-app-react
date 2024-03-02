@@ -35,20 +35,19 @@ const VideoCall = () => {
 
   const [isCalling, setIsCalling] = useState(false);
 
+  // * Required for Group Calls
+  const [callAccepted, setCallAccepted] = useState(false);
+
   const blockNavigation = useBlocker(
     ({ currentLocation, nextLocation }) =>
       isCalling && currentLocation.pathname !== nextLocation.pathname
   );
-
-  const isGroupChat = useSelector(
-    (state: RootState) => state.chat.selectedChat?.isGroupChat
-  );
-
+  
   const userId = useSelector((state: RootState) => state.user.user?._id);
+  const userName = useSelector((state: RootState) => state.user.user?.name);
   const caller = useSelector((state: RootState) => state.user.user);
 
-  const { players, addPlayer, toggleAudio, removePlayer, numOfPlayers } =
-    usePlayers();
+  const { players, addPlayer, toggleAudio, removePlayer } = usePlayers();
 
   console.log(players);
 
@@ -62,6 +61,7 @@ const VideoCall = () => {
     caller: callerWithRoomid,
     handleCaller,
     destroyPeer,
+    isGroupCall,
   } = usePeer();
 
   const { socket } = useSocket();
@@ -115,7 +115,7 @@ const VideoCall = () => {
 
   // * Listen for Call Rejected Event Here
   useEffect(() => {
-    if (!socket || !isCalling) return;
+    if (!socket || !isCalling || isGroupCall) return;
 
     const handleRejectCallback = (reason: string) => {
       console.log('PEER DESTROYED :: ');
@@ -151,7 +151,22 @@ const VideoCall = () => {
     socket,
     stream,
     peer,
+    isGroupCall,
   ]);
+
+  // * Listen If even a single user hasn't join the call.
+  useEffect(() => {
+    if (!socket || !isCalling || !isGroupCall || callAccepted) return;
+
+    const timeout = setTimeout(() => {
+      toast.error('No one Answered the call');
+      handleHangUp();
+    }, 30000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [callAccepted, handleHangUp, isCalling, isGroupCall, socket]);
 
   // * Listen for User Joined the room event
   useEffect(() => {
@@ -165,9 +180,13 @@ const VideoCall = () => {
       peerId: string;
     }) => {
       console.log('USER ACCEPTED THE CALL :: ', user, peerId);
+      // * For Group Call
+      if (isGroupCall && !callAccepted) {
+        setCallAccepted(true);
+      }
       try {
         const call = peer.call(peerId, stream, {
-          metadata: { id: caller?._id, name: caller?.name },
+          metadata: { id: userId, name: userName },
         });
         console.log('CALLED USER :: ', user.name);
         call.on('stream', (receiverStream) => {
@@ -187,11 +206,13 @@ const VideoCall = () => {
           });
         });
 
-        call?.on('close', () => {
-          console.log('Connection Closed');
+        if (!players[user._id]) {
+          call?.on('close', () => {
+            console.log('Connection Closed From User:: ', user._id, user.name);
 
-          removePlayer(user._id);
-        });
+            removePlayer(user._id);
+          });
+        }
       } catch (error) {
         console.log(error);
       }
@@ -202,7 +223,7 @@ const VideoCall = () => {
     return () => {
       socket.on(CALL_CONNECTED, callConnected);
     };
-  }, [socket, peer, isCalling, stream, addPlayer, caller?.name, caller?._id, removePlayer]);
+  }, [socket, peer, isCalling, stream, addPlayer, removePlayer, isGroupCall, callAccepted, userId, userName, players]);
 
   // * Listen for Incoming call on Peer
   useEffect(() => {
@@ -211,32 +232,42 @@ const VideoCall = () => {
     const onIncomingCall = (call: MediaConnection) => {
       const { metadata } = call;
 
+      if (isGroupCall && !callAccepted) {
+        setCallAccepted(true);
+      }
+
       console.log('GETTING CALL FROM :: ', metadata.name);
       call.answer(stream);
       console.log('ANSWERED CALL FROM :: ', metadata.name);
 
-      call.on('stream', (callerStream) => {
-        console.log(
-          'RECEIVED STREAM FROM USER :: ',
-          metadata.name,
-          callerStream
-        );
+      try {
+        call.on('stream', (callerStream) => {
+          console.log(
+            'RECEIVED STREAM FROM USER :: ',
+            metadata.name,
+            callerStream
+          );
 
-        addPlayer({
-          playerId: metadata.id,
-          muted: false,
-          playing: false,
-          stream: callerStream,
-          call,
-          name: metadata.name,
+          addPlayer({
+            playerId: metadata.id,
+            muted: false,
+            playing: false,
+            stream: callerStream,
+            call,
+            name: metadata.name,
+          });
         });
-      });
 
-      call.on('close', () => {
-        console.log('CONNECTION CLOSED :: ');
+        if(!players[metadata.id]) {
+          call.on('close', () => {
+            console.log('CONNECTION CLOSED :: ');
 
-        removePlayer(metadata.id);
-      });
+            removePlayer(metadata.id);
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     peer.on('call', onIncomingCall);
@@ -244,7 +275,7 @@ const VideoCall = () => {
     return () => {
       peer.off('call', onIncomingCall);
     };
-  }, [addPlayer, isCalling, peer, removePlayer, stream]);
+  }, [addPlayer, callAccepted, isCalling, isGroupCall, peer, players, removePlayer, stream]);
 
   // * Listen for User Leaving the Room
   useEffect(() => {
@@ -326,12 +357,14 @@ const VideoCall = () => {
       blockNavigation.reset();
   };
 
+  const numOfPlayers = Object.keys(players).length;
+
   return (
     <Modal
       id="audio-call"
       isOpen={isCalling}
       onClose={handleHangUp}
-      className="border-none w-full h-full !p-0 !py-6 grid gap-8 video-call-grid bg-accent"
+      className="border-none w-full h-full !p-0 grid gap-4 video-call-grid bg-accent relative"
       closeOnBackdrop={false}
     >
       {isCalling && (
@@ -344,7 +377,7 @@ const VideoCall = () => {
               <section
                 className={`players-grid h-full ${
                   numOfPlayers === 1 ? 'only-stream' : ''
-                } ${isGroupChat ? 'group-chat' : ''}`}
+                } ${numOfPlayers > 2 ? 'group-call' : ''}`}
               >
                 {Object.keys(players).map((player) => {
                   const props = players[player];
@@ -354,7 +387,7 @@ const VideoCall = () => {
               </section>
             )}
           </Modal.Body>
-          <Modal.Footer className="flex w-full justify-center gap-8">
+          <Modal.Footer className="self-center flex w-full justify-center gap-8">
             <CustomBtn
               clickHandler={handleToggleAudio}
               classes={`${

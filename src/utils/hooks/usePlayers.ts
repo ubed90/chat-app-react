@@ -13,31 +13,48 @@ export type PlayerProps = {
 
 const usePlayers = () => {
   const [players, setPlayers] = useState<{ [key: string]: PlayerProps }>({});
-  const [numOfPlayers, setNumOfPlayers] = useState(0)
 
-  const addPlayer = ({ stream, muted, playing, isCurrentUser, playerId, name }: PlayerProps & { playerId: string }) => {
+  const addPlayer = ({ stream, muted, playing, isCurrentUser, playerId, name, call }: PlayerProps & { playerId: string }) => {
     console.log(name)
 
-    setPlayers({
-      ...players,
-      [playerId]: { stream, muted, playing, isCurrentUser, name },
-    });
+    setPlayers((prevPlayers) => ({
+      ...prevPlayers,
+      [playerId]: { stream, muted, playing, isCurrentUser, name, call },
+    }));
     
-    setNumOfPlayers(Object.keys(players).length + 1);
   };
 
   const removePlayer = (playerId: string) => {
-    const copyPlayers = deepClone(players);
-    if (copyPlayers[playerId]?.stream) {
-      copyPlayers[playerId]?.stream.getTracks().forEach((track) => track.stop());
-    }
-    if(copyPlayers[playerId]?.call) {
-      copyPlayers[playerId]?.call?.close();
-    }
-    delete copyPlayers[playerId];
-    setPlayers(copyPlayers);
+    // const copyPlayers = deepClone(players);
+    // console.log("PLAYERS :: ", copyPlayers);
+    // console.log("DELETEING PLAYER WITH ID :: ", playerId);
+    
+    // if (copyPlayers[playerId]?.stream) {
+    //   copyPlayers[playerId]?.stream.getTracks().forEach((track) => track.stop());
+    // }
+    // // if(copyPlayers[playerId]?.call) {
+    // //   copyPlayers[playerId]?.call?.close();
+    // // }
+    // delete copyPlayers[playerId];
+    // setPlayers(copyPlayers);
 
-    setNumOfPlayers(Object.keys(copyPlayers).length);
+    setPlayers((prevPlayers) => {
+      const copyPlayers = deepClone(prevPlayers);
+
+      const player = copyPlayers[playerId];
+
+      if (player?.stream) {
+        player?.stream.getTracks().forEach((track) => track.stop());
+      }
+
+      if(player?.call) {
+        player?.call?.close();
+      }
+
+      delete copyPlayers[playerId];
+
+      return copyPlayers
+    })
   };
 
   const toggleAudio = (playerId: string) => {
@@ -56,7 +73,7 @@ const usePlayers = () => {
     setPlayers(copyPlayers);
   }
 
-  return { players, addPlayer, removePlayer, toggleAudio, toggleVideo, numOfPlayers };
+  return { players, addPlayer, removePlayer, toggleAudio, toggleVideo };
 };
 
 export default usePlayers;

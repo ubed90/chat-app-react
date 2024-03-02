@@ -39,7 +39,8 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
     incomingCall,
     caller,
     isVideoCall,
-    isAudioCall
+    isAudioCall,
+    handleIsGroupCall
   } = usePeer();
 
   const navigate = useNavigate();
@@ -101,10 +102,12 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     if (!socket) return;
 
-    const onIncomingCall = ({ caller, roomId, callType }: { caller: IUserData, roomId: string, callType: "Audio" | 'Video' }) => {
+    const onIncomingCall = ({ caller, roomId, callType, groupName }: { caller: IUserData, roomId: string, callType: "Audio" | 'Video', groupName?: string }) => {
       console.log('INCOMING CALL REQUEST FROM :: ', caller, roomId, callType);
       handleIncomingCall(true);
-      handleCaller({ caller, roomId, callType });
+      handleCaller({ caller, roomId, callType, ...(groupName ? { groupName } : {}) });
+      
+      if(groupName) handleIsGroupCall(true);
     };
 
     // ? Listener for INCOMING CALL EVENT
@@ -130,7 +133,5 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
 
 export default Landing;
 
-
-// TODO: Group Audio and Video Calls
 // TODO: Read Unread Messages FUNC
 // TODO: Group Scribilio

@@ -14,7 +14,7 @@ const CallNotifier = () => {
 
   const { socket } = useSocket();
 
-  const { handlePeer, handleVideoCall, handleAudioCall, stream, handleStream, caller, handleIncomingCall, handleCaller } =
+  const { handlePeer, handleVideoCall, handleAudioCall, stream, handleStream, caller, handleIncomingCall, handleCaller, isGroupCall, handleIsGroupCall } =
     usePeer();
 
   const handleDecline = () => {
@@ -22,6 +22,7 @@ const CallNotifier = () => {
       callerId: caller?.caller._id,
       reason: 'Call declined',
     });
+    handleIsGroupCall(false)
     handleIncomingCall(false);
     handleCaller(null);
     toast.dismiss(user?._id);
@@ -68,10 +69,11 @@ const CallNotifier = () => {
 
     handleIncomingCall(false);
     handleCaller(null);
+    handleIsGroupCall(false);
     toast.dismiss(user?._id);
   }
 
-  return toast(<Notify user={caller!.caller} callType={caller?.callType as string} handleDecline={handleDecline} handleAccepted={handleAccepted} handleNotAnswered={handleNotAnswered} />, {
+  return toast(<Notify user={caller!.caller} callType={caller?.callType as string} handleDecline={handleDecline} handleAccepted={handleAccepted} handleNotAnswered={handleNotAnswered} isGroupCall={isGroupCall} groupName={caller?.groupName} />, {
       position: 'bottom-right',
       closeButton: false,
       toastId: user?._id,
@@ -91,7 +93,7 @@ const CallNotifier = () => {
 export default CallNotifier;
 
 
-const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () => void, handleAccepted: () => void, handleNotAnswered: () => void }> = ({ user, callType, handleDecline, handleAccepted, handleNotAnswered }) => {
+const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () => void, handleAccepted: () => void, handleNotAnswered: () => void, isGroupCall: boolean, groupName?: string }> = ({ user, callType, handleDecline, handleAccepted, handleNotAnswered, isGroupCall, groupName }) => {
   return (
     <div className="call-notifier">
       <div
@@ -115,7 +117,7 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
       </div>
       <div className="call-notifier-info flex flex-col justify-between">
         <h4 className="text-2xl text-accent">
-          {user.name.toUpperCase()} &#183;{' '}
+          {isGroupCall ? groupName?.toUpperCase() : user.name.toUpperCase()} &#183;{' '}
           <span className="text-lg text-slate-600">ChatsUP</span> &#183;{' '}
           <span className="text-lg text-slate-600">now</span>
         </h4>
@@ -141,7 +143,7 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
               <path d="M29.6,24H45c1,0,1.3-1.1,0.5-1.9l-4.9-5l9-9.1c0.5-0.5,0.5-1.4,0-1.9l-3.7-3.7c-0.5-0.5-1.3-0.5-1.9,0 l-9.1,9.1l-5.1-4.9C29.1,5.7,28,6,28,7v15.3C28,23,28.9,24,29.6,24z"></path>{' '}
             </g>
           </svg>
-          Incoming {callType} Call
+          Incoming {isGroupCall ? ('Group ' + callType) : callType} {callType} Call
         </h5>
       </div>
       <div className="call-notifier-cta flex gap-2">

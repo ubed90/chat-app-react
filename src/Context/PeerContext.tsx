@@ -6,7 +6,8 @@ import { v4 as randomIdGenerator } from "uuid";
 type Caller = {
   caller: IUserData,
   roomId: string,
-  callType: 'Audio' | 'Video'
+  callType: 'Audio' | 'Video',
+  groupName?: string;
 }
 
 type PeerContext = {
@@ -27,8 +28,8 @@ type PeerContext = {
   handleVideoCall(value: boolean): void;
   isAudioCall: boolean;
   handleAudioCall(value: boolean): void;
-  // isGroupCall: boolean;
-  // handleIsGroupCall(isGroupCall: boolean): void;
+  isGroupCall: boolean;
+  handleIsGroupCall(isGroupCall: boolean): void;
 };
 
 const peerContext = createContext<PeerContext>({
@@ -49,8 +50,8 @@ const peerContext = createContext<PeerContext>({
   handleVideoCall: () => {},
   isAudioCall: false,
   handleAudioCall: () => {},
-  // isGroupCall: false,
-  // handleIsGroupCall: () => {},
+  isGroupCall: false,
+  handleIsGroupCall: () => {},
 });
 
 const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -61,6 +62,7 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [receiver, setReceiver] = useState<IUserData | null>(null);
   const [incomingCall, setIncomingCall] = useState(false);
   const [caller, setCaller] = useState<Caller | null>(null);
+  const [isGroupCall, setIsGroupCall] = useState(false)
 
   const [stream, setStream] = useState<MediaStream | null>(null);
 
@@ -105,6 +107,8 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
     setCaller(value);
   };
 
+  const handleIsGroupCall = (value: boolean) => setIsGroupCall(value);
+
   return (
     <peerContext.Provider
       value={{
@@ -125,6 +129,8 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
         handleIncomingCall,
         caller,
         handleCaller,
+        isGroupCall,
+        handleIsGroupCall
       }}
     >
       {children}

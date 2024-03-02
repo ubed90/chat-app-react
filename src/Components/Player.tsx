@@ -16,6 +16,7 @@ const Player: React.FC<PlayerProps> = (props) => {
         height="100%"
         url={props.stream}
         playing={true}
+        muted={props.muted}
       />
 
       {!props.playing && <Fallback currentUser={props.isCurrentUser} name={props.name} />}
@@ -48,13 +49,11 @@ const Fallback = ({
     } grid place-items-center absolute top-0 left-0`}
   >
     {name ? (
-      <div className="avatar placeholder">
+      <div className="avatar placeholder w-[50%]">
         <div
-          className={`bg-neutral text-neutral-content rounded-full ${
-            currentUser ? 'w-32' : 'w-72'
-          }`}
+          className={`bg-neutral text-neutral-content rounded-full w-full h-full`}
         >
-          <span className={`${currentUser ? 'text-3xl' : 'text-8xl'}`}>
+          <span className='text-6xl'>
             {name.substring(0, 2).toUpperCase()}
           </span>
         </div>

@@ -57,6 +57,7 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     handlePeer,
     handleCaller,
     handleStream,
+    handleIsGroupCall
   } = usePeer();
 
   // * CTA State
@@ -187,7 +188,9 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
   // * Video Call
   const onVideoCall = async () => {
     // * Check IF User online Locally
-    if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+    if (!selectedChat?.isGroupChat) {
+      if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+    }
 
     // * Get Media Permissions
     let mediaStream: MediaStream;
@@ -207,9 +210,12 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
 
       let isReceiverOnline = await socket?.emitWithAck(CALL_INITIATED, {
         caller: user,
-        receiver: otherUser._id,
+        receiver: selectedChat?.isGroupChat
+          ? selectedChat.users.filter(otherUser => otherUser._id !== user?._id).map((user) => user._id)
+          : [otherUser._id],
         roomId: selectedChat?._id,
         callType: 'Video',
+        ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name }: {}),
       });
       console.log('RECEIVED ACK FROM BE :: ', isReceiverOnline);
 
@@ -223,7 +229,11 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
           handleStream(null);
         }
         handleVideoCall(false);
-        return toast.error(otherUser.name + ' is not online');
+        return toast.error(
+          selectedChat?.isGroupChat
+            ? 'None of the group members are online'
+            : otherUser.name + ' is not online'
+        );
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -231,7 +241,7 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         mediaStream.getTracks().forEach((track) => track.stop());
         handleStream(null);
       }
-      handleVideoCall(false);
+    handleVideoCall(false);
       return toast.error(error);
     }
 
@@ -244,14 +254,20 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       caller: user!,
       roomId: selectedChat?._id as string,
       callType: 'Video',
+      ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {})
     });
     handleReceiver(otherUser);
+    if(selectedChat?.isGroupChat) {
+      handleIsGroupCall(true);
+    }
   };
 
   // * Video Call
   const onAudioCall = async () => {
     // * Check IF User online Locally
-    if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+    if (!selectedChat?.isGroupChat) {
+      if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+    }
 
     // * Get Media Permissions
     let mediaStream: MediaStream;
@@ -271,9 +287,14 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
 
       let isReceiverOnline = await socket?.emitWithAck(CALL_INITIATED, {
         caller: user,
-        receiver: otherUser._id,
+        receiver: selectedChat?.isGroupChat
+          ? selectedChat.users
+              .filter((otherUser) => otherUser._id !== user?._id)
+              .map((user) => user._id)
+          : [otherUser._id],
         roomId: selectedChat?._id,
         callType: 'Audio',
+        ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {}),
       });
       console.log('RECEIVED ACK FROM BE :: ', isReceiverOnline);
 
@@ -287,7 +308,11 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
           handleStream(null);
         }
         handleAudioCall(false);
-        return toast.error(otherUser.name + ' is not online');
+        return toast.error(
+          selectedChat?.isGroupChat
+            ? 'None of the group members are online'
+            : otherUser.name + ' is not online'
+        );
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -308,8 +333,12 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       caller: user!,
       roomId: selectedChat?._id as string,
       callType: 'Audio',
+      ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {}),
     });
     handleReceiver(otherUser);
+    if (selectedChat?.isGroupChat) {
+      handleIsGroupCall(true);
+    }
   };
 
   return (
@@ -335,26 +364,12 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         )}
       </div>
       <CustomBtn
-        disabled={selectedChat?.isGroupChat}
-        icon={
-          <FaPhone
-            className={`text-3xl text-accent ${
-              selectedChat?.isGroupChat ? 'text-slate-600' : ''
-            }`}
-          />
-        }
+        icon={<FaPhone className="text-3xl text-accent" />}
         clickHandler={onAudioCall}
         classes="ml-auto mr-3 btn-lg bg-transparent border-none outline-none shadow-none hover:bg-gray-400 rounded-lg px-4 h-[3rem] min-h-[3rem]"
       />
       <CustomBtn
-        disabled={selectedChat?.isGroupChat}
-        icon={
-          <FaVideo
-            className={`text-3xl text-accent ${
-              selectedChat?.isGroupChat ? 'text-slate-600' : ''
-            }`}
-          />
-        }
+        icon={<FaVideo className="text-3xl text-accent" />}
         clickHandler={onVideoCall}
         classes="btn-lg mr-3 bg-transparent border-none outline-none shadow-none hover:bg-gray-400 rounded-lg px-4 h-[3rem] min-h-[3rem] disabled:cursor-not-allowed disabled:bg-transparent"
       />

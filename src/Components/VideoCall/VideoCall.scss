@@ -1,10 +1,17 @@
 @use '../../assets/sass/abstracts/' as *; 
 
 .video-call-grid {
-    grid-template-rows: 1fr min-content;
-    background-image: linear-gradient(180deg, hsla(0, 0%, 0%, 0.5), hsla(0, 0%, 0%, 0.5)), url(../../assets/call-bg.jpg);
+    grid-template-rows: calc(100vh - 6rem) 4rem;
+
+    @supports(height: 100dvh) {
+        grid-template-rows: calc(100dvh - 6rem) 4rem;
+    }
+
+    background-image: linear-gradient(180deg, transparent, hsla(0, 0%, 0%, 0.5)), url(../../assets/call-bg.jpg);
 
     .players-grid {
+        height: calc(100% - 1rem);
+        margin-top: 1rem;
         position: relative;
         width: min(90%, 950px);
         margin-inline: auto;
@@ -12,9 +19,18 @@
         display: grid;
         z-index: 1;
 
-        &:not(.group-chat) {
-            grid-template-columns: 1fr;
-            grid-template-rows: 1fr;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+
+        &.group-call:not(.only-stream) {
+            grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+            grid-template-rows: initial;
+            // grid-auto-rows: 15rem;
+            gap: 1rem;
+
+            @include respond(lg-phone) {
+                grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+            }
         }
     }
 
@@ -27,17 +43,20 @@
     }
 
     .players-grid .player:not(.own-stream) {
-        grid-column: 1 / -1;
-        grid-row: 1 / -1;
         z-index: -1;
         border-radius: 1.5rem;
     }
 
-    .players-grid.only-stream .player.own-stream {
+    .players-grid:not(.group-call) .player:not(own-stream) {
+        grid-column: 1 / -1;
+        grid-row: 1 / -1;
+    }
+
+    .players-grid:where(.only-stream, .group-call) .player.own-stream {
         border-radius: 1.5rem;
     }
 
-    .players-grid:not(.only-stream) .player.own-stream {
+    .players-grid:not(.only-stream, .group-call) .player.own-stream {
         border-radius: 0 1.5rem 0 1.5rem;
         position: absolute;
         z-index: 1;
