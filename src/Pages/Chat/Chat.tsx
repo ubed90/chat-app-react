@@ -28,6 +28,10 @@ import {
 import UploadBubble from '../../Components/UploadBubble';
 import { getOtherUserDetails } from '../../utils/getOtherUser';
 
+export type CallProps = {
+  isUserOnline: boolean;
+}
+
 const Chat = () => {
   // * User and Selected chat to seklectively show only List or Chat as per Mobile / Desktop layout
   const { user } = useSelector((state: RootState) => state.user);
@@ -156,7 +160,6 @@ const Chat = () => {
     if(!socket) return;
 
     socket.on(USER_CONNECTED, (userId: string) => {
-      console.log("EXEC");
       if (selectedChat?.isGroupChat || !user || !selectedChat?.users) return;
 
       const otherUser = getOtherUserDetails(user, selectedChat.users);

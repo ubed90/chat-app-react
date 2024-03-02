@@ -13,6 +13,8 @@ const ChatListItem: React.FC<IChat> = (chat) => {
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
 
+  const otherUser = getOtherUserDetails(user!, chat.users)
+
   const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
@@ -37,6 +39,7 @@ const ChatListItem: React.FC<IChat> = (chat) => {
       });
     }
     dispatch(setSelectedChat(chat));
+    queryClient.invalidateQueries({ queryKey: ['chat', chat._id] })
     return navigate(chat._id as string, { relative: 'path' });
   };
 
@@ -56,7 +59,7 @@ const ChatListItem: React.FC<IChat> = (chat) => {
             >
               <div className="w-16 bg-neutral text-neutral-content">
                 {user?.profilePicture ? (
-                  <img src={user.profilePicture} alt={user.name} />
+                  <img src={user?.profilePicture?.url || user?.profilePicture} alt={user.name} />
                 ) : (
                   <span className="uppercase">{user.name.substring(0, 2)}</span>
                 )}
@@ -72,11 +75,25 @@ const ChatListItem: React.FC<IChat> = (chat) => {
           )}
         </div>
       ) : (
-        <div className="local-chat-profile-image avatar placeholder">
-          <div className="w-16 rounded-full bg-neutral text-neutral-content">
-            <span className="text-2xl uppercase">
-              {getOtherUserDetails(user!, chat.users).name.substring(0, 2)}
-            </span>
+        <div
+          className={`local-chat-profile-image avatar ${
+            user?.profilePicture ? '' : 'placeholder'
+          }`}
+        >
+          <div className="w-16 rounded-full bg-neutral text-neutral-content !flex justify-center items-center">
+            {otherUser?.profilePicture ? (
+              <img
+                src={
+                  otherUser?.profilePicture?.url || otherUser?.profilePicture
+                }
+                className="!object-contain"
+                alt={otherUser.name}
+              />
+            ) : (
+              <span className="text-2xl uppercase">
+                {otherUser.name.substring(0, 2)}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -100,7 +117,13 @@ const ChatListItem: React.FC<IChat> = (chat) => {
         </p>
       )}
       {chat?.notify && (
-        <span className={`badge badge-success badge-lg rounded-full justify-self-center ${chat.notify === 'new' && 'row-span-2'}`}>{chat.notify}</span>
+        <span
+          className={`badge badge-success badge-lg rounded-full justify-self-center ${
+            chat.notify === 'new' && 'row-span-2'
+          }`}
+        >
+          {chat.notify}
+        </span>
       )}
       {chat?.lastMessage && (
         <p className="text-sm local-chat-time">

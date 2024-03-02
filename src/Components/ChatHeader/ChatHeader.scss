@@ -3,9 +3,9 @@
 .local-chat-header {
     display: flex;
     align-items: center;
-    gap: calc(16 * 0.2vw);
 
     &-info {
+        margin-left: calc(16 * 0.2vw);
         display: grid;
         grid-template-columns: min-content auto;
         grid-template-rows: repeat(2, min-content);

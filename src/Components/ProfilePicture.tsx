@@ -29,7 +29,7 @@ const ProfilePicture: React.FC<
             >
               <div className={`bg-neutral text-neutral-content ${width}`}>
                 {user?.profilePicture ? (
-                  <img src={user.profilePicture.url} alt={user.name} />
+                  <img src={user.profilePicture} alt={user.name} />
                 ) : (
                   <span className="uppercase">{user.name.substring(0, 2)}</span>
                 )}
@@ -51,14 +51,20 @@ const ProfilePicture: React.FC<
       ) : (
         <div
           {...rest}
-          className={`local-chat-profile-image avatar placeholder ${className}`}
+          className={`local-chat-profile-image avatar ${
+            otherUser?.profilePicture ? '' : 'placeholder'
+          } ${className}`}
         >
           <div
             className={`rounded-full bg-neutral text-neutral-content ${width}`}
           >
-            <span className={`uppercase ${placeholderSize}`}>
-              {otherUser.name.substring(0, 2)}
-            </span>
+            {otherUser?.profilePicture ? (
+              <img src={otherUser?.profilePicture?.url || otherUser?.profilePicture} className='!object-contain' alt={otherUser.name} />
+            ) : (
+              <span className={`uppercase ${placeholderSize}`}>
+                {otherUser.name.substring(0, 2)}
+              </span>
+            )}
           </div>
         </div>
       )}

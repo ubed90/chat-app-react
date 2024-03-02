@@ -32,7 +32,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
           <div className="w-10 rounded-full ring-1 ring-primary ring-opacity-50">
             <img
               alt={message.sender.name}
-              src={message.sender?.profilePicture}
+              src={message.sender.profilePicture?.url || message.sender.profilePicture}
               className="!object-contain"
             />
           </div>
@@ -49,7 +49,11 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
       <div className="chat-header capitalize text-lg font-bold text-primary">
         {sentByYou ? 'You' : message.sender.name}
       </div>
-      <div className={`chat-bubble rounded-xl text-2xl text-justify ${sentByYou ? '' : 'chat-bubble-success text-white'}`}>
+      <div
+        className={`chat-bubble rounded-xl text-2xl text-justify ${
+          sentByYou ? '' : 'chat-bubble-success text-white'
+        }`}
+      >
         {message.content}
       </div>
       <div className="chat-footer">

@@ -15,7 +15,7 @@ import { MdDelete } from 'react-icons/md';
 import { CustomBtn } from '..';
 import { IoAddCircle } from 'react-icons/io5';
 import { HiUserRemove } from 'react-icons/hi';
-import { FaRegEye } from 'react-icons/fa';
+import { FaPhone, FaRegEye, FaVideo } from 'react-icons/fa';
 import { CiText } from 'react-icons/ci';
 import EditGroupName from '../Group/EditGroupName';
 import ViewParticipants from '../Group/ViewParticipants';
@@ -25,11 +25,15 @@ import { useMutation } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import { toast } from 'react-toastify';
 import { useChatsContext } from '../../Context/ChatsContext';
+import { usePeer } from '../../Context/PeerContext';
+import { useSocket } from '../../Context/SocketContext';
+import { CALL_INITIATED } from '../../utils/EventsMap';
+import askRequiredPermission from '../../utils/askCameraPermission';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
 const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
-  const { user } = useSelector((state: RootState) => state.user);
+  const user = useSelector((state: RootState) => state.user.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
   const otherUser = getOtherUserDetails(user!, selectedChat!.users);
 
@@ -41,6 +45,20 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
   const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
+
+  const { socket } = useSocket();
+
+  // * For Video And Audio Call
+  const {
+    handleVideoCall,
+    handleAudioCall,
+    handleReceiver,
+    handleIsCaller,
+    handlePeer,
+    handleCaller,
+    handleStream,
+    handleIsGroupCall
+  } = usePeer();
 
   // * CTA State
   const [ctaState, setCtaState] = useState<CTA_STATE>(null);
@@ -165,7 +183,163 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         },
       });
     }
-  }
+  };
+
+  // * Video Call
+  const onVideoCall = async () => {
+    // * Check IF User online Locally
+    if (!selectedChat?.isGroupChat) {
+      if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+    }
+
+    // * Get Media Permissions
+    let mediaStream: MediaStream;
+    try {
+      mediaStream = await askRequiredPermission(true);
+      handleStream(mediaStream);
+      // * Min required Entities for Caller to start the stream
+      handleVideoCall(true);
+    } catch (error) {
+      console.log(error);
+      return toast.error('Please allow audio and video permission.');
+    }
+
+    // * CHeck If User online in BackEnd MAP
+    try {
+      console.log('CHECK IF USER IS ONLINE IN BE:: ');
+
+      let isReceiverOnline = await socket?.emitWithAck(CALL_INITIATED, {
+        caller: user,
+        receiver: selectedChat?.isGroupChat
+          ? selectedChat.users.filter(otherUser => otherUser._id !== user?._id).map((user) => user._id)
+          : [otherUser._id],
+        roomId: selectedChat?._id,
+        callType: 'Video',
+        ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name }: {}),
+      });
+      console.log('RECEIVED ACK FROM BE :: ', isReceiverOnline);
+
+      isReceiverOnline = Array.isArray(isReceiverOnline)
+        ? isReceiverOnline[0]
+        : isReceiverOnline;
+
+      if (!isReceiverOnline) {
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          handleStream(null);
+        }
+        handleVideoCall(false);
+        return toast.error(
+          selectedChat?.isGroupChat
+            ? 'None of the group members are online'
+            : otherUser.name + ' is not online'
+        );
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        handleStream(null);
+      }
+    handleVideoCall(false);
+      return toast.error(error);
+    }
+
+    // * Set Peer
+    handlePeer();
+
+    // * Required Entities for Caller
+    handleIsCaller(true);
+    handleCaller({
+      caller: user!,
+      roomId: selectedChat?._id as string,
+      callType: 'Video',
+      ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {})
+    });
+    handleReceiver(otherUser);
+    if(selectedChat?.isGroupChat) {
+      handleIsGroupCall(true);
+    }
+  };
+
+  // * Video Call
+  const onAudioCall = async () => {
+    // * Check IF User online Locally
+    if (!selectedChat?.isGroupChat) {
+      if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+    }
+
+    // * Get Media Permissions
+    let mediaStream: MediaStream;
+    try {
+      mediaStream = await askRequiredPermission(false);
+      handleStream(mediaStream);
+      // * Min required Entities for Caller to start the stream
+      handleAudioCall(true);
+    } catch (error) {
+      console.log(error);
+      return toast.error('Please allow audio permission.');
+    }
+
+    // * CHeck If User online in BackEnd MAP
+    try {
+      console.log('CHECK IF USER IS ONLINE IN BE:: ');
+
+      let isReceiverOnline = await socket?.emitWithAck(CALL_INITIATED, {
+        caller: user,
+        receiver: selectedChat?.isGroupChat
+          ? selectedChat.users
+              .filter((otherUser) => otherUser._id !== user?._id)
+              .map((user) => user._id)
+          : [otherUser._id],
+        roomId: selectedChat?._id,
+        callType: 'Audio',
+        ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {}),
+      });
+      console.log('RECEIVED ACK FROM BE :: ', isReceiverOnline);
+
+      isReceiverOnline = Array.isArray(isReceiverOnline)
+        ? isReceiverOnline[0]
+        : isReceiverOnline;
+
+      if (!isReceiverOnline) {
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          handleStream(null);
+        }
+        handleAudioCall(false);
+        return toast.error(
+          selectedChat?.isGroupChat
+            ? 'None of the group members are online'
+            : otherUser.name + ' is not online'
+        );
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        handleStream(null);
+      }
+      handleAudioCall(false);
+      return toast.error(error);
+    }
+
+    // * Set Peer
+    handlePeer();
+
+    // * Required Entities for Caller
+    handleIsCaller(true);
+    handleCaller({
+      caller: user!,
+      roomId: selectedChat?._id as string,
+      callType: 'Audio',
+      ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {}),
+    });
+    handleReceiver(otherUser);
+    if (selectedChat?.isGroupChat) {
+      handleIsGroupCall(true);
+    }
+  };
 
   return (
     <header className="local-chat-header px-4 border-b-[1px] border-b-accent">
@@ -189,7 +363,17 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
           <p className="local-chat-header-info-status text-base">Online</p>
         )}
       </div>
-      <div className="local-chat-header-dropdown cursor-pointer relative ml-auto dropdown dropdown-end dropdown-hover">
+      <CustomBtn
+        icon={<FaPhone className="text-3xl text-accent" />}
+        clickHandler={onAudioCall}
+        classes="ml-auto mr-3 btn-lg bg-transparent border-none outline-none shadow-none hover:bg-gray-400 rounded-lg px-4 h-[3rem] min-h-[3rem]"
+      />
+      <CustomBtn
+        icon={<FaVideo className="text-3xl text-accent" />}
+        clickHandler={onVideoCall}
+        classes="btn-lg mr-3 bg-transparent border-none outline-none shadow-none hover:bg-gray-400 rounded-lg px-4 h-[3rem] min-h-[3rem] disabled:cursor-not-allowed disabled:bg-transparent"
+      />
+      <div className="local-chat-header-dropdown cursor-pointer relative dropdown dropdown-end dropdown-hover">
         <button role="button" className="btn btn-ghost rounded-xl btn-lg px-0">
           <CiMenuKebab className="text-4xl" />
         </button>
