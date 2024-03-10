@@ -28,7 +28,7 @@ const getCorrespondingComponent = (type: IMessageTypes) => {
   }
 }
 
-const UploadBubble: React.FC<IMessage> = (message) => {
+const UploadBubble: React.FC<IMessage & { isInRoom: boolean }> = (message) => {
   const user = useSelector((state: RootState) => state.user.user);
 
   const [file] = useState<File | string | Buffer | undefined>(
@@ -38,7 +38,7 @@ const UploadBubble: React.FC<IMessage> = (message) => {
   );
 
   return (
-    <FileUploader messageId={message._id as string} file={file}>
+    <FileUploader isInRoom={message.isInRoom} messageId={message._id as string} file={file}>
       {({ isLoading, percentage, handleDownload }) => {
         const Component = getCorrespondingComponent(message.attachment!.type)
 

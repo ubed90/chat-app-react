@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RootState, useAppDispatch } from '../../Store';
-import { setSelectedChat } from '../../features/chat';
+import { addMessage, clearUnreadMessages, setMessages, setSelectedChat } from '../../features/chat';
 import { Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import {
-  IMessage,
   IMessageResponse,
   INewMessageResponse,
 } from '../../models/message.model';
@@ -19,7 +18,9 @@ import { FaArrowsRotate } from 'react-icons/fa6';
 import { IoChatboxEllipses } from 'react-icons/io5';
 import { useSocket } from '../../Context/SocketContext';
 import {
+  EXISTING_USERS_EVENT,
   JOIN_CHAT_EVENT,
+  LEAVE_CHAT_EVENT,
   STOP_TYPING_EVENT,
   TYPING_EVENT,
   USER_CONNECTED,
@@ -30,12 +31,19 @@ import { getOtherUserDetails } from '../../utils/getOtherUser';
 
 export type CallProps = {
   isUserOnline: boolean;
-}
+};
 
 const Chat = () => {
   // * User and Selected chat to seklectively show only List or Chat as per Mobile / Desktop layout
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
+
+  // * New Redux Way to Handle Messages
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const messages = useSelector((state: RootState) => state.chat.messages) || {};
+
+  const numOfMessages = useMemo(() => Object.keys(messages).length, [messages]);
+
   const dispatch = useAppDispatch();
 
   // * Only use is to clean the selected chat state when component is unmounted
@@ -44,9 +52,12 @@ const Chat = () => {
   // * Is User Online STate
   const [isOnline, setIsOnline] = useState<boolean>(false);
 
+  // * AVailable Users
+  const [isInRoom, setIsInRoom] = useState<boolean>(false);
+
   const handleStatus = (status: boolean) => {
     setIsOnline(status);
-  }
+  };
 
   // * Local client instance to set new messages in cache
   const queryClient = useQueryClient();
@@ -54,7 +65,7 @@ const Chat = () => {
   // * Mutation to send message
   const { mutate: sendMessage, isPending } = useMutation({
     mutationKey: ['send-message', selectedChat?._id],
-    mutationFn: (variables: { content: string }) =>
+    mutationFn: (variables: { content: string; status?: string }) =>
       customFetch.post<INewMessageResponse>(
         `/message/${selectedChat?._id}`,
         variables
@@ -73,16 +84,24 @@ const Chat = () => {
     sendMessage(
       {
         content,
+        ...(selectedChat?.isGroupChat
+          ? {}
+          : isInRoom
+          ? { status: 'READ' }
+          : {}),
       },
       {
         onSuccess: ({ data }) => {
-          queryClient.setQueryData(
-            ['chat', selectedChat?._id],
-            (oldMessages: IMessage[]) => {
-              const newMessages = [data.newMessage, ...oldMessages];
-              return newMessages;
-            }
-          );
+          // ! Not required since we are moving from RTK Query to Redux
+          // queryClient.setQueryData(
+          //   ['chat', selectedChat?._id],
+          //   (oldMessages: IMessage[]) => {
+          //     const newMessages = [data.newMessage, ...oldMessages];
+          //     return newMessages;
+          //   }
+          // );
+          dispatch(addMessage({ message: data.newMessage }));
+
           queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
             let newChats: IChat[] = structuredClone(chats);
 
@@ -112,7 +131,6 @@ const Chat = () => {
 
   // * Query to fetch data dynamically whem Single Chat is Loaded
   const {
-    data: messages,
     isLoading,
     isError,
     error,
@@ -124,6 +142,7 @@ const Chat = () => {
         '/message/' + id
       );
       setIsOnline(data.isOnline);
+      dispatch(setMessages({ messages: data.messages }))
       return data.messages;
     },
   });
@@ -138,66 +157,134 @@ const Chat = () => {
 
   // * To clean the selected Chat when the component is unmounted
   useEffect(() => {
-    if (!socket) return;
+    return () => {
+      dispatch(setSelectedChat(undefined));
+    };
+  }, [dispatch]);
+
+  // * Mount Join CHat and Leave Chat Event
+  useEffect(() => {
+    if (!socket || !selectedChat?._id || !user?._id) return;
+
+    socket.emit(JOIN_CHAT_EVENT, {
+      chatId: selectedChat._id,
+      userId: user._id,
+    });
+
+    return () => {
+      socket.emit(LEAVE_CHAT_EVENT, {
+        chatId: selectedChat?._id,
+        userId: user?._id,
+      });
+    };
+  }, [dispatch, selectedChat?._id, socket, user?._id]);
+
+  // * Mount the Typing events
+  useEffect(() => {
+    if (!socket || !user || selectedChat?._id) return;
 
     socket.on(TYPING_EVENT, () => handleTyping(true));
 
     socket.on(STOP_TYPING_EVENT, () => handleTyping(false));
 
     return () => {
-      dispatch(setSelectedChat(undefined));
+      socket.off(TYPING_EVENT, () => handleTyping(true));
+
+      socket.off(STOP_TYPING_EVENT, () => handleTyping(false));
     };
-  }, [dispatch, socket]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.emit(JOIN_CHAT_EVENT, selectedChat?._id);
-  }, [selectedChat?._id, socket]);
+  }, [selectedChat?._id, socket, user]);
 
   // * To Check for whether other user is online or not
   useEffect(() => {
-    if(!socket) return;
+    if (!socket || selectedChat?.isGroupChat) return;
 
-    socket.on(USER_CONNECTED, (userId: string) => {
-      if (selectedChat?.isGroupChat || !user || !selectedChat?.users) return;
+    const handleUserConnection = (userId: string) => {
+      if (!user || !selectedChat?.users) return;
 
       const otherUser = getOtherUserDetails(user, selectedChat.users);
 
       if (otherUser._id === userId) {
         handleStatus(true);
       }
-    })
+    };
 
-    socket.on(USER_DISCONNECTED, (userId: string) => {
-      if (selectedChat?.isGroupChat || !user || !selectedChat?.users) return;
+    const handleUserDisconnection = (userId: string) => {
+      if (!user || !selectedChat?.users) return;
 
       const otherUser = getOtherUserDetails(user, selectedChat.users);
 
       if (otherUser._id === userId) {
         handleStatus(false);
       }
-    });
-  }, [selectedChat?.isGroupChat, selectedChat?.users, socket, user])
+    };
 
-  // ! Use Effect to make user wait before leaving the page when it is uploading / Downloading
+    socket.on(USER_CONNECTED, handleUserConnection);
 
-  // useEffect(() => {
-  //   if (!files || Object.keys(files).length === 0) return;
+    socket.on(USER_DISCONNECTED, handleUserDisconnection);
 
-  //   const handleBeforeUnload = (event: Event) => {
-  //     event.preventDefault();
-  //     // Custom logic to handle the refresh
-  //     // Display a confirmation message or perform necessary actions
-  //     if (prompt('Are you Sure you want to leave ?')) {
-  //       window.location.reload();
-  //     }
-  //   };
-  //   window.addEventListener('beforeunload', handleBeforeUnload);
-  //   return () => {
-  //     window.removeEventListener('beforeunload', handleBeforeUnload);
-  //   };
-  // }, [files]);
+    return () => {
+      socket.off(USER_CONNECTED, handleUserConnection);
+      socket.off(USER_DISCONNECTED, handleUserDisconnection);
+    };
+  }, [selectedChat?.isGroupChat, selectedChat?.users, socket, user]);
+
+  // * Set / Unset Available Users for One on One Chat
+  useEffect(() => {
+    if (!socket || !selectedChat?._id || !user?._id || selectedChat.isGroupChat) return;
+
+    const handleJoinChatEvent = (props: { chatId: string; userId: string }) => {
+      if (props.chatId !== selectedChat._id) return;
+
+      socket.emit(EXISTING_USERS_EVENT, {
+        chatId: selectedChat._id,
+        userId: user._id,
+        otherUser: props.userId,
+      });
+      
+      setIsInRoom((prev) => {
+        if(!prev) {
+          dispatch(clearUnreadMessages());
+          return true
+        }
+
+        return prev
+      })
+    };
+
+    // * Handle Leave Chat Event
+    const handleLeaveChatEvent = (props: {
+      chatId: string;
+      userId: string;
+    }) => {
+      if (props.chatId !== selectedChat._id) return;
+
+      setIsInRoom(false)
+    };
+
+    // * Handle Existing Users Event
+    const handleExistingUsersEvent = (props: {
+      chatId: string;
+      userId: string;
+    }) => {
+      if (props.chatId !== selectedChat._id) return;
+
+      setIsInRoom(true);
+    };
+
+    socket.on(JOIN_CHAT_EVENT, handleJoinChatEvent);
+
+    socket.on(LEAVE_CHAT_EVENT, handleLeaveChatEvent);
+
+    socket.on(EXISTING_USERS_EVENT, handleExistingUsersEvent);
+
+    return () => {
+      socket.off(JOIN_CHAT_EVENT, handleJoinChatEvent);
+
+      socket.off(LEAVE_CHAT_EVENT, handleLeaveChatEvent);
+
+      socket.off(EXISTING_USERS_EVENT, handleExistingUsersEvent);
+    };
+  }, [dispatch, selectedChat?._id, selectedChat?.isGroupChat, socket, user?._id]);
 
   // * We are using this hack to set the selected chat dynamically when the user does a refresh on single chat page
   if (id && !selectedChat) {
@@ -261,10 +348,10 @@ const Chat = () => {
       <ChatHeader isUserOnline={isOnline} />
       <section
         className={`messages p-4 relative ${
-          messages?.length === 0 && 'justify-center items-center'
+          numOfMessages === 0 && 'justify-center items-center'
         }`}
       >
-        {messages!.length <= 0 && (
+        {numOfMessages <= 0 && (
           <div className="flex flex-col items-center">
             <IoChatboxEllipses className="text-6xl text-accent opacity-30" />
             <p className="text-3xl opacity-30">No Messages Here.</p>
@@ -273,23 +360,25 @@ const Chat = () => {
         {isTyping && (
           <div
             className={`bg-primary bg-opacity-25 backdrop-blur-lg px-3 grid place-items-center rounded-full w-max ${
-              messages!.length <= 0 && 'absolute bottom-2 left-4'
+              numOfMessages <= 0 && 'absolute bottom-2 left-4'
             }`}
           >
             <span className="loading loading-dots loading-lg text-accent"></span>
           </div>
         )}
-        {messages?.map((message) =>
-          message.isAttachment ? (
-            <UploadBubble key={message._id} {...message} />
+        {Object.keys(messages)?.map((messageId) => {
+          const message = messages[messageId];
+
+          return message.isAttachment ? (
+            <UploadBubble key={message._id} {...message} isInRoom={selectedChat?.isGroupChat ? false : isInRoom} />
           ) : (
             <ChatBubble
               key={message._id}
               sentByYou={user?._id === message.sender._id}
               message={message}
             />
-          )
-        )}
+          );
+        })}
       </section>
       <ChatFooter sendMessage={handleNewMessage} isPending={isPending} />
     </div>

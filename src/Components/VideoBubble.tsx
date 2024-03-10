@@ -4,6 +4,7 @@ import { IUserData } from '../models/user.model';
 import { FileUploaderChildrenArgs } from './FileUploader';
 import VideoPlayer from "react-player/lazy";
 import dayjs from 'dayjs';
+import MessageStatus from './MessageStatus';
 
 const VideoBubble: React.FC<
   FileUploaderChildrenArgs & {
@@ -14,9 +15,7 @@ const VideoBubble: React.FC<
 > = ({ isLoading, handleDownload, percentage, message, user, sentByYou }) => {
   return (
     <div
-      className={`chat ${
-        sentByYou ? 'chat-end' : 'chat-start'
-      }`}
+      className={`chat ${sentByYou ? 'chat-end' : 'chat-start'}`}
       onClick={() => {
         if (sentByYou) return;
 
@@ -57,12 +56,10 @@ const VideoBubble: React.FC<
           user?._id !== message.sender._id && 'flex-row-reverse'
         }`}
       >
-        {isLoading && (
+        {isLoading && !message.attachment?.url && (
           <div
             className={`radial-progress text-success text-base font-bold ${
-              isLoading || sentByYou
-                ? ''
-                : 'text-white cursor-pointer'
+              isLoading || sentByYou ? '' : 'text-white cursor-pointer'
             }`}
             style={{
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -78,7 +75,7 @@ const VideoBubble: React.FC<
           </div>
         )}
 
-        {!isLoading && (
+        {!isLoading && message.attachment?.url && (
           <VideoPlayer
             controls
             width="100%"
@@ -87,6 +84,9 @@ const VideoBubble: React.FC<
           />
         )}
         {/* <p className="text-2xl">{message.content}</p> */}
+        {sentByYou && message.status && (
+          <MessageStatus status={message.status} />
+        )}
       </div>
       <div className="chat-footer">
         <time className="text-sm">{dayjs().format('hh:mm a')}</time>

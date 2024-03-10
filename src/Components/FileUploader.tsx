@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { IMessage, INewMessageResponse } from '../models/message.model';
+import { INewMessageResponse } from '../models/message.model';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import customFetch from '../utils/customFetch';
 import { useSelector } from 'react-redux';
-import { RootState } from '../Store';
+import { RootState, useAppDispatch } from '../Store';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { deleteMessage, editMessage } from '../features/chat';
 
 type FileUploaderProps = {
   messageId: string;
   children: (props: FileUploaderChildrenArgs) => JSX.Element;
   file?: File | string | Buffer;
+  isInRoom: boolean;
 };
 
 export type FileUploaderChildrenArgs = {
@@ -26,11 +28,15 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   messageId,
   children,
   file,
+  isInRoom
 }) => {
   // * Selected Chat
   const selectedChatId = useSelector(
     (state: RootState) => state.chat.selectedChat?._id
   );
+
+  // * Dispatch for upading message
+  const dispatch = useAppDispatch();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,9 +54,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           onUploadProgress(progressEvent) {
             setIsLoading(true);
             if (progressEvent.progress && progressEvent.progress > 0) {
-              const uploadPercentage =
-                (progressEvent.progress * 100).toFixed(2);
-                setPercentage(+uploadPercentage)
+              const uploadPercentage = (progressEvent.progress * 100).toFixed(
+                2
+              );
+              setPercentage(+uploadPercentage);
             }
           },
         }
@@ -58,10 +65,16 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   });
 
   // * Function to Download the Attachment
-  const handleDownload = async ({type, fileName}: { type?: string, fileName: string }) => {
+  const handleDownload = async ({
+    type,
+    fileName,
+  }: {
+    type?: string;
+    fileName: string;
+  }) => {
     if (!file || file instanceof File || !type) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     if (type === 'IMAGE' || type === 'VIDEO') {
       const { data } = await axios.get(file as string, {
@@ -70,9 +83,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           if (progressEvent.progress && progressEvent.progress > 0) {
             const uploadPercentage = progressEvent.progress * 100;
             setPercentage(uploadPercentage);
-            
-            if(uploadPercentage === 100) {
-              setIsLoading(false)
+
+            if (uploadPercentage === 100) {
+              setIsLoading(false);
             }
           }
         },
@@ -80,7 +93,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
 
       const downloadLink = URL.createObjectURL(data);
       const downloadButton = document.createElement('a');
-      
+
       downloadButton.href = downloadLink;
       downloadButton.download = fileName;
 
@@ -89,7 +102,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           URL.revokeObjectURL(downloadLink);
           downloadButton.removeEventListener('click', handleOnDownload);
         }, 100);
-      }
+      };
 
       downloadButton.addEventListener('click', handleOnDownload, false);
 
@@ -113,34 +126,25 @@ const FileUploader: React.FC<FileUploaderProps> = ({
 
   // * TO invoke Upload Dynamically whenever File Changes and Type is Upload
   useEffect(() => {
-    if (!file || !(file instanceof File)) return;
+    if (!file || !(file instanceof File) || isLoading) return;
 
     const formData = new FormData();
     formData.append('attachments', file);
 
+    if(isInRoom) {
+      formData.append('status', 'READ')
+    }
+
     // Send The Request to Server
     uploadAttachment(formData, {
       onSuccess({ data }) {
-        queryClient.setQueryData(
-          ['chat', selectedChatId],
-          (oldMessages: IMessage[]) => {
-            const allMessages = structuredClone(oldMessages);
-
-            const message = allMessages.find((mes) => mes._id === messageId);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            if(message) {
-              message._id = data.newMessage._id
-              message.chat = data.newMessage.chat
-              message.content = data.newMessage.content
-              message.sender = data.newMessage.sender
-              message.isNotification = data.newMessage.isNotification
-              message.isAttachment = data.newMessage.isAttachment
-              message.attachment = data.newMessage.attachment
-              message.createdAt = data.newMessage.createdAt
-            }
-            
-            return allMessages;
-          }
+        console.log(data.newMessage);
+        
+        dispatch(
+          editMessage({
+            id: messageId,
+            message: data.newMessage,
+          })
         );
         setIsLoading(false);
       },
@@ -149,19 +153,11 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         setIsLoading(false);
         toast.error(error?.response?.data?.message || error.message);
 
-        queryClient.setQueryData(
-          ['chat', selectedChatId],
-          (oldMessages: IMessage[]) => {
-            const allMessages = structuredClone(oldMessages).filter(
-              (message) => message._id !== messageId
-            );
-
-            return allMessages;
-          }
-        );
+        setIsLoading(false);
+        dispatch(deleteMessage({ id: messageId }))
       },
     });
-  }, [file, messageId, queryClient, selectedChatId, uploadAttachment]);
+  }, [dispatch, file, isInRoom, isLoading, messageId, queryClient, selectedChatId, uploadAttachment]);
 
   return children({ isLoading, percentage, handleDownload });
 };

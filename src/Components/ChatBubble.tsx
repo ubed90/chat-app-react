@@ -1,6 +1,7 @@
 import React from 'react';
 import { IMessage } from '../models/message.model';
 import dayjs from 'dayjs';
+import MessageStatus from './MessageStatus';
 
 type ChatBubbleProps = {
   sentByYou: boolean;
@@ -50,11 +51,12 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
         {sentByYou ? 'You' : message.sender.name}
       </div>
       <div
-        className={`chat-bubble rounded-xl text-2xl text-justify ${
-          sentByYou ? '' : 'chat-bubble-success text-white'
+        className={`chat-bubble rounded-xl text-2xl text-justify relative ${
+          sentByYou ? 'pr-8' : 'chat-bubble-success text-white'
         }`}
       >
         {message.content}
+        {sentByYou && message.status && <MessageStatus status={message.status} />}
       </div>
       <div className="chat-footer">
         <time className="text-sm">

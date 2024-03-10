@@ -5,6 +5,7 @@ import { FileUploaderChildrenArgs } from './FileUploader';
 import { FaCheck } from 'react-icons/fa';
 import { IoMdDownload } from 'react-icons/io';
 import dayjs from 'dayjs';
+import MessageStatus from './MessageStatus';
 
 const DocumentBubble: React.FC<
   FileUploaderChildrenArgs & {
@@ -14,11 +15,7 @@ const DocumentBubble: React.FC<
   }
 > = ({ isLoading, percentage, handleDownload, message, user, sentByYou }) => {
   return (
-    <div
-      className={`chat ${
-        sentByYou ? 'chat-end' : 'chat-start'
-      }`}
-    >
+    <div className={`chat ${sentByYou ? 'chat-end' : 'chat-start'}`}>
       <div
         className={`chat-image avatar ${
           user?.profilePicture ? '' : 'placeholder:'
@@ -52,9 +49,7 @@ const DocumentBubble: React.FC<
       >
         <div
           className={`radial-progress text-success text-base font-bold ${
-            isLoading || sentByYou
-              ? ''
-              : 'text-white cursor-pointer'
+            isLoading || sentByYou ? '' : 'text-white cursor-pointer'
           }`}
           style={{
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -85,6 +80,9 @@ const DocumentBubble: React.FC<
         <p className="text-2xl max-w-80 md:max-w-xl truncate">
           {message.content}
         </p>
+        {sentByYou && message.status && (
+          <MessageStatus status={message.status} />
+        )}
       </div>
       <div className="chat-footer">
         <time className="text-sm">{dayjs().format('hh:mm a')}</time>
