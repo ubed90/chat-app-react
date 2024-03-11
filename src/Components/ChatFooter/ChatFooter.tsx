@@ -41,7 +41,7 @@ type ChatFooterProps = {
   isPending: boolean;
 };
 
-const ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
+let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
   const { user } = useSelector((state: RootState) => state.user);
   const [content, setContent] = useState('');
   const { theme } = useSelector((state: RootState) => state.user);
@@ -283,5 +283,7 @@ const ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
     </footer>
   );
 };
+
+ChatFooter = React.memo(ChatFooter);
 
 export default ChatFooter;

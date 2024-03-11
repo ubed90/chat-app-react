@@ -6,7 +6,7 @@ import { CiMenuKebab } from 'react-icons/ci';
 import './ChatHeader.scss';
 import { useNavigate } from 'react-router-dom';
 import { setSelectedChat } from '../../features/chat';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Modal from '../Modal/Modal';
 import ProfilePicture from '../ProfilePicture';
 import { CgProfile } from 'react-icons/cg';
@@ -32,7 +32,7 @@ import askRequiredPermission from '../../utils/askCameraPermission';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
-const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
+let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
   const otherUser = getOtherUserDetails(user!, selectedChat!.users);
@@ -566,5 +566,7 @@ const ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     </header>
   );
 };
+
+ChatHeader = React.memo(ChatHeader);
 
 export default ChatHeader;

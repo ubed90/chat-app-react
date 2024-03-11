@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RootState, useAppDispatch } from '../../Store';
 import { addMessage, clearMessages, clearUnreadMessages, setMessages, setSelectedChat } from '../../features/chat';
 import { Navigate, useParams } from 'react-router-dom';
@@ -28,6 +28,8 @@ import {
 } from '../../utils/EventsMap';
 import UploadBubble from '../../Components/UploadBubble';
 import { getOtherUserDetails } from '../../utils/getOtherUser';
+import throttle from '../../utils/throttle';
+import { FaArrowDown } from 'react-icons/fa';
 
 export type CallProps = {
   isUserOnline: boolean;
@@ -40,9 +42,27 @@ const Chat = () => {
 
   // * New Redux Way to Handle Messages
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const messages = useSelector((state: RootState) => state.chat.messages) || {};
+  const messages = useSelector((state: RootState) => state.chat.messages);
 
-  const numOfMessages = useMemo(() => Object.keys(messages).length, [messages]);
+  const numOfMessages = useMemo(() => Object.keys(messages || {}).length, [messages]);
+
+  // * CHeck whether the user is at the bottom or not
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  // * Ref for Message Box
+  const messageRef = useRef<HTMLDivElement | null>(null);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleScroll = useCallback(throttle(
+    (event: React.UIEvent<HTMLElement, UIEvent>) => {
+      if ((event.target as HTMLElement).scrollTop < -50) {
+        setIsAtBottom(false);
+      } else {
+        setIsAtBottom(true);
+      }
+    },
+    1000
+  ), [])
 
   const dispatch = useAppDispatch();
 
@@ -345,12 +365,14 @@ const Chat = () => {
     );
 
   return (
-    <div className="chat-body overflow-hidden">
+    <div className="chat-body relative overflow-hidden">
       <ChatHeader isUserOnline={isOnline} />
       <section
+        ref={messageRef}
         className={`messages p-4 relative ${
           numOfMessages === 0 && 'justify-center items-center'
         }`}
+        onScroll={handleScroll}
       >
         {numOfMessages <= 0 && (
           <div className="flex flex-col items-center">
@@ -367,21 +389,33 @@ const Chat = () => {
             <span className="loading loading-dots loading-lg text-accent"></span>
           </div>
         )}
-        {Object.keys(messages)?.map((messageId) => {
-          const message = messages[messageId];
+        {messages &&
+          Object.keys(messages)?.map((messageId) => {
+            const message = messages[messageId];
 
-          return message.isAttachment ? (
-            <UploadBubble key={message._id} {...message} isInRoom={selectedChat?.isGroupChat ? false : isInRoom} />
-          ) : (
-            <ChatBubble
-              key={message._id}
-              sentByYou={user?._id === message.sender._id}
-              message={message}
-            />
-          );
-        })}
+            return message.isAttachment ? (
+              <UploadBubble
+                key={messageId}
+                {...message}
+                isInRoom={selectedChat?.isGroupChat ? false : isInRoom}
+              />
+            ) : (
+              <ChatBubble
+                key={messageId}
+                sentByYou={user?._id === message.sender._id}
+                messageId={messageId}
+              />
+            );
+          })}
       </section>
       <ChatFooter sendMessage={handleNewMessage} isPending={isPending} />
+      {!isAtBottom && (
+        <span onClick={() => {
+          messageRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }} className="btn btn-accent btn-rounded absolute right-10 bottom-28 animate-bounce">
+          <FaArrowDown />
+        </span>
+      )}
     </div>
   );
 };

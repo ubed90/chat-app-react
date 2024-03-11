@@ -40,8 +40,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const [isUploaded, setIsUploaded] = useState(false)
+
   // * Upload Percentage
   const [percentage, setPercentage] = useState<number>(0);
+
+  // * Local State to check whether the File is uploaded or not
 
   // * Mutation to Upload Attachment
   const { mutate: uploadAttachment } = useMutation({
@@ -126,7 +130,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({
 
   // * TO invoke Upload Dynamically whenever File Changes and Type is Upload
   useEffect(() => {
-    if (!file || !(file instanceof File) || isLoading) return;
+    if (!file || !(file instanceof File) || isLoading || isUploaded) return;
+
+    console.log("UPLOAD STARTED :: ", isLoading, isUploaded);
+    
 
     const formData = new FormData();
     formData.append('attachments', file);
@@ -147,10 +154,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           })
         );
         setIsLoading(false);
+        setIsUploaded(true);
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError(error: any) {
         setIsLoading(false);
+        setIsUploaded(false)
         toast.error(error?.response?.data?.message || error.message);
 
         setIsLoading(false);

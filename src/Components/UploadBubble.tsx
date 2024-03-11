@@ -28,7 +28,7 @@ const getCorrespondingComponent = (type: IMessageTypes) => {
   }
 }
 
-const UploadBubble: React.FC<IMessage & { isInRoom: boolean }> = (message) => {
+let UploadBubble: React.FC<IMessage & { isInRoom: boolean }> = (message) => {
   const user = useSelector((state: RootState) => state.user.user);
 
   const [file] = useState<File | string | Buffer | undefined>(
@@ -58,4 +58,6 @@ const UploadBubble: React.FC<IMessage & { isInRoom: boolean }> = (message) => {
   );
 };
 
-export default UploadBubble;
+UploadBubble = React.memo(UploadBubble);
+
+export default UploadBubble
