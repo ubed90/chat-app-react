@@ -25,7 +25,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   return (
     <div className={`chat ${sentByYou ? 'chat-end' : 'chat-start'}`}>
       <div
-        className={`chat-image avatar ${
+        className={`chat-image avatar rounded-full ${
           message.sender?.profilePicture ? '' : 'placeholder:'
         }`}
       >
@@ -38,7 +38,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
             />
           </div>
         ) : (
-          <div className="avatar placeholder ring-1 ring-primary ring-opacity-50">
+          <div className="avatar placeholder rounded-full ring-1 ring-primary ring-opacity-50">
             <div className="bg-neutral text-neutral-content rounded-full w-10">
               <span className="text-xl uppercase">
                 {message.sender.name.substring(0, 2)}

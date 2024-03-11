@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RootState, useAppDispatch } from '../../Store';
-import { addMessage, clearUnreadMessages, setMessages, setSelectedChat } from '../../features/chat';
+import { addMessage, clearMessages, clearUnreadMessages, setMessages, setSelectedChat } from '../../features/chat';
 import { Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
@@ -159,6 +159,7 @@ const Chat = () => {
   useEffect(() => {
     return () => {
       dispatch(setSelectedChat(undefined));
+      dispatch(clearMessages());
     };
   }, [dispatch]);
 
@@ -181,7 +182,7 @@ const Chat = () => {
 
   // * Mount the Typing events
   useEffect(() => {
-    if (!socket || !user || selectedChat?._id) return;
+    if (!socket || !user || !selectedChat?._id) return;
 
     socket.on(TYPING_EVENT, () => handleTyping(true));
 
