@@ -132,5 +132,3 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 export default Landing;
-
-// TODO: Group Scribilio

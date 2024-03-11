@@ -103,6 +103,9 @@ const chatSlice = createSlice({
       state,
       { payload }: PayloadAction<{ id: string; message: IMessage }>
     ) => {
+      console.log(state.messages?.[payload.id], payload.message);
+      
+
       state.messages = {
         ...state.messages,
         [payload.id]: payload.message,
