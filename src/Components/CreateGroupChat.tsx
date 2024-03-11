@@ -46,9 +46,8 @@ const CreateGroupChat: React.FC<CreateChatProps<IUserData[]>> = ({
             required
             value={name}
             handleChange={handleName}
-            size="input-lg"
             marginRequired={false}
-            customClasses="!input-bordered focus:outline-white bg-accent bg-opacity-10 !text-xl"
+            customClasses="!input-bordered focus:outline-white bg-accent bg-opacity-10 !text-xl input-lg"
           />
           <CustomSelect
             key={JSON.stringify(searchType)}

@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import WaveSurfer from 'wavesurfer.js';
 import { FaPlay, FaStop } from 'react-icons/fa';
 import formatTime from '../utils/formatTime';
+import MessageStatus from './MessageStatus';
 
 const AudioBubble: React.FC<
   FileUploaderChildrenArgs & {
@@ -96,11 +97,7 @@ const AudioBubble: React.FC<
   };
 
   return (
-    <div
-      className={`chat ${
-        sentByYou ? 'chat-end' : 'chat-start'
-      }`}
-    >
+    <div className={`chat ${sentByYou ? 'chat-end' : 'chat-start'}`}>
       <div
         className={`chat-image avatar ${
           user?.profilePicture ? '' : 'placeholder:'
@@ -132,31 +129,30 @@ const AudioBubble: React.FC<
           user?._id !== message.sender._id && isLoading && 'flex-row-reverse'
         } ${sentByYou ? '' : 'chat-bubble-success text-white'}`}
       >
-        {isLoading && (
-          <>
-            <div
-              className={`radial-progress text-success text-base font-bold ${
-                isLoading || sentByYou
-                  ? ''
-                  : 'text-white cursor-pointer'
-              }`}
-              style={{
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                // TS Giving error on Dynamic Custom Properties
-                '--value': isLoading ? percentage : 100,
-                '--size': '3.5rem',
-                '--thickness': '2px',
-              }}
-              role="progressbar"
-            >
-              {isLoading && Math.floor(percentage) + '%'}
-            </div>
-            <p className="text-2xl max-w-80 md:max-w-xl truncate">
-              {message.content}
-            </p>
-          </>
-        )}
+        {isLoading ||
+          (!message.attachment?.content && (
+            <>
+              <div
+                className={`radial-progress text-success text-base font-bold ${
+                  isLoading || sentByYou ? '' : 'text-white cursor-pointer'
+                }`}
+                style={{
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-expect-error
+                  // TS Giving error on Dynamic Custom Properties
+                  '--value': isLoading ? percentage : 100,
+                  '--size': '3.5rem',
+                  '--thickness': '2px',
+                }}
+                role="progressbar"
+              >
+                {isLoading && Math.floor(percentage) + '%'}
+              </div>
+              <p className="text-2xl max-w-80 md:max-w-xl truncate">
+                {message.content}
+              </p>
+            </>
+          ))}
         {!isLoading && message.attachment?.content && (
           <>
             {isPlaying ? (
@@ -180,6 +176,10 @@ const AudioBubble: React.FC<
               </span>
             )}
           </>
+        )}
+
+        {sentByYou && message.status && (
+          <MessageStatus status={message.status} />
         )}
       </div>
       <div className="chat-footer">

@@ -16,7 +16,7 @@ const Player: React.FC<PlayerProps> = (props) => {
         height="100%"
         url={props.stream}
         playing={true}
-        muted={props.muted}
+        muted={props.isCurrentUser ? true : props.muted}
       />
 
       {!props.playing && <Fallback currentUser={props.isCurrentUser} name={props.name} />}

@@ -9,7 +9,6 @@ type FormInputProps = {
   errors?: { [key: string]: string };
   required?: boolean;
   label?: string;
-  size?: string;
   defaultValue?: string;
   value?: string;
   hideLabel?: boolean;
@@ -18,13 +17,12 @@ type FormInputProps = {
   marginRequired?: boolean;
 };
 
-const FormInput: React.FC<FormInputProps & InputHTMLAttributes<HTMLInputElement>> = ({
+const Input: React.FC<FormInputProps & InputHTMLAttributes<HTMLInputElement>> = ({
   name,
   type = 'text',
   defaultValue,
   value,
   label,
-  size,
   placeholder,
   errors,
   borderRadius = 'rounded-lg',
@@ -66,7 +64,7 @@ const FormInput: React.FC<FormInputProps & InputHTMLAttributes<HTMLInputElement>
         name={name}
         id={name}
         placeholder={placeholder}
-        className={`input w-full input-primary ${size} !text-lg md:!text-2xl form-input ${borderRadius} ${customClasses}`}
+        className={`input w-full input-primary !text-lg md:!text-2xl form-input ${borderRadius} ${customClasses}`}
         defaultValue={defaultValue}
         value={value}
         required={required}
@@ -101,4 +99,6 @@ const FormInput: React.FC<FormInputProps & InputHTMLAttributes<HTMLInputElement>
   );
 };
 
-export default React.memo(FormInput);
+const FormInput = React.memo(Input);
+
+export default FormInput

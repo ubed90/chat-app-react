@@ -111,7 +111,7 @@ const ForgotPassword = () => {
             type="email"
             placeholder="eg. johnDoe@email.com"
             label="Email"
-            size="input-md md:input-lg"
+            customClasses="input-md md:input-lg"
             borderRadius="rounded-xl"
             required
           />

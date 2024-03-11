@@ -5,6 +5,7 @@ import { IUserData } from '../models/user.model';
 // import { FaCheck } from 'react-icons/fa';
 // import { IoMdDownload } from 'react-icons/io';
 import dayjs from 'dayjs';
+import MessageStatus from './MessageStatus';
 
 const ImageBubble: React.FC<
   FileUploaderChildrenArgs & {
@@ -56,33 +57,37 @@ const ImageBubble: React.FC<
           user?._id !== message.sender._id && 'flex-row-reverse'
         }`}
       >
-        {isLoading && (
-          <div
-            className={`radial-progress text-success text-base font-bold ${
-              isLoading || sentByYou ? '' : 'text-white cursor-pointer'
-            }`}
-            style={{
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
-              // TS Giving error on Dynamic Custom Properties
-              '--value': isLoading ? percentage : 100,
-              '--size': '3.5rem',
-              '--thickness': '2px',
-            }}
-            role="progressbar"
-          >
-            {isLoading && Math.floor(percentage) + '%'}
-          </div>
-        )}
+        {isLoading &&
+          !message.attachment?.url && (
+            <div
+              className={`radial-progress text-success text-base font-bold ${
+                isLoading || sentByYou ? '' : 'text-white cursor-pointer'
+              }`}
+              style={{
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                // TS Giving error on Dynamic Custom Properties
+                '--value': isLoading ? percentage : 100,
+                '--size': '3.5rem',
+                '--thickness': '2px',
+              }}
+              role="progressbar"
+            >
+              {isLoading && Math.floor(percentage) + '%'}
+            </div>
+          )}
 
-        {!isLoading && (
-          <img
-            src={message.attachment?.url}
-            alt="Some error sending image"
-            className="w-full h-full"
-          />
-        )}
+        {!isLoading && message.attachment?.url && (
+            <img
+              src={message.attachment?.url}
+              alt="Some error sending image"
+              className="w-full h-full"
+            />
+          )}
         {/* <p className="text-2xl">{message.content}</p> */}
+        {sentByYou && message.status && (
+          <MessageStatus status={message.status} />
+        )}
       </div>
       <div className="chat-footer">
         <time className="text-sm">{dayjs().format('hh:mm a')}</time>

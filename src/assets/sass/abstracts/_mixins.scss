@@ -43,7 +43,7 @@ ORDER: Base + typography > general layout + grid > page layout > components
 
     @media only screen and (min-width: 48em) {
       @content;
-    } //860px
+    } //768px
   }
 
   @if $breakpoint == tab-land {

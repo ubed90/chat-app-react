@@ -7,7 +7,7 @@ import { FaMicrophone } from 'react-icons/fa6';
 import { BsFillEmojiLaughingFill } from 'react-icons/bs';
 import { useSelector } from 'react-redux';
 import { Form } from 'react-router-dom';
-import { RootState } from '../../Store';
+import { RootState, useAppDispatch } from '../../Store';
 import { Themes } from '../../utils/localStorage';
 import { toast } from 'react-toastify';
 import { useSocket } from '../../Context/SocketContext';
@@ -15,9 +15,9 @@ import { STOP_TYPING_EVENT, TYPING_EVENT } from '../../utils/EventsMap';
 import { v4 as generateRandomUID } from 'uuid';
 import { IMessage, IMessageTypes } from '../../models/message.model';
 import { IUserData } from '../../models/user.model';
-import { useQueryClient } from '@tanstack/react-query';
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import SendAudio from '../SendAudio';
+import { addMessage } from '../../features/chat';
 
 const FILE_TYPES = {
   IMAGE: ['png', 'jpg', 'jpeg'],
@@ -103,7 +103,9 @@ const ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
   };
 
   // * QueryClient for adding placeholder message
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
+
+  const dispatch = useAppDispatch()
 
   const handleFileUpload = ({ event, file }: {
     event?: ChangeEvent<HTMLInputElement>;
@@ -161,16 +163,19 @@ const ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
         type: fileType as IMessageTypes,
         file: uploadedFile
       },
+      status: 'LOADING'
     };
 
-    // // * Pushing the Dummy Message to Query
-    queryClient.setQueryData(
-      ['chat', selectedChat?._id],
-      (oldMessages: IMessage[]) => {
-        const newMessages = [attachmentMessage, ...oldMessages];
-        return newMessages;
-      }
-    );
+    // * Pushing the Dummy Message to Query
+    // ! Not required in latest Redux implementation
+    // queryClient.setQueryData(
+    //   ['chat', selectedChat?._id],
+    //   (oldMessages: IMessage[]) => {
+    //     const newMessages = [attachmentMessage, ...oldMessages];
+    //     return newMessages;
+    //   }
+    // );
+    dispatch(addMessage({ message: attachmentMessage }))
   };
 
   return (

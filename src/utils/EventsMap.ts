@@ -4,6 +4,10 @@ export const DISCONNECT_EVENT = 'disconnected';
 
 export const JOIN_CHAT_EVENT = 'joinChat';
 
+export const LEAVE_CHAT_EVENT = 'leaveChat';
+
+export const EXISTING_USERS_EVENT = 'existingUsers';
+
 export const DELETE_CHAT_EVENT = 'deleteChat';
 // ? when admin updates a group name
 export const UPDATE_GROUP_NAME_EVENT = 'updateGroupName';

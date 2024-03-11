@@ -65,10 +65,7 @@ const Login = () => {
                 placeholder="Enter your email"
                 type="email"
                 label="Email"
-                //@ts-expect-error
-                // Custom Prop size is conflicting with Input Intrinsic Attr
-                // TODO: Need to change the name of the prop size
-                size="input-md md:input-lg"
+                customClasses="input-md md:input-lg"
                 borderRadius="rounded-full"
                 required
                 autoComplete="off"
@@ -78,9 +75,7 @@ const Login = () => {
                 placeholder="Enter password"
                 type="password"
                 label="Password"
-                //@ts-expect-error
-                // Custom Prop size is conflicting with Input Intrinsic Attr
-                size="input-md md:input-lg"
+                customClasses="input-md md:input-lg"
                 borderRadius="rounded-full"
                 required
                 autoComplete="off"

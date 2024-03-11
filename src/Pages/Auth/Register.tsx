@@ -123,10 +123,7 @@ const Register = () => {
                   placeholder="eg. John Doe"
                   type="text"
                   label="name"
-                  //@ts-expect-error
-                  // Custom Prop size is conflicting with Input Intrinsic Attr
-                  // TODO: Need to change the name of the prop size
-                  size="input-md md:input-lg"
+                  customClasses="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
                 />
@@ -135,10 +132,7 @@ const Register = () => {
                   placeholder="eg. johndoe@email.com"
                   type="email"
                   label="Email"
-                  //@ts-expect-error
-                  // Custom Prop size is conflicting with Input Intrinsic Attr
-                  // TODO: Need to change the name of the prop size
-                  size="input-md md:input-lg"
+                  customClasses="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
                 />
@@ -147,10 +141,7 @@ const Register = () => {
                   placeholder="eg. johnDoe123"
                   type="text"
                   label="Username"
-                  //@ts-expect-error
-                  // Custom Prop size is conflicting with Input Intrinsic Attr
-                  // TODO: Need to change the name of the prop size
-                  size="input-md md:input-lg"
+                  customClasses="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
                 />
@@ -159,10 +150,7 @@ const Register = () => {
                   placeholder="Enter password"
                   type="password"
                   label="Password"
-                  //@ts-expect-error
-                  // Custom Prop size is conflicting with Input Intrinsic Attr
-                  // TODO: Need to change the name of the prop size
-                  size="input-md md:input-lg"
+                  customClasses="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
                   errors={errors}
@@ -172,10 +160,7 @@ const Register = () => {
                   placeholder="Re-Enter your password"
                   type="password"
                   label="Confirm Password"
-                  //@ts-expect-error
-                  // Custom Prop size is conflicting with Input Intrinsic Attr
-                  // TODO: Need to change the name of the prop size
-                  size="input-md md:input-lg"
+                  customClasses="input-md md:input-lg"
                   borderRadius="rounded-full"
                   required
                   errors={errors}

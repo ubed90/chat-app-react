@@ -5,6 +5,7 @@ import { IChat } from '../models/chat.model';
 import { Store } from '@reduxjs/toolkit';
 import { RootState } from '../Store';
 import {
+  addMessage,
   deleteNotification,
   setNotification,
   setSelectedChat,
@@ -18,10 +19,14 @@ const onNewMessage =
     const id = store.getState().chat.selectedChat?._id;
 
     if (id && id === newMessage.chat) {
-      queryClient.setQueryData(['chat', id], (oldMessages: IMessage[]) => {
-        const newMessages = [newMessage, ...oldMessages];
-        return newMessages;
-      });
+      // ! Since we are moving from RTK Query to Redux this is not required.
+      // queryClient.setQueryData(['chat', id], (oldMessages: IMessage[]) => {
+      //   const newMessages = [newMessage, ...oldMessages];
+      //   return newMessages;
+      // });
+      store.dispatch(addMessage({ message: newMessage }))
+
+
       queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
         const newChats: IChat[] = structuredClone(chats);
 
@@ -71,16 +76,18 @@ const onNewMessage =
         ...(chat.isGroupChat ? { isGroupChat: true, chatName: chat.name } : {}),
       };
 
-      queryClient.setQueryData(
-        ['chat', newMessage.chat],
-        (oldMessages: IMessage[] | undefined) => {
-          let newMessages = [newMessage];
-          if (oldMessages) {
-            newMessages = [...newMessages, ...oldMessages];
-          }
-          return newMessages;
-        }
-      );
+      // ! I guess we dont require this coz we are anyhow Refetching the latest messages on CLick
+      // queryClient.setQueryData(
+      //   ['chat', newMessage.chat],
+      //   (oldMessages: IMessage[] | undefined) => {
+      //     let newMessages = [newMessage];
+      //     if (oldMessages) {
+      //       newMessages = [...newMessages, ...oldMessages];
+      //     }
+      //     return newMessages;
+      //   }
+      // );
+
       queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
         let newChats: IChat[] = structuredClone(chats);
 
@@ -96,8 +103,6 @@ const onNewMessage =
 
         return newChats;
       });
-
-      console.log(existingNotification);
 
       store.dispatch(
         setNotification({
