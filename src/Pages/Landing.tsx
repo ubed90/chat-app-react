@@ -133,5 +133,4 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
 
 export default Landing;
 
-// TODO: Read Unread Messages FUNC
 // TODO: Group Scribilio

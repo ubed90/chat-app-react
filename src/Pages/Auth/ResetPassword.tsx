@@ -92,7 +92,7 @@ const ResetPassword = () => {
             type="password"
             placeholder="eg. Password@1234"
             label="New Password"
-            size="input-md md:input-lg"
+            customClasses="input-md md:input-lg"
             borderRadius="rounded-xl"
             required
           />
