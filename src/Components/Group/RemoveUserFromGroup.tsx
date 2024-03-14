@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux"
 import { RootState, useAppDispatch } from "../../Store"
 import CustomSelect from "../CustomSelect";
-import { useState } from "react";
+import React, { useState } from "react";
 import { IUserData } from "../../models/user.model";
 import { CustomBtn } from "..";
 import { IoRemoveCircle } from 'react-icons/io5';
@@ -15,7 +15,7 @@ type RemoveUserFromGroupProps = {
     onSuccess?: () => void;
 }
 
-const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) => {
+let RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) => {
     const { selectedChat } = useSelector((state: RootState) => state.chat);
 
     const adminId = useSelector((state: RootState) => state.user.user?._id);
@@ -106,5 +106,7 @@ const RemoveUserFromGroup: React.FC<RemoveUserFromGroupProps> = ({ onSuccess }) 
     </section>
   )
 }
+
+RemoveUserFromGroup = React.memo(RemoveUserFromGroup);
 
 export default RemoveUserFromGroup

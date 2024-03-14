@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FormInput } from '..';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 
-const ViewParticipants = () => {
+let ViewParticipants: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { selectedChat } = useSelector((state: RootState) => state.chat);
@@ -45,5 +45,7 @@ const ViewParticipants = () => {
     </section>
   );
 };
+
+ViewParticipants = React.memo(ViewParticipants);
 
 export default ViewParticipants;

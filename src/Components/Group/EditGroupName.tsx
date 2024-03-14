@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { RootState, useAppDispatch } from '../../Store';
 import { CustomBtn, FormInput } from '..';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import { IChat, IChatCreation } from '../../models/chat.model';
@@ -13,7 +13,7 @@ type EditGroupNameProps = {
     onSuccess?: () => void;
 }
 
-const EditGroupName: React.FC<EditGroupNameProps> = ({ onSuccess }) => {
+let EditGroupName: React.FC<EditGroupNameProps> = ({ onSuccess }) => {
   const { selectedChat } = useSelector((state: RootState) => state.chat);
   const [groupName, setGroupName] = useState<string>(
     selectedChat?.name as string
@@ -93,5 +93,7 @@ const EditGroupName: React.FC<EditGroupNameProps> = ({ onSuccess }) => {
     </section>
   );
 };
+
+EditGroupName = React.memo(EditGroupName);
 
 export default EditGroupName;

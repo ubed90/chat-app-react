@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { IUserData, IUsersResponse } from '../../models/user.model';
 import customFetch from '../../utils/customFetch';
 import debounce from '../../utils/debounce';
@@ -38,7 +38,7 @@ type Props = {
     onSuccess?: () => void;
 }
 
-const AddUserToGroup: React.FC<Props> = ({ onSuccess }) => {
+let AddUserToGroup: React.FC<Props> = ({ onSuccess }) => {
   const { selectedChat } = useSelector((state: RootState) => state.chat);
   const [selectedUser, setselectedUser] = useState<IUserData | null>(null);
 
@@ -116,5 +116,7 @@ const AddUserToGroup: React.FC<Props> = ({ onSuccess }) => {
     </section>
   );
 };
+
+AddUserToGroup = React.memo(AddUserToGroup);
 
 export default AddUserToGroup;
