@@ -15,8 +15,6 @@ let ChatBubble: React.FC<ChatBubbleProps> = ({
 }) => {
 
   const message = useSelector((state: RootState) => state.chat.messages?.[messageId]);
-
-  console.log("RE RENDERED");
   
 
   if(message?.isNotification) {

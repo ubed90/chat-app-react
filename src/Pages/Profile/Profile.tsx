@@ -16,8 +16,6 @@ import { IUserData } from '../../models/user.model';
 import { updateUser } from '../../features/user';
 import { ImCross } from 'react-icons/im';
 
-// TODO: Need to Bifurcate Profile Data Updation and Profile Picture Updation
-
 const SUPPORTED_FILE_TYPES = ['jpg', 'jpeg', 'png'];
 
 type ProfileResponse = {

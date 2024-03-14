@@ -29,7 +29,7 @@ const ProfilePicture: React.FC<
             >
               <div className={`bg-neutral text-neutral-content ${width}`}>
                 {user?.profilePicture ? (
-                  <img src={user.profilePicture} alt={user.name} />
+                  <img src={user.profilePicture?.url || user.profilePicture} alt={user.name} />
                 ) : (
                   <span className="uppercase">{user.name.substring(0, 2)}</span>
                 )}

@@ -6,21 +6,12 @@ import { CiMenuKebab } from 'react-icons/ci';
 import './ChatHeader.scss';
 import { useNavigate } from 'react-router-dom';
 import { setSelectedChat } from '../../features/chat';
-import React, { useState } from 'react';
-import Modal from '../Modal/Modal';
+import React from 'react';
 import ProfilePicture from '../ProfilePicture';
-import { CgProfile } from 'react-icons/cg';
 import { BiExit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
 import { CustomBtn } from '..';
-import { IoAddCircle } from 'react-icons/io5';
-import { HiUserRemove } from 'react-icons/hi';
-import { FaPhone, FaRegEye, FaVideo } from 'react-icons/fa';
-import { CiText } from 'react-icons/ci';
-import EditGroupName from '../Group/EditGroupName';
-import ViewParticipants from '../Group/ViewParticipants';
-import RemoveUserFromGroup from '../Group/RemoveUserFromGroup';
-import AddUserToGroup from '../Group/AddUserToGroup';
+import { FaPhone, FaVideo } from 'react-icons/fa';
 import { useMutation } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import { toast } from 'react-toastify';
@@ -29,18 +20,12 @@ import { usePeer } from '../../Context/PeerContext';
 import { useSocket } from '../../Context/SocketContext';
 import { CALL_INITIATED } from '../../utils/EventsMap';
 import askRequiredPermission from '../../utils/askCameraPermission';
-
-type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
+import ChatDetails from '../ChatDetails';
 
 let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
   const otherUser = getOtherUserDetails(user!, selectedChat!.users);
-
-  // * Profile Modal
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleToggle = () => setIsOpen(!isOpen);
 
   const navigate = useNavigate();
 
@@ -59,27 +44,6 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     handleStream,
     handleIsGroupCall
   } = usePeer();
-
-  // * CTA State
-  const [ctaState, setCtaState] = useState<CTA_STATE>(null);
-
-  const handleCtaToggle = (state: CTA_STATE) => setCtaState(state);
-
-  // * On SuccessFull Name Change
-  const onSuccess = () => {
-    handleCtaToggle(null);
-    handleToggle();
-  };
-
-  // TODO: Remove the Redundant Code Available using HOC / RP / Custom Hooks
-  // TODO: Clean Up ChatHeader.tsx
-
-  const CTA = {
-    EDIT: <EditGroupName onSuccess={onSuccess} />,
-    ADD: <AddUserToGroup onSuccess={onSuccess} />,
-    REMOVE: <RemoveUserFromGroup onSuccess={onSuccess} />,
-    VIEW: <ViewParticipants />,
-  };
 
   const handleBack = () => {
     dispatch(setSelectedChat(undefined));
@@ -382,134 +346,7 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
           className="dropdown-content z-[1] menu p-2 shadow bg-neutral rounded-xl w-max mt-4 flex flex-col gap-2"
         >
           <li>
-            <>
-              <button
-                onClick={handleToggle}
-                className="btn btn-ghost content-center rounded-xl text-xl text-white gap-3"
-              >
-                <CgProfile className="text-3xl" />
-                {selectedChat?.isGroupChat
-                  ? 'View Group Details'
-                  : 'View Profile'}
-              </button>
-
-              <Modal id="profile-modal" isOpen={isOpen} onClose={handleToggle}>
-                <Modal.Header onClose={handleToggle}>
-                  {selectedChat?.isGroupChat
-                    ? selectedChat.name
-                    : otherUser.name}
-                </Modal.Header>
-                <Modal.Body className="pt-4 flex flex-col gap-6">
-                  <div
-                    className={`profile-modal-header flex justify-center items-center gap-4 ${
-                      !selectedChat?.isGroupChat && 'flex-col'
-                    }`}
-                  >
-                    <ProfilePicture
-                      className="-space-x-20 md:-space-x-28"
-                      width="w-28 md:w-36"
-                      placeholderSize="text-4xl md:text-6xl"
-                    />
-                    <div className="profile-modal-info flex flex-col">
-                      {selectedChat?.isGroupChat && (
-                        <p className="text-2xl md:text-3xl flex gap-2">
-                          Admin :
-                          <span className="text-accent underline underline-offset-2 cursor-pointer">
-                            {selectedChat?.isGroupChat
-                              ? '@' + selectedChat.admin.name
-                              : otherUser?.username}
-                          </span>
-                        </p>
-                      )}
-                      {!selectedChat?.isGroupChat && (
-                        <p className="text-2xl md:text-3xl flex gap-4 items-center">
-                          Username :
-                          <span className="text-accent underline underline-offset-2 cursor-pointer">
-                            @{otherUser.username}
-                          </span>
-                        </p>
-                      )}
-                      {selectedChat?.isGroupChat && (
-                        <p className="text-xl md:text-2xl mt-2">
-                          Participants -{' '}
-                          <span className="text-accent font-bold">
-                            {selectedChat.users.length}
-                          </span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {selectedChat?.isGroupChat && (
-                    <>
-                      <div className="profile-modal-cta">
-                        {selectedChat.admin._id === user?._id && (
-                          <>
-                            <CustomBtn
-                              type="button"
-                              text="Edit Group Name"
-                              clickHandler={() =>
-                                handleCtaToggle(
-                                  ctaState === 'EDIT' ? null : 'EDIT'
-                                )
-                              }
-                              icon={<CiText className="text-2xl" />}
-                              classes={`btn-info rounded-md text-xl flex-row-reverse ${
-                                ctaState === 'EDIT' ? '' : 'btn-outline'
-                              }`}
-                              isDisabled={selectedChat.admin._id !== user._id}
-                            />
-                            <CustomBtn
-                              type="button"
-                              clickHandler={() =>
-                                handleCtaToggle(
-                                  ctaState === 'ADD' ? null : 'ADD'
-                                )
-                              }
-                              text="Add User"
-                              classes={`btn-success rounded-md text-xl flex-row-reverse ${
-                                ctaState === 'ADD' ? '' : 'btn-outline'
-                              }`}
-                              isDisabled={selectedChat.admin._id !== user._id}
-                              icon={<IoAddCircle className="text-2xl" />}
-                            />
-                            <CustomBtn
-                              type="button"
-                              clickHandler={() =>
-                                handleCtaToggle(
-                                  ctaState === 'REMOVE' ? null : 'REMOVE'
-                                )
-                              }
-                              text="Remove User"
-                              classes={`btn-error rounded-md text-xl flex-row-reverse ${
-                                ctaState === 'REMOVE' ? '' : 'btn-outline'
-                              }`}
-                              isDisabled={selectedChat.admin._id !== user._id}
-                              icon={<HiUserRemove className="text-2xl" />}
-                            />
-                          </>
-                        )}
-                        <CustomBtn
-                          type="button"
-                          text="View Participants"
-                          clickHandler={() =>
-                            handleCtaToggle(ctaState === 'VIEW' ? null : 'VIEW')
-                          }
-                          classes={`btn-accent rounded-md text-xl flex-row-reverse ${
-                            ctaState === 'VIEW' ? '' : 'btn-outline'
-                          }`}
-                          icon={<FaRegEye className="text-2xl" />}
-                        />
-                      </div>
-                      {ctaState && (
-                        <div className="profile-modal-action">
-                          {CTA[ctaState]}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </Modal.Body>
-              </Modal>
-            </>
+            <ChatDetails />
           </li>
           {selectedChat?.isGroupChat && (
             <>
