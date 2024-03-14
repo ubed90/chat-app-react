@@ -6,7 +6,7 @@ import { Form } from 'react-router-dom';
 import { CustomBtn, FormInput } from '../../Components';
 import { RxReset } from 'react-icons/rx';
 import { RxUpdate } from 'react-icons/rx';
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaRegSave, FaTrashAlt } from 'react-icons/fa';
 import { useMutation } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import { useState } from 'react';
@@ -14,6 +14,7 @@ import Modal from '../../Components/Modal/Modal';
 import { toast } from 'react-toastify';
 import { IUserData } from '../../models/user.model';
 import { updateUser } from '../../features/user';
+import { ImCross } from 'react-icons/im';
 
 // TODO: Need to Bifurcate Profile Data Updation and Profile Picture Updation
 
@@ -40,8 +41,17 @@ const Profile = () => {
   // * Profile Update Mutation
   const { mutate: updateProfile, isPending } = useMutation({
     mutationKey: ['update-profile', user?._id],
-    mutationFn: (data: any) => customFetch.patch<ProfileResponse>(`/auth/update-profile/${user?._id}`, data)
-  })
+    mutationFn: (data: {
+      name: string;
+      enail: string;
+      username: string;
+      phoneNumber: string
+    }) =>
+      customFetch.patch<ProfileResponse>(
+        `/auth/update-profile/${user?._id}`,
+        data
+      ),
+  });
 
   // * Picture Delete Mutation
   const { mutate: deleteProfilePicture, isPending: isProfileDeleting } = useMutation({
@@ -56,7 +66,7 @@ const Profile = () => {
     deleteProfilePicture(user?._id as string, {
       onSuccess({ data }) {
         dispatch(updateUser({ user: data.user }));
-        toast.success('Profile Picture deleted successfully 🚀')
+        toast.success(data.message + ' 🚀')
       },
       onError(error) {
         toast.error(error.message);
@@ -64,18 +74,40 @@ const Profile = () => {
     })
   }
 
+  // * Update Profile Picture
+  const { mutate: updateProfilePicture, isPending: isProfileUpdating } =
+    useMutation({
+      mutationKey: ['update-profile-picture'],
+      mutationFn: (data: FormData) =>
+        customFetch.post<ProfileResponse>(`/auth/update-profile/${user?._id}`, data),
+    });
+
+  const handleUpdateProfilePicture = () => {
+    if(!file) return toast.error('Please upload a file');
+
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+
+    updateProfilePicture(formData, {
+      onSuccess({ data }) {
+        dispatch(updateUser({ user: data.user }));
+        toast.success(data.message + ' 🚀');
+        setFile(null);
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+    });
+  }
+
+  const handleUpdateCancel = () => {
+    if(file) setFile(null);
+
+    handleToggle();
+  }
+
   // * Dispatch For Updating User state in Redux
   const dispatch = useAppDispatch();
-
-  // const handleChange = ({
-  //   key,
-  //   value,
-  // }: {
-  //   key: keyof IUserData;
-  //   value: string;
-  // }) => {
-  //   setProfileState({ ...profileState, [key]: value });
-  // };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -83,14 +115,7 @@ const Profile = () => {
     const data = new FormData(event.target as HTMLFormElement);
     const processedData = Object.fromEntries(data.entries())
 
-    const formData = new FormData();
-    if(file) formData.append('profilePicture', file);
-    formData.append('name', processedData.name);
-    formData.append('email', processedData.email);
-    formData.append('username', processedData.username);
-    formData.append('phoneNumber', processedData.phoneNumber);
-
-    updateProfile(formData, {
+    updateProfile(processedData as any, {
       onSuccess({ data }) {
         dispatch(updateUser({ user: data.user }))
         toast.success('Profile Update Successfully 🚀')
@@ -186,7 +211,7 @@ const Profile = () => {
                     classes="btn-outline btn-error rounded-lg text-xl"
                     isDisabled={!user?.profilePicture || isProfileDeleting}
                     isLoading={isProfileDeleting}
-                    loadingText='Deleting...'
+                    loadingText="Deleting..."
                   />
                   <input
                     id="profile-picture-upload"
@@ -198,6 +223,28 @@ const Profile = () => {
                   />
                 </div>
               </Modal.Body>
+              <Modal.Footer>
+                <div className="flex mt-4 justify-end gap-4">
+                  <CustomBtn
+                    type="reset"
+                    clickHandler={handleUpdateCancel}
+                    classes="btn btn-outline btn-white rounded-md text-xl"
+                    text="Cancel"
+                    icon={<ImCross />}
+                    isDisabled={isProfileUpdating}
+                  />
+                  <CustomBtn
+                    type="button"
+                    classes="btn btn-accent rounded-md text-xl"
+                    clickHandler={handleUpdateProfilePicture}
+                    text="Update"
+                    icon={<FaRegSave className="text-4xl" />}
+                    loadingText="Updating..."
+                    isLoading={isProfileUpdating}
+                    isDisabled={!file}
+                  />
+                </div>
+              </Modal.Footer>
             </Modal>
           </div>
         </header>
