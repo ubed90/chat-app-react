@@ -1,7 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState, useAppDispatch } from '../../Store';
-import avatar from '../../assets/avatar.jpg';
 import Logo from '../Logo';
 import { Themes } from '../../utils/localStorage';
 import { logoutUser, toggleTheme } from '../../features/user';
@@ -44,9 +43,10 @@ const Header = () => {
           return newChats;
         });
         dispatch(deleteNotification({ key }));
-        if(notification.isGroupChat) {
-          await queryClient.refetchQueries({ queryKey: ['chat', key] })
-        }
+        queryClient.invalidateQueries({ queryKey: ['chat', key] });
+        // if(notification.isGroupChat) {
+        //   await queryClient.refetchQueries({ queryKey: ['chat', key] })
+        // }
         return navigate(`/chats/${key}`);
       }
     }
@@ -70,40 +70,6 @@ const Header = () => {
         <section className="navbar-start">
           <Logo />
         </section>
-        {/* <section className="navbar-center">
-          <NavLink
-            to="/chats"
-            className={({ isActive }) =>
-              isActive
-                ? `btn ${
-                    theme === Themes.LIGHT
-                      ? 'btn-primary bg-slate-50 bg-opacity-30'
-                      : 'btn-ghost'
-                  } rounded-md btn-md sm:btn-lg !text-2xl ml-2 btn-active`
-                : `btn ${
-                    theme === Themes.LIGHT ? 'btn-primary' : 'btn-ghost'
-                  } rounded-md btn-md sm:btn-lg !text-2xl ml-2`
-            }
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/search"
-            className={({ isActive }) =>
-              isActive
-                ? `btn ${
-                    theme === Themes.LIGHT
-                      ? 'btn-primary bg-slate-50 bg-opacity-30'
-                      : 'btn-ghost'
-                  } rounded-md btn-md sm:btn-lg !text-2xl ml-2 btn-active`
-                : `btn ${
-                    theme === Themes.LIGHT ? 'btn-primary' : 'btn-ghost'
-                  } rounded-md btn-md sm:btn-lg !text-2xl ml-2`
-            }
-          >
-            Search
-          </NavLink>
-        </section> */}
         <section className="navbar-end flex items-center justify-end gap-4">
           <div className="dropdown dropdown-end">
             <button
@@ -181,15 +147,24 @@ const Header = () => {
             <summary
               tabIndex={0}
               role="button"
-              className="btn btn-ghost btn-circle avatar"
+              className="btn btn-ghost btn-circle"
             >
-              <div className="w-10 sm:w-20 rounded-full ring-1 ring-accent ring-offset-base-100 ring-offset-2">
-                <img
-                  alt="profile-image"
-                  className="!object-contain"
-                  src={user?.profilePicture || avatar}
-                />
-              </div>
+              {user?.profilePicture ? (
+                <div className="avatar w-12c aspect-square rounded-full overflow-hidden ring-primary ring-1">
+                  <img
+                    src={user.profilePicture || user.profilePicture?.url}
+                    className="!object-contain w-full h-full"
+                  />
+                </div>
+              ) : (
+                <div className="avatar placeholder">
+                  <div className="bg-accent text-neutral-content rounded-full w-12">
+                    <span className="text-xl uppercase">
+                      {user?.name.substring(0, 2)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </summary>
             <ul
               tabIndex={0}
@@ -251,7 +226,7 @@ const Header = () => {
               <li>
                 <button
                   onClick={handleLogout}
-                  className="!text-xl sm:!text-2xl bg-red-400 text-white font-bold sm:bg-transparent sm:text-current hover:bg-red-400 hover:text-black rounded-xl p-3"
+                  className="!text-xl sm:!text-2xl bg-red-400 text-white font-bold sm:hover:bg-red-400/80 sm:text-current rounded-xl p-3"
                 >
                   Logout
                 </button>
