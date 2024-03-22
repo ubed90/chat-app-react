@@ -39,7 +39,7 @@ import { loginAction } from './Pages/Auth/Login';
 import { registerAction } from './Pages/Auth/Register';
 
 // * Loader
-// import { chatsLoader } from "./Pages/ChatsContainer/ChatsContainer";
+import { ChatLoader } from "./Pages/Chat/Chat";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +70,7 @@ const router = createBrowserRouter([
             path: ':id',
             element: <Chat />,
             errorElement: <ErrorElement />,
+            loader: ChatLoader(queryClient, store),
           },
         ],
       },
@@ -85,7 +86,9 @@ const router = createBrowserRouter([
       {
         path: 'change-password',
         lazy: async () => {
-          const changePasswordComponent = await import('./Pages/Profile/ChangePassword');
+          const changePasswordComponent = await import(
+            './Pages/Profile/ChangePassword'
+          );
 
           return { Component: changePasswordComponent.default };
         },
