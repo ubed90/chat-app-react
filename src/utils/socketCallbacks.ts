@@ -12,10 +12,17 @@ import {
 } from '../features/chat';
 import { NavigateFunction } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { MutableRefObject } from 'react';
+
+type CallbackProps = {
+  queryClient: QueryClient;
+  store: Store<RootState, any>;
+  notificationRef?: MutableRefObject<HTMLAudioElement | null>;
+};
 
 const onNewMessage =
-  (queryClient: QueryClient, store: Store<RootState, any>) =>
-  ({ newMessage, chat }: { newMessage: IMessage, chat: IChat }) => {
+  ({ store, notificationRef, queryClient }: CallbackProps) =>
+  ({ newMessage, chat }: { newMessage: IMessage; chat: IChat }) => {
     const id = store.getState().chat.selectedChat?._id;
 
     if (id && id === newMessage.chat) {
@@ -24,8 +31,7 @@ const onNewMessage =
       //   const newMessages = [newMessage, ...oldMessages];
       //   return newMessages;
       // });
-      store.dispatch(addMessage({ message: newMessage }))
-
+      store.dispatch(addMessage({ message: newMessage }));
 
       queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
         const newChats: IChat[] = structuredClone(chats);
@@ -111,10 +117,12 @@ const onNewMessage =
         })
       );
     }
+
+    notificationRef?.current?.play();
   };
 
 const onNewChat =
-  (queryClient: QueryClient, store: Store<RootState, any>) => (chat: IChat) => {
+  ({ queryClient, store, notificationRef }: CallbackProps) => (chat: IChat) => {
     queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
       let newChats: IChat[] = structuredClone(chats);
 
@@ -141,6 +149,8 @@ const onNewChat =
         value: notification as any,
       })
     );
+
+    notificationRef?.current?.play();
   };
 
 const onDeleteChat =

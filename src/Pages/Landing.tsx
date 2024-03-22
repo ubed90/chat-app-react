@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect, useRef } from 'react';
 import { useSocket } from '../Context/SocketContext';
 import { useSelector } from 'react-redux';
 import { RootState, store } from '../Store';
@@ -24,13 +24,14 @@ import { useNavigate } from 'react-router-dom';
 import { usePeer } from '../Context/PeerContext';
 import { AudioCall, VideoCall, CallNotifier } from '../Components';
 import { IUserData } from '../models/user.model';
-// import { IUserData } from "../models/user.model";
-// import { usePeer } from "../Context/PeerContext";
+import notificationSound from "../assets/sounds/notification.mp3";
 
 const Landing: React.FC<PropsWithChildren> = ({ children }) => {
   const { socket, disconnect } = useSocket();
   const { user } = useSelector((state: RootState) => state.user);
   const queryClient = useQueryClient();
+
+  const notificationRef = useRef<HTMLAudioElement | null>(null);
 
   // * For Video / Audio Call
   const {
@@ -58,10 +59,16 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
     socket.on(DISCONNECT_EVENT, disconnect);
 
     // ? Listener for New Messages
-    socket.on(MESSAGE_RECEIVED_EVENT, onNewMessage(queryClient, store));
+    socket.on(
+      MESSAGE_RECEIVED_EVENT,
+      onNewMessage({ queryClient, store, notificationRef })
+    );
 
     // ? Listener for New Chat Event
-    socket.on(NEW_CHAT_EVENT, onNewChat(queryClient, store));
+    socket.on(
+      NEW_CHAT_EVENT,
+      onNewChat({ queryClient, store, notificationRef })
+    );
 
     // ? Listener for Delete Chat Event
     socket.on(DELETE_CHAT_EVENT, onDeleteChat(queryClient, store, navigate));
@@ -87,9 +94,15 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
 
       socket.off(DELETE_CHAT_EVENT, onDeleteChat(queryClient, store, navigate));
 
-      socket.off(MESSAGE_RECEIVED_EVENT, onNewMessage(queryClient, store));
+      socket.off(
+        MESSAGE_RECEIVED_EVENT,
+        onNewMessage({ queryClient, store, notificationRef })
+      );
 
-      socket.off(NEW_CHAT_EVENT, onNewChat(queryClient, store));
+      socket.off(
+        NEW_CHAT_EVENT,
+        onNewChat({ queryClient, store, notificationRef })
+      );
 
       socket.off(CONNECTED_EVENT, () =>
         console.log('USER DISCONNECTED ⚠️', user?._id)
@@ -127,6 +140,7 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
       {isAudioCall && <AudioCall />}
       {isVideoCall && <VideoCall />}
       {incomingCall && caller && <CallNotifier />}
+      <audio ref={notificationRef} src={notificationSound} hidden></audio>
     </main>
   );
 };

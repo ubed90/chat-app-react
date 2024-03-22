@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RootState, useAppDispatch } from '../../Store';
 import { addMessage, clearMessages, clearUnreadMessages, setMessages, setSelectedChat } from '../../features/chat';
-import { Navigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { LoaderFunction, useParams } from 'react-router-dom';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import {
   IMessageResponse,
@@ -11,7 +11,7 @@ import {
 import { ChatBubble, ChatFooter, ChatHeader } from '../../Components';
 import { useSelector } from 'react-redux';
 import './Chat.scss';
-import { IChat } from '../../models/chat.model';
+import { IChat, IChatCreation } from '../../models/chat.model';
 import { toast } from 'react-toastify';
 import { MdOutlineError } from 'react-icons/md';
 import { FaArrowsRotate } from 'react-icons/fa6';
@@ -30,6 +30,24 @@ import UploadBubble from '../../Components/UploadBubble';
 import { getOtherUserDetails } from '../../utils/getOtherUser';
 import throttle from '../../utils/throttle';
 import { FaArrowDown } from 'react-icons/fa';
+import { Store } from '@reduxjs/toolkit';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const ChatLoader = (queryClient: QueryClient, store: Store<RootState, any>): LoaderFunction => async ({ params }) => {
+  const { id } = params;
+  const selectedChat = store.getState().chat.selectedChat;
+
+  if(!selectedChat) {
+    const { data } = await queryClient.ensureQueryData({
+      queryKey: ['current-chat', id],
+      queryFn: () => customFetch.get<IChatCreation>(`/chats/${id}`)
+    })
+    
+    store.dispatch(setSelectedChat(data.chat));
+  }
+
+  return null;
+}
 
 export type CallProps = {
   isUserOnline: boolean;
@@ -308,27 +326,27 @@ const Chat = () => {
   }, [dispatch, selectedChat?._id, selectedChat?.isGroupChat, socket, user?._id]);
 
   // * We are using this hack to set the selected chat dynamically when the user does a refresh on single chat page
-  if (id && !selectedChat) {
-    // * Reading chats from cache
-    const data = queryClient.getQueryData(['all-chats']) as IChat[];
-    if (data) {
-      const chats = data;
+  // if (id && !selectedChat) {
+  //   // * Reading chats from cache
+  //   const data = queryClient.getQueryData(['all-chats']) as IChat[];
+  //   if (data) {
+  //     const chats = data;
 
-      if (!chats || chats.length === 0) {
-        return <Navigate to="/chats" />;
-      }
+  //     if (!chats || chats.length === 0) {
+  //       return <Navigate to="/chats" />;
+  //     }
 
-      const openedChat = chats.find((chat) => chat._id === id);
+  //     const openedChat = chats.find((chat) => chat._id === id);
 
-      if (!openedChat) {
-        toast.error(`No chat found with id: ${id}`);
-        return <Navigate to="/chats" />;
-      }
+  //     if (!openedChat) {
+  //       toast.error(`No chat found with id: ${id}`);
+  //       return <Navigate to="/chats" />;
+  //     }
 
-      // ! Set the currently opened chat page as selected chat
-      dispatch(setSelectedChat(openedChat));
-    }
-  }
+  //     // ! Set the currently opened chat page as selected chat
+  //     dispatch(setSelectedChat(openedChat));
+  //   }
+  // }
 
   if (isLoading)
     return (

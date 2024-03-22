@@ -4,7 +4,7 @@ import ReactPlayer from 'react-player';
 import { IoMdMic } from 'react-icons/io';
 import { IoMdMicOff } from 'react-icons/io';
 
-const Player: React.FC<PlayerProps> = (props) => {
+let Player: React.FC<PlayerProps> = (props) => {
   return (
     <article
       className={`player w-full h-full relative ${
@@ -34,9 +34,11 @@ const Player: React.FC<PlayerProps> = (props) => {
   );
 };
 
+Player = React.memo(Player);
+
 export default Player;
 
-const Fallback = ({
+const Fallback = React.memo(({
   currentUser,
   name,
 }: {
@@ -49,13 +51,13 @@ const Fallback = ({
     } grid place-items-center absolute top-0 left-0`}
   >
     {name ? (
-      <div className="avatar placeholder w-[50%]">
+      <div
+        className={`avatar placeholder ${currentUser ? 'w-[50%]' : 'w-[30%]'}`}
+      >
         <div
           className={`bg-neutral text-neutral-content rounded-full w-full h-full`}
         >
-          <span className='text-6xl'>
-            {name.substring(0, 2).toUpperCase()}
-          </span>
+          <span className="text-6xl">{name.substring(0, 2).toUpperCase()}</span>
         </div>
       </div>
     ) : (
@@ -110,4 +112,4 @@ const Fallback = ({
       </svg>
     )}
   </div>
-);
+))

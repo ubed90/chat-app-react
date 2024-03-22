@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSocket } from '../../Context/SocketContext';
 import { CALL_REJECTED, JOIN_CALL_ROOM } from '../../utils/EventsMap';
 import { IUserData } from '../../models/user.model';
@@ -6,8 +6,9 @@ import { usePeer } from '../../Context/PeerContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 import { toast } from 'react-toastify'
-import "./CallNotifier.scss";
 import askRequiredPermission from '../../utils/askCameraPermission';
+import ringtone from "../../assets/sounds/ringtone.mp3";
+import "./CallNotifier.scss";
 
 const CallNotifier = () => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -94,6 +95,14 @@ export default CallNotifier;
 
 
 const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () => void, handleAccepted: () => void, handleNotAnswered: () => void, isGroupCall: boolean, groupName?: string }> = ({ user, callType, handleDecline, handleAccepted, handleNotAnswered, isGroupCall, groupName }) => {
+
+  // * Local Ref for Ringtone
+  const ringtoneRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    ringtoneRef.current?.play();
+  }, [])
+
   return (
     <div className="call-notifier">
       <div
@@ -116,10 +125,11 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
         </div>
       </div>
       <div className="call-notifier-info flex flex-col justify-between">
-        <h4 className="text-2xl text-accent">
-          {isGroupCall ? groupName?.toUpperCase() : user.name.toUpperCase()} &#183;{' '}
-          <span className="text-lg text-slate-600">ChatsUP</span> &#183;{' '}
-          <span className="text-lg text-slate-600">now</span>
+        <h4 className="text-2xl text-accent truncate">
+          {isGroupCall ? groupName?.toUpperCase() : user.name.toUpperCase()}
+          {/* {' '}
+          &#183; <span className="text-lg text-slate-600">ChatsUP</span> &#183;{' '}
+          <span className="text-lg text-slate-600">now</span> */}
         </h4>
         <h5 className="text-lg flex items-center gap-2">
           <svg
@@ -143,7 +153,7 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
               <path d="M29.6,24H45c1,0,1.3-1.1,0.5-1.9l-4.9-5l9-9.1c0.5-0.5,0.5-1.4,0-1.9l-3.7-3.7c-0.5-0.5-1.3-0.5-1.9,0 l-9.1,9.1l-5.1-4.9C29.1,5.7,28,6,28,7v15.3C28,23,28.9,24,29.6,24z"></path>{' '}
             </g>
           </svg>
-          Incoming {isGroupCall ? ('Group ' + callType) : callType} {callType} Call
+          Incoming {isGroupCall ? 'Group ' + callType : callType} Call
         </h5>
       </div>
       <div className="call-notifier-cta flex gap-2">
@@ -245,6 +255,7 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
         </button>
       </div>
       <div onAnimationEnd={handleNotAnswered} className="progress-bar"></div>
+      <audio ref={ringtoneRef} src={ringtone} loop hidden></audio>
     </div>
   );
 }
