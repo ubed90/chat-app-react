@@ -49,7 +49,7 @@ const onNewMessage =
       // * Notification Logic
       const notification = store.getState().chat?.notification;
 
-      let existingNotification;
+      let existingNotification: any;
 
       console.log(notification, existingNotification);
 
