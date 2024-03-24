@@ -45,13 +45,10 @@ const onNewMessage =
         return newChats;
       });
     } else {
-      console.log('Notify 📢');
       // * Notification Logic
       const notification = store.getState().chat?.notification;
 
       let existingNotification: any;
-
-      console.log(notification, existingNotification);
 
       if (notification && notification[newMessage.chat]) {
         existingNotification = structuredClone(notification[newMessage.chat]);
@@ -230,9 +227,7 @@ const onRemove =
 
 const onGroupRename =
   (queryClient: QueryClient, store: Store<RootState, any>) =>
-  ({ chatId, name }: { chatId: string; name: string }) => {
-    console.log("ON GROUP RENAME", chatId, name);
-    
+  ({ chatId, name }: { chatId: string; name: string }) => {    
     const id = store.getState().chat.selectedChat?._id;
 
     queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {

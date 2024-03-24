@@ -86,7 +86,6 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
   // * Enable Drawer to get closed with Escape
   useEffect(() => {
     const onKeyPress = (event: globalThis.KeyboardEvent) => {
-      // console.log(event);
       if (event.key === 'Escape') {
         onClose();
       }

@@ -20,7 +20,6 @@ const loginUserThunk = async (
 
         return data;
     } catch (error: any) {
-        console.log(error);
         return thunkAPI.rejectWithValue(error.response.data.message)
     }
 };

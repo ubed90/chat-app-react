@@ -70,8 +70,6 @@ let AddUserToGroup: React.FC<Props> = ({ onSuccess }) => {
         if (data.status !== 'success') return;
 
         queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
-          console.log(chats);
-
           const newChats: IChat[] = structuredClone(chats);
 
           const chat = newChats.find((chat) => chat._id === data.chat._id);

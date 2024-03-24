@@ -130,10 +130,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
 
   // * TO invoke Upload Dynamically whenever File Changes and Type is Upload
   useEffect(() => {
-    if (!file || !(file instanceof File) || isLoading || isUploaded) return;
-
-    console.log("UPLOAD STARTED :: ", isLoading, isUploaded);
-    
+    if (!file || !(file instanceof File) || isLoading || isUploaded) return;    
 
     const formData = new FormData();
     formData.append('attachments', file);
@@ -144,9 +141,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
 
     // Send The Request to Server
     uploadAttachment(formData, {
-      onSuccess({ data }) {
-        console.log(data.newMessage);
-        
+      onSuccess({ data }) {        
         dispatch(
           editMessage({
             id: messageId,

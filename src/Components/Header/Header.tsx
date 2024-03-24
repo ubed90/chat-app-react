@@ -59,7 +59,6 @@ const Header = () => {
       return navigate('/login');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.log(error);
       toast.error(error.response.data.message);
     }
   };
@@ -110,8 +109,6 @@ const Header = () => {
                   const isMessageNotification =
                     notify.action === 'NEW_MESSAGE' &&
                     Array.isArray(notify.value);
-
-                  console.log(notify);
 
                   return isMessageNotification ? (
                     <li

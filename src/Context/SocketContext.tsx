@@ -6,8 +6,10 @@ import { store } from "../Store";
 const getSocket = () => {
     const user = getUserFromLocalStorage() || store.getState()?.user?.user;
     
-    return socketio(import.meta.env.VITE_WS_URI, {
-      withCredentials: true,
+    return socketio(import.meta.env.VITE_WS_URI || process.env.VITE_WS_URI, {
+      ...(import.meta?.env?.PROD || process.env.NODE_ENV === 'production'
+        ? {}
+        : { withCredentials: true }),
       auth: { token: user?.token },
     });
 }

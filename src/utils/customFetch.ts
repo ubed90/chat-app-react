@@ -8,7 +8,9 @@ const customFetch = axios.create({
 
 customFetch.interceptors.request.use(
   (config) => {
-    config.withCredentials = true;
+    if(import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
+      config.withCredentials = true;
+    }
     return config;
   },
   (error) => {
