@@ -85,7 +85,7 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
       debug: 2,
       host: '/',
       path: '/peerjs/video-call',
-      port: 3000,
+      port: import.meta?.env?.PORT || process.env.PORT,
     });
 
     console.log('PEER CREATED :: ', myPeer.id);
