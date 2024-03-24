@@ -131,13 +131,6 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
     const isLimitExcedded =
       MAX_SIZES[fileType as keyof typeof FILE_TYPES] < uploadedFile.size;
 
-      console.log(
-        fileType,
-        isLimitExcedded,
-        MAX_SIZES[fileType as keyof typeof FILE_TYPES],
-        uploadedFile.size
-      );
-
     if (isLimitExcedded)
       return toast.error(
         'Max file size for ' +

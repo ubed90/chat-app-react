@@ -15,8 +15,6 @@ const usePlayers = () => {
   const [players, setPlayers] = useState<{ [key: string]: PlayerProps }>({});
 
   const addPlayer = ({ stream, muted, playing, isCurrentUser, playerId, name, call }: PlayerProps & { playerId: string }) => {
-    console.log(name)
-
     setPlayers((prevPlayers) => ({
       ...prevPlayers,
       [playerId]: { stream, muted, playing, isCurrentUser, name, call },
@@ -25,19 +23,6 @@ const usePlayers = () => {
   };
 
   const removePlayer = (playerId: string) => {
-    // const copyPlayers = deepClone(players);
-    // console.log("PLAYERS :: ", copyPlayers);
-    // console.log("DELETEING PLAYER WITH ID :: ", playerId);
-    
-    // if (copyPlayers[playerId]?.stream) {
-    //   copyPlayers[playerId]?.stream.getTracks().forEach((track) => track.stop());
-    // }
-    // // if(copyPlayers[playerId]?.call) {
-    // //   copyPlayers[playerId]?.call?.close();
-    // // }
-    // delete copyPlayers[playerId];
-    // setPlayers(copyPlayers);
-
     setPlayers((prevPlayers) => {
       const copyPlayers = deepClone(prevPlayers);
 

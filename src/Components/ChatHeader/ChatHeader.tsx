@@ -164,7 +164,6 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       // * Min required Entities for Caller to start the stream
       handleVideoCall(true);
     } catch (error) {
-      console.log(error);
       return toast.error('Please allow audio and video permission.');
     }
 

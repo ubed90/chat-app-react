@@ -49,7 +49,6 @@ const CustomForm: React.FC<ICustomFormProps> = ({
         clickHandler={() => {
           if(!validate) return;
           const errors = validate({ formValues: getFormValues() })
-          console.log(errors);
           setErrors(errors);
         }}
       />

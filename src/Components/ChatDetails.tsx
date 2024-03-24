@@ -17,9 +17,7 @@ import { FaRegEye } from 'react-icons/fa';
 
 type CTA_STATE = 'EDIT' | 'ADD' | 'REMOVE' | 'VIEW' | null;
 
-let ChatDetails: React.FC = () => {
-  console.log("RE RENDERED");
-  
+let ChatDetails: React.FC = () => {  
     const user = useSelector((state: RootState) => state.user.user);
     const { selectedChat } = useSelector((state: RootState) => state.chat);
     const otherUser = getOtherUserDetails(user!, selectedChat!.users);

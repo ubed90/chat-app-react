@@ -73,6 +73,7 @@ const SendAudio: React.FC<SendAudioProps> = ({ cancelRecording, handleFileUpload
 
       audioRef.current.srcObject = mediaStream;
 
+      // * Previous Implementation which was redundant
       // let audioChunks: BlobPart[] = [];
 
       // mediaRecorder.ondataavailable = (event) => {

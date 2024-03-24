@@ -49,8 +49,6 @@ const VideoCall = () => {
 
   const { players, addPlayer, toggleAudio, removePlayer } = usePlayers();
 
-  console.log(players);
-
   const {
     peer,
     stream,
