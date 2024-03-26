@@ -1,7 +1,6 @@
 import Peer from 'peerjs';
 import { PropsWithChildren, createContext, useContext, useState } from 'react';
 import { IUserData } from '../models/user.model';
-import { v4 as randomIdGenerator } from "uuid";
 
 type Caller = {
   caller: IUserData,
@@ -12,7 +11,7 @@ type Caller = {
 
 type PeerContext = {
   peer: Peer | null;
-  handlePeer: () => string;
+  handlePeer: () => Promise<string>;
   destroyPeer: () => void;
   incomingCall: boolean;
   handleIncomingCall: (value: boolean) => void;
@@ -34,7 +33,7 @@ type PeerContext = {
 
 const peerContext = createContext<PeerContext>({
   peer: null,
-  handlePeer: () => '',
+  handlePeer: () => Promise.resolve(''),
   destroyPeer: () => {},
   incomingCall: false,
   handleIncomingCall: () => {},
@@ -79,25 +78,44 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const handleReceiver = (receiver: IUserData | null) => setReceiver(receiver);
 
   const handlePeer = () => {
-    if(peer) return peer.id
+    return new Promise<string>((resolve, reject) => {
+      if (peer) {
+        if(peer.disconnected) {
+          peer.reconnect();
+        }
 
-    const myPeer = new Peer(randomIdGenerator(), {
-      debug: 2,
-      host: '/',
-      path: '/peerjs/video-call',
-      port: import.meta?.env?.PORT || process.env.PORT,
-    });
+        return resolve(peer.id)
+      }
 
-    console.log('PEER CREATED :: ', myPeer.id);
+      const myPeer = new Peer({
+        debug: 2,
+        host: '/',
+        path: '/call',
+        ...(import.meta.env.PROD
+          ? {}
+          : { port: Number(import.meta.env.VITE_PEER_PORT) }),
+        ...(import.meta.env.PROD ? { secure: true } : {}),
+      });
 
-    setPeer(myPeer);
+      
+      myPeer.on('open', (id) => {
+        console.log('PEER CREATED / RECONNECTED :: ', id);
+        setPeer(myPeer);
+        return resolve(id);
+      })
 
-    return myPeer.id;
+      myPeer.on('error', (error) => {
+        console.log('Error Creating Peer :: ', error);
+        return reject(error)
+      })
+    })
   };
 
   const destroyPeer = () => {
     console.log("PEER SET TO NULL ::");
-    setPeer(null);
+    if(peer) {
+      peer.disconnect();
+    }
   };
 
   const handleIncomingCall = (value: boolean) => setIncomingCall(value);

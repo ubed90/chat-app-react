@@ -30,8 +30,8 @@ const CreateGroupChat: React.FC<CreateChatProps<IUserData[]>> = ({
     <>
       <li onClick={handleToggle} className="chat-menu-item cursor-pointer">
         <p className="text-xl md:text-2xl">Create Group</p>
-        <button className="btn btn-circle btn-outline btn-accent btn-lg">
-          <HiUserGroup className="text-4xl" />
+        <button className="btn btn-circle border-2 btn-accent btn-lg">
+          <HiUserGroup className="text-white text-4xl" />
         </button>
       </li>
 

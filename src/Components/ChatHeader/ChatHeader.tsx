@@ -42,7 +42,7 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     handlePeer,
     handleCaller,
     handleStream,
-    handleIsGroupCall
+    handleIsGroupCall,
   } = usePeer();
 
   const handleBack = () => {
@@ -156,6 +156,14 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
     }
 
+    // * Create Peer
+    try {
+      await handlePeer();
+    } catch (error) {
+      console.log(error);
+      return toast.error('Error creating peer');
+    }
+
     // * Get Media Permissions
     let mediaStream: MediaStream;
     try {
@@ -174,11 +182,13 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       let isReceiverOnline = await socket?.emitWithAck(CALL_INITIATED, {
         caller: user,
         receiver: selectedChat?.isGroupChat
-          ? selectedChat.users.filter(otherUser => otherUser._id !== user?._id).map((user) => user._id)
+          ? selectedChat.users
+              .filter((otherUser) => otherUser._id !== user?._id)
+              .map((user) => user._id)
           : [otherUser._id],
         roomId: selectedChat?._id,
         callType: 'Video',
-        ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name }: {}),
+        ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {}),
       });
       console.log('RECEIVED ACK FROM BE :: ', isReceiverOnline);
 
@@ -204,12 +214,9 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         mediaStream.getTracks().forEach((track) => track.stop());
         handleStream(null);
       }
-    handleVideoCall(false);
+      handleVideoCall(false);
       return toast.error(error);
     }
-
-    // * Set Peer
-    handlePeer();
 
     // * Required Entities for Caller
     handleIsCaller(true);
@@ -217,10 +224,10 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       caller: user!,
       roomId: selectedChat?._id as string,
       callType: 'Video',
-      ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {})
+      ...(selectedChat?.isGroupChat ? { groupName: selectedChat.name } : {}),
     });
     handleReceiver(otherUser);
-    if(selectedChat?.isGroupChat) {
+    if (selectedChat?.isGroupChat) {
       handleIsGroupCall(true);
     }
   };
@@ -230,6 +237,14 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
     // * Check IF User online Locally
     if (!selectedChat?.isGroupChat) {
       if (!isUserOnline) return toast.error(otherUser.name + ' is not online');
+    }
+
+    // * Create Peer
+    try {
+      await handlePeer();
+    } catch (error) {
+      console.log(error);
+      return toast.error('Error creating peer');
     }
 
     // * Get Media Permissions
@@ -287,9 +302,6 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       return toast.error(error);
     }
 
-    // * Set Peer
-    handlePeer();
-
     // * Required Entities for Caller
     handleIsCaller(true);
     handleCaller({
@@ -303,6 +315,7 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
       handleIsGroupCall(true);
     }
   };
+  
 
   return (
     <header className="local-chat-header px-4 border-b-[1px] border-b-accent">
@@ -313,7 +326,7 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         <IoMdArrowRoundBack className="text-2xl" />
       </button>
       <div
-        className={`local-chat-header-info ${isUserOnline && 'user-online'}`}
+        className={`local-chat-header-info ${!selectedChat?.isGroupChat && isUserOnline && 'user-online'}`}
       >
         <ProfilePicture className="-space-x-16" width="w-16" />
         <h4
@@ -322,7 +335,7 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         >
           {selectedChat?.isGroupChat ? selectedChat.name : otherUser.name}
         </h4>
-        {isUserOnline && (
+        {!selectedChat?.isGroupChat && isUserOnline && (
           <p className="local-chat-header-info-status text-base">Online</p>
         )}
       </div>
@@ -342,7 +355,7 @@ let ChatHeader: React.FC<{ isUserOnline: boolean }> = ({ isUserOnline }) => {
         </button>
         <ul
           tabIndex={0}
-          className="dropdown-content z-[1] menu p-2 shadow bg-neutral rounded-xl w-max mt-4 flex flex-col gap-2"
+          className="dropdown-content z-[1] menu p-2 shadow bg-neutral rounded-xl w-max mt-6 flex flex-col gap-2"
         >
           <li>
             <ChatDetails />

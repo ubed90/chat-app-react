@@ -22,8 +22,8 @@ const ChatMenu: React.FC<ChatMenuProps & PropsWithChildren> = ({ position }) => 
       <CreateGroupChat />
       <CreateChat />
       <li className="chat-menu-item">
-        <button onClick={handleToggle} className="btn btn-circle btn-outline btn-accent btn-lg">
-          <IoMdAdd className="text-4xl" />
+        <button onClick={handleToggle} className="btn btn-circle border-2 btn-accent btn-lg">
+          <IoMdAdd className="text-white text-4xl" />
         </button>
       </li>
     </ul>

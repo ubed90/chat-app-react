@@ -85,10 +85,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         responseType: 'blob',
         onDownloadProgress(progressEvent) {
           if (progressEvent.progress && progressEvent.progress > 0) {
-            const uploadPercentage = progressEvent.progress * 100;
-            setPercentage(uploadPercentage);
+            const downloadPercentage = progressEvent.progress * 100;
+            setPercentage(downloadPercentage);
 
-            if (uploadPercentage === 100) {
+            if (downloadPercentage === 100) {
               setIsLoading(false);
             }
           }
@@ -119,6 +119,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
       downloadButton.download = fileName;
 
       downloadButton.click();
+      setIsLoading(false);
     }
 
     // * Buffer / PDF
@@ -161,7 +162,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         dispatch(deleteMessage({ id: messageId }))
       },
     });
-  }, [dispatch, file, isInRoom, isLoading, messageId, queryClient, selectedChatId, uploadAttachment]);
+  }, [dispatch, file, isInRoom, isLoading, isUploaded, messageId, queryClient, selectedChatId, uploadAttachment]);
 
   return children({ isLoading, percentage, handleDownload });
 };

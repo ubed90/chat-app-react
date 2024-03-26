@@ -4,15 +4,13 @@ import { PropsWithChildren, createContext, useContext, useEffect, useState } fro
 import { store } from "../Store";
 
 const getSocket = () => {
-    const user = getUserFromLocalStorage() || store.getState()?.user?.user;
-    
-    return socketio(import.meta.env.VITE_WS_URI || process.env.VITE_WS_URI, {
-      ...(import.meta?.env?.PROD || process.env.NODE_ENV === 'production'
-        ? {}
-        : { withCredentials: true }),
-      auth: { token: user?.token },
-    });
-}
+  const user = getUserFromLocalStorage() || store.getState()?.user?.user;
+
+  return socketio(import.meta.env.VITE_WS_URI, {
+    ...(import.meta.env.PROD ? {} : { withCredentials: true }),
+    auth: { token: user?.token },
+  });
+};
 
 type SocketContext = {
   socket: Socket | null;

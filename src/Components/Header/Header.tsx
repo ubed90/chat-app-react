@@ -140,10 +140,8 @@ const Header = () => {
               )}
             </ul>
           </div>
-          <details className="dropdown dropdown-end">
-            <summary
-              tabIndex={0}
-              role="button"
+          <div className="dropdown dropdown-end flex">
+            <button
               className="btn btn-ghost btn-circle"
             >
               {user?.profilePicture ? (
@@ -162,10 +160,10 @@ const Header = () => {
                   </div>
                 </div>
               )}
-            </summary>
+            </button>
             <ul
               tabIndex={0}
-              className="mt-6 z-[1] p-4 shadow menu menu-lg !text-2xl dropdown-content bg-neutral rounded-xl w-64 gap-2 text-white"
+              className="mt-20 z-[1] p-4 shadow menu menu-lg !text-2xl dropdown-content bg-neutral rounded-xl w-64 gap-2 text-white"
             >
               <li>
                 <NavLink
@@ -229,7 +227,7 @@ const Header = () => {
                 </button>
               </li>
             </ul>
-          </details>
+          </div>
         </section>
       </nav>
     </header>
