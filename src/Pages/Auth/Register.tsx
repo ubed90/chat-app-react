@@ -37,7 +37,7 @@ export const registerAction: ActionFunction = async ({ request }) => {
 };
 
 // * Register Custom Validion
-const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/g;
+// const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/g;
 
 const customValidator = ({ formValues }: ValidatorProps) => {
   const errors: {
@@ -58,9 +58,13 @@ const customValidator = ({ formValues }: ValidatorProps) => {
   const password = formValues.password as string;
   const confirmPassword = formValues.confirmPassword as string;
 
-  if (!passwordRegex.test(password)) {
-    errors['invalidPassword'] =
-      'Password must contain at least 1 Uppercase, 1 Lowercase and 1 Number';
+  // if (!passwordRegex.test(password)) {
+  //   errors['invalidPassword'] =
+  //     'Password must contain at least 1 Uppercase, 1 Lowercase and 1 Number';
+  // }
+
+  if(password.length < 8) {
+    errors['invalidPassword'] = 'Password should be minimum of 8 characters.'
   }
 
   if (password !== confirmPassword) {

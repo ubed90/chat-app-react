@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const baseURL = '/api/v1';
+const baseURL = import.meta.env.DEV
+  ? import.meta.env.VITE_SERVER_URI + '/api/v1'
+  : '/api/v1';
 
 const customFetch = axios.create({
   baseURL,
@@ -8,7 +10,7 @@ const customFetch = axios.create({
 
 customFetch.interceptors.request.use(
   (config) => {
-    if(import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
+    if(import.meta.env.DEV) {
       config.withCredentials = true;
     }
     return config;

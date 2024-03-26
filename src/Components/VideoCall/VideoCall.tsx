@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '../Modal/Modal';
 import { toast } from 'react-toastify';
 import { useSocket } from '../../Context/SocketContext';
@@ -88,7 +88,6 @@ const VideoCall = () => {
     setIsCalling(false);
     handleVideoCall(false);
     if(peer) {
-      peer.destroy();
       destroyPeer();
     }
   }, [caller, callerWithRoomid?.roomId, destroyPeer, handleCaller, handleIsCaller, handleReceiver, handleStream, handleVideoCall, peer, socket, stream]);
@@ -108,7 +107,6 @@ const VideoCall = () => {
     const handleRejectCallback = (reason: string) => {
       console.log('PEER DESTROYED :: ');
       if(peer) {
-        peer.destroy();
         destroyPeer();
       }
     
@@ -148,7 +146,7 @@ const VideoCall = () => {
 
   // * Listen for User Joined the room event
   useEffect(() => {
-    if (!socket || !peer || !stream || !isCalling) return;
+    if (!socket || !peer || peer.disconnected || !stream || !isCalling) return;
 
     const callConnected = ({ user, peerId }: { user: IUserData, peerId: string }) => {
       console.log('USER ACCEPTED THE CALL :: ', user, peerId);
@@ -168,14 +166,16 @@ const VideoCall = () => {
             receiverStream
           );
 
-          addPlayer({
-            playerId: user._id,
-            name: user.name,
-            muted: false,
-            playing: true,
-            stream: receiverStream,
-            call,
-          });
+          if(!players[user._id]) {
+            addPlayer({
+              playerId: user._id,
+              name: user.name,
+              muted: false,
+              playing: true,
+              stream: receiverStream,
+              call,
+            });
+          }
         });
 
         if(!players[user._id]) {
@@ -193,13 +193,13 @@ const VideoCall = () => {
     socket.on(CALL_CONNECTED, callConnected);
 
     return () => {
-      socket.on(CALL_CONNECTED, callConnected);
+      socket.off(CALL_CONNECTED, callConnected);
     }
   }, [socket, peer, isCalling, stream, addPlayer, removePlayer, isGroupCall, callAccepted, userId, userName, players])
 
   // * Listen for Incoming call on Peer
   useEffect(() => {
-    if(!peer || !isCalling || !stream) return;
+    if(!peer || peer.disconnected || !isCalling || !stream) return;
 
     const onIncomingCall = (call: MediaConnection) => {
       const { metadata } = call;
@@ -220,14 +220,16 @@ const VideoCall = () => {
             callerStream
           );
 
-          addPlayer({
-            playerId: metadata.id,
-            muted: false,
-            playing: true,
-            stream: callerStream,
-            call,
-            name: metadata.name,
-          });
+          if(!players[metadata.id]) {
+            addPlayer({
+              playerId: metadata.id,
+              muted: false,
+              playing: true,
+              stream: callerStream,
+              call,
+              name: metadata.name,
+            });
+          }
         });
 
         if (!players[metadata.id]) {
@@ -342,7 +344,7 @@ const VideoCall = () => {
     blockNavigation.state === 'blocked' && blockNavigation.reset &&  blockNavigation.reset();
   }
 
-  const numOfPlayers = Object.keys(players).length
+  const numOfPlayers = useMemo(() => Object.keys(players).length, [players]);
 
   console.log(players);
   

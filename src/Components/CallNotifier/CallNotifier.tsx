@@ -33,10 +33,10 @@ const CallNotifier = () => {
     if (!stream) {
       try {
         const mediaStream = await askRequiredPermission(caller?.callType === 'Video');
-        const peerId = handlePeer();
+        const peerId = await handlePeer();
         handleStream(mediaStream);
         console.log(
-          'EVENT EMITETD TO JOIN THE ROOM :: ',
+          'EVENT EMITTED TO JOIN THE ROOM :: ',
           caller?.roomId,
           user?._id
         );

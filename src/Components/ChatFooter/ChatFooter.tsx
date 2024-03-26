@@ -229,7 +229,7 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
                 type="text"
                 name="content"
                 placeholder="Enter Your Message..."
-                className={`w-full h-full focus:outline-none hover:outline-none px-4 rounded-xl ${
+                className={`w-full h-full focus:outline-none hover:outline-none pl-4 pr-16 rounded-xl ${
                   theme === Themes.LIGHT && 'bg-gray-200'
                 }`}
                 value={content}
