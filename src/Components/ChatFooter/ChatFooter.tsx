@@ -64,7 +64,6 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
 
   const handleEmojiClick = (event: EmojiClickData) => {
     setContent(prevContent => prevContent + event.emoji)
-    setEmojiPicker(false);
   }
 
   const [localTyping, setLocalTyping] = useState(false);
