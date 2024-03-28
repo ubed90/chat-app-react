@@ -9,7 +9,9 @@ import { useNavigate } from 'react-router-dom';
 import { deleteNotification, setSelectedChat } from '../../features/chat';
 import { useQueryClient } from '@tanstack/react-query';
 
-const ChatListItem: React.FC<IChat> = (chat) => {
+let ChatListItem: React.FC<IChat> = (chat) => {
+  console.log('Chats Child Re Rendered');
+
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
 
@@ -133,5 +135,7 @@ const ChatListItem: React.FC<IChat> = (chat) => {
     </li>
   );
 };
+
+ChatListItem = React.memo(ChatListItem);
 
 export default ChatListItem;

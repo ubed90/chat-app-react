@@ -438,5 +438,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
-// TODO: Need to implement New Message scroll to bottom Functionality
