@@ -217,6 +217,6 @@ export const usePeer = () => useContext(peerContext);
 // TODO: Add shouldModalCloseOnESC ? Feature for Modals. - Fixed
 // ! BUG: Fix Call Notifier on Light Mode - Fixed
 // ! BUG: Removed messages Loader Skeleton with better loader - Fixed
-// TODO: Implement User already in Call functionality.
+// TODO: Implement User already in Call functionality. - Fixed
 // TODO: Find new Color for Other user messages - Fixed
 // TODO: Do not notify with sound when message received in active chat - Fixed
