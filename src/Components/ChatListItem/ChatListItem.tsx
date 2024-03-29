@@ -10,8 +10,6 @@ import { deleteNotification, setSelectedChat } from '../../features/chat';
 import { useQueryClient } from '@tanstack/react-query';
 
 let ChatListItem: React.FC<IChat> = (chat) => {
-  console.log('Chats Child Re Rendered');
-
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
 

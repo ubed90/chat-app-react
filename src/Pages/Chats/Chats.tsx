@@ -33,8 +33,6 @@ const Chats = () => {
   };
 
   const handleReset = () => setSearchTerm('');
-
-  console.log("Chats Parent Re Rendered");
   
   if(isLoading || isRefetching) {
     return (
@@ -55,16 +53,16 @@ const Chats = () => {
   }
 
   return (
-    <section className="md:border-r-[1px] md:border-r-primary md:border-opacity-30 h-full">
+    <section className="chats-list-container md:border-r-[1px] md:border-r-primary md:border-opacity-30 h-full">
       {chats.length > 0 && (
-        <div className="search-box relative">
+        <div className="search-box flex items-center relative border-b-[1px] border-accent border-opacity-20">
           <FormInput
             name="search-users"
             type="search"
             hideLabel
-            customClasses="w-auto border-opacity-50"
+            customClasses="!w-auto border-opacity-50"
+            containerClasses='px-4'
             placeholder="Search For Users..."
-            containerClasses="p-4 border-b-[1px] border-accent border-opacity-20"
             marginRequired={false}
             disabled={isLoading || isRefetching}
             value={searchTerm}
