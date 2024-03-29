@@ -33,6 +33,7 @@ type ModalProps = {
   onClose(): void;
   className?: string;
   closeOnBackdrop?: boolean;
+  disableCloseOnEscape?: boolean;
 };
 
 const Modal: React.FC<ModalProps & PropsWithChildren> &
@@ -42,7 +43,8 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
   onClose,
   children,
   className,
-  closeOnBackdrop = true
+  closeOnBackdrop = true,
+  disableCloseOnEscape = false
 }) => {
   const bodyRef = useRef<HTMLBodyElement>(document.querySelector('body')!);
   const portalExists = useRef(document.getElementById('modal-root'));
@@ -70,7 +72,7 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
     };
   }, [portalExists]);
 
-  // Prevent page scrolling when the drawer is open
+  // * Prevent page scrolling when the drawer is open
   useEffect(() => {
     const updatePageScroll = () => {
       if (isOpen) {
@@ -85,6 +87,8 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
 
   // * Enable Drawer to get closed with Escape
   useEffect(() => {
+    if(disableCloseOnEscape) return;
+
     const onKeyPress = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
@@ -96,7 +100,7 @@ const Modal: React.FC<ModalProps & PropsWithChildren> &
     return () => {
       window.removeEventListener('keyup', onKeyPress);
     };
-  }, [isOpen, onClose]);
+  }, [disableCloseOnEscape, isOpen, onClose]);
 
   if (!isTransitioning && !isOpen) return null;
 

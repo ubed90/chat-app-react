@@ -357,6 +357,7 @@ const VideoCall = () => {
       onClose={handleHangUp}
       className="border-none w-full h-full !p-0 grid gap-4 video-call-grid bg-accent relative"
       closeOnBackdrop={false}
+      disableCloseOnEscape
     >
       {isCalling && (
         <>
