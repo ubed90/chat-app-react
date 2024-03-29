@@ -211,10 +211,11 @@ export default PeerProvider;
 export const usePeer = () => useContext(peerContext);
 
 // ! New Features and Bugs
-// TODO: Add Search User Functionality in Chats List
+// TODO: Add Search User Functionality in Chats List - Fixed
 // TODO: Fetch Max 30 messages at a time. Implement Messages Loader on Scroll
-// ! BUG: Fix Audio WaveForm Z-index Issue
+// ! BUG: Fix Audio WaveForm Z-index Issue - Fixed
 // TODO: Add shouldModalCloseOnESC ? Feature for Modals.
 // ! BUG: Fix Call Notifier on Light Mode
 // ! BUG: Removed messages Loader Skeleton with better loader
 // TODO: Implement User already in Call functionality.
+// TODO: Find new Color for Other user messages
