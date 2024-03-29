@@ -216,6 +216,6 @@ export const usePeer = () => useContext(peerContext);
 // ! BUG: Fix Audio WaveForm Z-index Issue - Fixed
 // TODO: Add shouldModalCloseOnESC ? Feature for Modals. - Fixed
 // ! BUG: Fix Call Notifier on Light Mode - Fixed
-// ! BUG: Removed messages Loader Skeleton with better loader
+// ! BUG: Removed messages Loader Skeleton with better loader - Fixed
 // TODO: Implement User already in Call functionality.
 // TODO: Find new Color for Other user messages - Fixed

@@ -349,16 +349,9 @@ const Chat = () => {
 
   if (isLoading)
     return (
-      <div className="w-full h-full p-4">
-        {Array.from({ length: 20 }, (_, index) => (
-          <div
-            key={index}
-            className={`chat ${index % 2 === 0 ? 'chat-start' : 'chat-end'}`}
-          >
-            <div className="w-10 h-10 bg-secondary bg-opacity-20 chat-image avatar skeleton"></div>
-            <div className="w-52 bg-secondary bg-opacity-20 chat-bubble skeleton"></div>
-          </div>
-        ))}
+      <div className="w-full h-full p-4 flex gap-4 flex-col items-center justify-center">
+        <span className="loading loading-bars text-accent loading-lg"></span>
+        <p className="text-accent text-2xl md:text-3xl">Loading your messages...</p>
       </div>
     );
 
