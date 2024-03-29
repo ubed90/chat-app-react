@@ -219,3 +219,4 @@ export const usePeer = () => useContext(peerContext);
 // ! BUG: Removed messages Loader Skeleton with better loader - Fixed
 // TODO: Implement User already in Call functionality.
 // TODO: Find new Color for Other user messages - Fixed
+// TODO: Do not notify with sound when message received in active chat - Fixed
