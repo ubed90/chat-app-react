@@ -141,11 +141,13 @@ const Header = () => {
             </ul>
           </div>
           <div className="dropdown dropdown-end flex">
-            <button
-              className="btn btn-ghost btn-circle"
-            >
+            <button className="btn btn-ghost btn-circle">
               {user?.profilePicture ? (
-                <div className="avatar w-12c aspect-square rounded-full overflow-hidden ring-primary ring-1">
+                <div
+                  className={`avatar w-12 aspect-square rounded-full overflow-hidden ring-primary ring-1 ${
+                    theme === Themes.LIGHT ? 'ring-white ring-2' : ''
+                  }`}
+                >
                   <img
                     src={user.profilePicture || user.profilePicture?.url}
                     className="!object-contain w-full h-full"

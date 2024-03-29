@@ -176,7 +176,7 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
         <SendAudio cancelRecording={toggleAudioRecorderStatus} handleFileUpload={handleFileUpload} />
       ) : (
         <>
-          <div className="dropdown dropdown-top">
+          <div className="dropdown dropdown-top z-10">
             <button className="btn btn-square btn-lg btn-neutral rounded-xl">
               <GrAttachment className="text-2xl" />
             </button>

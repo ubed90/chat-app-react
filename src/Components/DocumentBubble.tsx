@@ -30,7 +30,7 @@ const DocumentBubble: React.FC<
             />
           </div>
         ) : (
-          <div className="avatar placeholder ring-1 ring-primary ring-opacity-50">
+          <div className="avatar rounded-full placeholder ring-1 ring-primary ring-opacity-50">
             <div className="bg-neutral text-neutral-content rounded-full w-10">
               <span className="text-xl uppercase">
                 {message.sender.name.substring(0, 2)}
@@ -45,7 +45,7 @@ const DocumentBubble: React.FC<
       <div
         className={`chat-bubble p-4 rounded-xl text-2xl text-justify flex items-center gap-4 ${
           user?._id !== message.sender._id && 'flex-row-reverse'
-        } ${sentByYou ? '' : 'chat-bubble-success text-white'}`}
+        } ${sentByYou ? '' : 'chat-bubble-secondary text-white'}`}
       >
         <div
           className={`radial-progress text-success text-base font-bold ${

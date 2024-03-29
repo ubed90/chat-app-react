@@ -125,11 +125,8 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
         </div>
       </div>
       <div className="call-notifier-info flex flex-col justify-between">
-        <h4 className="text-2xl text-accent truncate">
+        <h4 className="text-2xl text-white truncate">
           {isGroupCall ? groupName?.toUpperCase() : user.name.toUpperCase()}
-          {/* {' '}
-          &#183; <span className="text-lg text-slate-600">ChatsUP</span> &#183;{' '}
-          <span className="text-lg text-slate-600">now</span> */}
         </h4>
         <h5 className="text-lg flex items-center gap-2">
           <svg
@@ -159,7 +156,7 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
       <div className="call-notifier-cta flex gap-2">
         <button
           onClick={handleDecline}
-          className="btn btn-error rounded-badge text-lg px-6"
+          className="btn btn-error rounded-3xl text-lg px-6"
         >
           <svg
             fill="#000000"
@@ -186,7 +183,7 @@ const Notify: React.FC<{ user: IUserData, callType: string, handleDecline: () =>
         </button>
         <button
           onClick={handleAccepted}
-          className="btn btn-success rounded-badge text-lg px-6"
+          className="btn btn-success rounded-3xl text-lg px-6"
         >
           {callType === 'Video' ? (
             <svg

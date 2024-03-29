@@ -215,7 +215,7 @@ export const usePeer = () => useContext(peerContext);
 // TODO: Fetch Max 30 messages at a time. Implement Messages Loader on Scroll
 // ! BUG: Fix Audio WaveForm Z-index Issue - Fixed
 // TODO: Add shouldModalCloseOnESC ? Feature for Modals. - Fixed
-// ! BUG: Fix Call Notifier on Light Mode
+// ! BUG: Fix Call Notifier on Light Mode - Fixed
 // ! BUG: Removed messages Loader Skeleton with better loader
 // TODO: Implement User already in Call functionality.
-// TODO: Find new Color for Other user messages
+// TODO: Find new Color for Other user messages - Fixed

@@ -35,7 +35,7 @@ const AudioBubble: React.FC<
       interact: false,
       waveColor: '#fff',
       progressColor: sentByYou ? '#4a9eff' : '#ff6347',
-      cursorColor: sentByYou ? '#7ae3c3' : '#000',
+      cursorColor: '#7ae3c3',
       barWidth: 2,
       height: 30,
     });
@@ -112,7 +112,7 @@ const AudioBubble: React.FC<
             />
           </div>
         ) : (
-          <div className="avatar placeholder ring-1 ring-primary ring-opacity-50">
+          <div className="avatar rounded-full placeholder ring-1 ring-primary ring-opacity-50">
             <div className="bg-neutral text-neutral-content rounded-full w-10">
               <span className="text-xl uppercase">
                 {message.sender.name.substring(0, 2)}
@@ -127,7 +127,7 @@ const AudioBubble: React.FC<
       <div
         className={`chat-bubble p-4 rounded-xl text-2xl text-justify flex items-center gap-4 ${
           user?._id !== message.sender._id && isLoading && 'flex-row-reverse'
-        } ${sentByYou ? '' : 'chat-bubble-success text-white'}`}
+        } ${sentByYou ? '' : 'chat-bubble-secondary text-white'}`}
       >
         {isLoading ||
           (!message.attachment?.content && (
