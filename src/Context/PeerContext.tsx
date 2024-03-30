@@ -212,7 +212,7 @@ export const usePeer = () => useContext(peerContext);
 
 // ! New Features and Bugs
 // TODO: Add Search User Functionality in Chats List - Fixed
-// TODO: Fetch Max 30 messages at a time. Implement Messages Loader on Scroll
+// TODO: Fetch Max 30 messages at a time. Implement Messages Loader on Scroll - Fixed
 // ! BUG: Fix Audio WaveForm Z-index Issue - Fixed
 // TODO: Add shouldModalCloseOnESC ? Feature for Modals. - Fixed
 // ! BUG: Fix Call Notifier on Light Mode - Fixed

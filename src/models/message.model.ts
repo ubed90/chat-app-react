@@ -25,6 +25,7 @@ export type IMessageResponse = {
   status: string,
   message: string,
   messages: IMessage[],
+  pages: number,
   isOnline: boolean;
 }
 

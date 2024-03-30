@@ -64,24 +64,6 @@ const Chat = () => {
 
   const numOfMessages = useMemo(() => Object.keys(messages || {}).length, [messages]);
 
-  // * CHeck whether the user is at the bottom or not
-  const [isAtBottom, setIsAtBottom] = useState(true);
-
-  // * Ref for Message Box
-  const messageRef = useRef<HTMLDivElement | null>(null);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleScroll = useCallback(throttle(
-    (event: React.UIEvent<HTMLElement, UIEvent>) => {
-      if ((event.target as HTMLElement).scrollTop < -50) {
-        setIsAtBottom(false);
-      } else {
-        setIsAtBottom(true);
-      }
-    },
-    1000
-  ), [])
-
   const dispatch = useAppDispatch();
 
   // * Only use is to clean the selected chat state when component is unmounted
@@ -166,23 +148,66 @@ const Chat = () => {
     );
   };
 
-  // * Query to fetch data dynamically whem Single Chat is Loaded
+  // * State For Fetching Old Messages
+  const [page, setPage] = useState(0);
+  const totalPages = useRef(0);
+
+  const fetchMessages = async (page: number) => {
+    if(page > 0) {
+      messageRef.current?.scrollTo({ top: -messageRef.current.scrollHeight, behavior: 'smooth' })
+    }
+    const { data } = await customFetch.get<IMessageResponse>(`/message/${id}/${page}`);
+    if(isOnline !== data.isOnline) {
+      setIsOnline(data.isOnline);
+    }
+    totalPages.current = data.pages;
+    dispatch(setMessages({ messages: data.messages }));
+    return data.messages;
+  }
+
+  // * Query to fetch data dynamically when Single Chat is Loaded
   const {
     isLoading,
     isError,
     error,
+    isFetching,
     refetch: refetchMessages,
   } = useQuery({
-    queryKey: ['chat', id],
-    queryFn: async () => {
-      const { data } = await customFetch.get<IMessageResponse>(
-        '/message/' + id
-      );
-      setIsOnline(data.isOnline);
-      dispatch(setMessages({ messages: data.messages }))
-      return data.messages;
-    },
+    queryKey: ['chat', id, page],
+    queryFn: () => fetchMessages(page),
+    placeholderData: Object.keys(messages || []).length > 0 ? Object.values(messages || []) : []
   });
+
+  // * CHeck whether the user is at the bottom or not
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  // * Ref for Message Box
+  const messageRef = useRef<HTMLDivElement | null>(null);
+
+  const handleScroll = useCallback(throttle(
+    (event: React.UIEvent<HTMLElement, UIEvent>) => {
+      const scrollHeight = (event.target as HTMLElement).scrollHeight;
+      const scrollTop = Math.abs((event.target as HTMLElement).scrollTop);
+      const clientHeight = (event.target as HTMLElement).clientHeight;
+
+      // * Logic for Scroll to Bottom Button
+      if (scrollTop > 50) {
+        setIsAtBottom(false);
+      } else {
+        setIsAtBottom(true);
+      }
+
+      // * Logic for Fetching old messages
+      const reachedTop = scrollHeight === scrollTop + clientHeight;
+
+      if(reachedTop) {
+        if(page < totalPages.current) {
+          setPage(prevPage => prevPage + 1)
+        }
+      }
+    },
+    1000
+  ), [page])
 
   // * Socket to join the current Chat room
   const { socket } = useSocket();
@@ -324,36 +349,18 @@ const Chat = () => {
     };
   }, [dispatch, selectedChat?._id, selectedChat?.isGroupChat, socket, user?._id]);
 
-  // * We are using this hack to set the selected chat dynamically when the user does a refresh on single chat page
-  // if (id && !selectedChat) {
-  //   // * Reading chats from cache
-  //   const data = queryClient.getQueryData(['all-chats']) as IChat[];
-  //   if (data) {
-  //     const chats = data;
+  // * Use Effect For Scroll Events of Message Container
+  useEffect(() => {
+    if(isLoading || numOfMessages === 0) return;
 
-  //     if (!chats || chats.length === 0) {
-  //       return <Navigate to="/chats" />;
-  //     }
+    const messageContainer = messageRef.current;
 
-  //     const openedChat = chats.find((chat) => chat._id === id);
+    messageContainer?.addEventListener('scroll', handleScroll);
 
-  //     if (!openedChat) {
-  //       toast.error(`No chat found with id: ${id}`);
-  //       return <Navigate to="/chats" />;
-  //     }
-
-  //     // ! Set the currently opened chat page as selected chat
-  //     dispatch(setSelectedChat(openedChat));
-  //   }
-  // }
-
-  if (isLoading)
-    return (
-      <div className="w-full h-full p-4 flex gap-4 flex-col items-center justify-center">
-        <span className="loading loading-bars text-accent loading-lg"></span>
-        <p className="text-accent text-2xl md:text-3xl">Loading your messages...</p>
-      </div>
-    );
+    return () => {
+      messageContainer?.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll, isLoading, numOfMessages])
 
   if (isError)
     return (
@@ -382,9 +389,9 @@ const Chat = () => {
         className={`messages p-4 relative ${
           numOfMessages === 0 && 'justify-center items-center'
         }`}
-        onScroll={handleScroll}
       >
-        {numOfMessages <= 0 && (
+        {isLoading && numOfMessages === 0 && <MessagesLoader isFullPage />}
+        {!isLoading && numOfMessages === 0 && (
           <div className="flex flex-col items-center">
             <IoChatboxEllipses className="text-6xl text-accent opacity-30" />
             <p className="text-3xl opacity-30">No Messages Here.</p>
@@ -417,12 +424,16 @@ const Chat = () => {
               />
             );
           })}
+        {isFetching && <MessagesLoader />}
       </section>
       <ChatFooter sendMessage={handleNewMessage} isPending={isPending} />
       {!isAtBottom && (
-        <span onClick={() => {
-          messageRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        }} className="btn btn-accent btn-rounded absolute right-10 bottom-28 animate-bounce">
+        <span
+          onClick={() => {
+            messageRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="btn btn-accent btn-rounded absolute right-10 bottom-28 animate-bounce"
+        >
           <FaArrowDown />
         </span>
       )}
@@ -431,3 +442,15 @@ const Chat = () => {
 };
 
 export default Chat;
+
+
+const MessagesLoader = ({ isFullPage = false }: { isFullPage?: boolean }) => (
+  <div
+    className={`${
+      isFullPage ? 'w-full h-full' : ''
+    } p-4 flex gap-4 flex-col items-center justify-center`}
+  >
+    <span className="loading loading-bars text-accent loading-lg"></span>
+    <p className="text-accent text-2xl md:text-3xl">Loading your messages...</p>
+  </div>
+);

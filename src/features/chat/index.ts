@@ -73,10 +73,10 @@ const chatSlice = createSlice({
         }
       }
 
-      state.messages = messages;
+      state.messages = { ...state.messages, ...messages };
       state.unreadMessages =
         state.selectedChat && !state.selectedChat.isGroupChat
-          ? unreadMessages
+          ? [...unreadMessages, ...(state.unreadMessages ? state.unreadMessages : [])]
           : undefined;
     },
     clearMessages: (state) => {
