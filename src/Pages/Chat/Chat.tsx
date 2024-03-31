@@ -171,6 +171,7 @@ const Chat = () => {
     isError,
     error,
     isFetching,
+    isPlaceholderData,
     refetch: refetchMessages,
   } = useQuery({
     queryKey: ['chat', id, page],
@@ -391,7 +392,7 @@ const Chat = () => {
         }`}
       >
         {isLoading && numOfMessages === 0 && <MessagesLoader isFullPage />}
-        {!isLoading && numOfMessages === 0 && (
+        {!isLoading && !isPlaceholderData && numOfMessages === 0 && (
           <div className="flex flex-col items-center">
             <IoChatboxEllipses className="text-6xl text-accent opacity-30" />
             <p className="text-3xl opacity-30">No Messages Here.</p>
