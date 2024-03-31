@@ -84,10 +84,11 @@ const createChatHOC =
           label: 'User Name',
           value: 'username',
         },
-        {
-          label: 'Phone Number',
-          value: 'phoneNumber',
-        },
+        // ! Removed From PROD - Privacy Issue
+        // {
+        //   label: 'Phone Number',
+        //   value: 'phoneNumber',
+        // },
       ];
       const [isOpen, setIsOpen] = useState<boolean>(false);
       const [searchType, setSearchType] = useState<(typeof searchTypes)[0]>(

@@ -220,3 +220,4 @@ export const usePeer = () => useContext(peerContext);
 // TODO: Implement User already in Call functionality. - Fixed
 // TODO: Find new Color for Other user messages - Fixed
 // TODO: Do not notify with sound when message received in active chat - Fixed
+// TODO: Removed Search with Number while creating Chats / Group (Privacy Constraint) - Fixed
