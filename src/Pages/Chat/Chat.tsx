@@ -168,6 +168,7 @@ const Chat = () => {
   // * Query to fetch data dynamically when Single Chat is Loaded
   const {
     isLoading,
+    isPending: messagesPending,
     isError,
     error,
     isFetching,
@@ -392,12 +393,15 @@ const Chat = () => {
         }`}
       >
         {isLoading && numOfMessages === 0 && <MessagesLoader isFullPage />}
-        {!isLoading && !isPlaceholderData && numOfMessages === 0 && (
-          <div className="flex flex-col items-center">
-            <IoChatboxEllipses className="text-6xl text-accent opacity-30" />
-            <p className="text-3xl opacity-30">No Messages Here.</p>
-          </div>
-        )}
+        {!isLoading &&
+          !messagesPending && !isFetching &&
+          !isPlaceholderData &&
+          numOfMessages === 0 && (
+            <div className="flex flex-col items-center">
+              <IoChatboxEllipses className="text-6xl text-accent opacity-30" />
+              <p className="text-3xl opacity-30">No Messages Here.</p>
+            </div>
+          )}
         {isTyping && (
           <div
             className={`bg-primary bg-opacity-25 backdrop-blur-lg px-3 grid place-items-center rounded-full w-max ${
