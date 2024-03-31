@@ -165,7 +165,7 @@ const Header = () => {
             </button>
             <ul
               tabIndex={0}
-              className="mt-20 z-[1] p-4 shadow menu menu-lg !text-2xl dropdown-content bg-neutral rounded-xl w-64 gap-2 text-white"
+              className="mt-20 z-[5] p-4 shadow menu menu-lg !text-2xl dropdown-content bg-neutral rounded-xl w-64 gap-2 text-white"
             >
               <li>
                 <NavLink

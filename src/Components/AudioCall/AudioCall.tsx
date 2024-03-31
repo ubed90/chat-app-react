@@ -24,15 +24,7 @@ import { IUserData } from '../../models/user.model';
 import { MediaConnection } from 'peerjs';
 import { useBlocker } from 'react-router-dom';
 
-// type CTA_STATES = {
-//   muted: boolean,
-//   playing: boolean,
-// }
-
 const VideoCall = () => {
-  // CTA States
-  // const [ctaStates, setCtaStates] = useState<CTA_STATES>({ muted: true, playing: true })
-
   const [isCalling, setIsCalling] = useState(false);
 
   // * Required for Group Calls
@@ -42,12 +34,14 @@ const VideoCall = () => {
     ({ currentLocation, nextLocation }) =>
       isCalling && currentLocation.pathname !== nextLocation.pathname
   );
-  
+
   const userId = useSelector((state: RootState) => state.user.user?._id);
   const userName = useSelector((state: RootState) => state.user.user?.name);
   const caller = useSelector((state: RootState) => state.user.user);
 
   const { players, addPlayer, toggleAudio, removePlayer } = usePlayers();
+
+  const numOfPlayers = useMemo(() => Object.keys(players).length, [players]);
 
   const {
     peer,
@@ -78,6 +72,14 @@ const VideoCall = () => {
     });
     setIsCalling(false);
     handleAudioCall(false);
+
+    // * Close all the open connections before disconnecting
+    Object.values(players).forEach((player) => {
+      if (player?.call) {
+        player.call.close();
+      }
+    });
+
     if (peer) {
       destroyPeer();
     }
@@ -90,6 +92,7 @@ const VideoCall = () => {
     caller,
     callerWithRoomid?.roomId,
     handleAudioCall,
+    players,
     peer,
     handleStream,
     destroyPeer,
@@ -192,7 +195,7 @@ const VideoCall = () => {
             receiverStream
           );
 
-          if(!players[user._id]) {
+          if (!players[user._id]) {
             addPlayer({
               playerId: user._id,
               name: user.name,
@@ -221,7 +224,19 @@ const VideoCall = () => {
     return () => {
       socket.off(CALL_CONNECTED, callConnected);
     };
-  }, [socket, peer, isCalling, stream, addPlayer, removePlayer, isGroupCall, callAccepted, userId, userName, players]);
+  }, [
+    socket,
+    peer,
+    isCalling,
+    stream,
+    addPlayer,
+    removePlayer,
+    isGroupCall,
+    callAccepted,
+    userId,
+    userName,
+    players,
+  ]);
 
   // * Listen for Incoming call on Peer
   useEffect(() => {
@@ -258,7 +273,7 @@ const VideoCall = () => {
           }
         });
 
-        if(!players[metadata.id]) {
+        if (!players[metadata.id]) {
           call.on('close', () => {
             console.log('CONNECTION CLOSED :: ');
 
@@ -275,7 +290,16 @@ const VideoCall = () => {
     return () => {
       peer.off('call', onIncomingCall);
     };
-  }, [addPlayer, callAccepted, isCalling, isGroupCall, peer, players, removePlayer, stream]);
+  }, [
+    addPlayer,
+    callAccepted,
+    isCalling,
+    isGroupCall,
+    peer,
+    players,
+    removePlayer,
+    stream,
+  ]);
 
   // * Listen for User Leaving the Room
   useEffect(() => {
@@ -286,6 +310,10 @@ const VideoCall = () => {
       console.log('USER LEFT THE CALL :: ', user);
 
       removePlayer(user._id);
+
+      if (!isGroupCall) {
+        handleHangUp();
+      }
     };
 
     socket.on(USER_HANG_UP, onUserHangUP);
@@ -293,7 +321,7 @@ const VideoCall = () => {
     return () => {
       socket.off(USER_HANG_UP, onUserHangUP);
     };
-  }, [socket, isCalling, removePlayer]);
+  }, [socket, isCalling, removePlayer, isGroupCall, handleHangUp]);
 
   // * Listen for Audio and Video Toggle Events
   useEffect(() => {
@@ -356,8 +384,6 @@ const VideoCall = () => {
       blockNavigation.reset &&
       blockNavigation.reset();
   };
-
-  const numOfPlayers = useMemo(() => Object.keys(players).length, [players]);
 
   return (
     <Modal

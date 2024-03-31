@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '../Modal/Modal';
 import { toast } from 'react-toastify';
 import { useSocket } from '../../Context/SocketContext';
-// import { CallProps } from '../Chat/Chat';
 import {
   CALL_CONNECTED,
   CALL_REJECTED,
@@ -28,7 +27,7 @@ import { MdCallEnd } from 'react-icons/md';
 import { IUserData } from '../../models/user.model';
 import { MediaConnection } from 'peerjs';
 
-import { useBlocker } from "react-router-dom";
+import { useBlocker } from 'react-router-dom';
 
 // type CTA_STATES = {
 //   muted: boolean,
@@ -55,7 +54,10 @@ const VideoCall = () => {
 
   const { players, addPlayer, toggleAudio, toggleVideo, removePlayer } =
     usePlayers();
-    
+
+  const numOfPlayers = useMemo(() => Object.keys(players).length, [players]);
+
+  console.log(players);
 
   const {
     peer,
@@ -67,19 +69,18 @@ const VideoCall = () => {
     caller: callerWithRoomid,
     handleCaller,
     destroyPeer,
-    isGroupCall
+    isGroupCall,
   } = usePeer();
 
   const { socket } = useSocket();
-  
 
   const handleHangUp = useCallback(() => {
     handleIsCaller(false);
-    if(stream) {
-      stream.getTracks().forEach(track => track.stop());
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
       handleStream(null);
     }
-    handleReceiver(null)
+    handleReceiver(null);
     handleCaller(null);
     socket?.emit(USER_HANG_UP, {
       user: caller,
@@ -87,36 +88,64 @@ const VideoCall = () => {
     });
     setIsCalling(false);
     handleVideoCall(false);
-    if(peer) {
+
+    // * Close all the open connections before disconnecting
+    Object.values(players).forEach((player) => {
+      if (player?.call) {
+        player.call.close();
+      }
+    });
+
+    if (peer) {
       destroyPeer();
     }
-  }, [caller, callerWithRoomid?.roomId, destroyPeer, handleCaller, handleIsCaller, handleReceiver, handleStream, handleVideoCall, peer, socket, stream]);
+  }, [
+    caller,
+    callerWithRoomid?.roomId,
+    destroyPeer,
+    handleCaller,
+    handleIsCaller,
+    handleReceiver,
+    handleStream,
+    handleVideoCall,
+    peer,
+    players,
+    socket,
+    stream,
+  ]);
 
   // * Add Our Own Stream whenever Component Mounts
   useEffect(() => {
-    if(!stream || !userId || isCalling) return;
+    if (!stream || !userId || isCalling) return;
 
-    addPlayer({ playerId: userId, muted: true, playing: true, stream, isCurrentUser: true, name: caller?.name as string })
+    addPlayer({
+      playerId: userId,
+      muted: true,
+      playing: true,
+      stream,
+      isCurrentUser: true,
+      name: caller?.name as string,
+    });
     setIsCalling(true);
-  }, [addPlayer, caller?.name, isCalling, stream, userId])
+  }, [addPlayer, caller?.name, isCalling, stream, userId]);
 
   // * Listen for Call Rejected Event Here
   useEffect(() => {
-    if(!socket || !isCalling || isGroupCall) return;
+    if (!socket || !isCalling || isGroupCall) return;
 
     const handleRejectCallback = (reason: string) => {
       console.log('PEER DESTROYED :: ');
-      if(peer) {
+      if (peer) {
         destroyPeer();
       }
-    
-      console.log("STREAM DESTROYED :: ");
-      if(stream) {
+
+      console.log('STREAM DESTROYED :: ');
+      if (stream) {
         stream.getTracks().forEach((track) => track.stop());
         handleStream(null);
       }
 
-      handleIsCaller(false)
+      handleIsCaller(false);
       handleCaller(null);
       handleVideoCall(false);
       toast.error(reason);
@@ -125,14 +154,24 @@ const VideoCall = () => {
     socket.on(CALL_REJECTED, handleRejectCallback);
 
     return () => {
-      socket.off(CALL_REJECTED, handleRejectCallback)
-    }
-  }, [destroyPeer, handleCaller, handleIsCaller, handleStream, handleVideoCall, isCalling, isGroupCall, peer, socket, stream])
+      socket.off(CALL_REJECTED, handleRejectCallback);
+    };
+  }, [
+    destroyPeer,
+    handleCaller,
+    handleIsCaller,
+    handleStream,
+    handleVideoCall,
+    isCalling,
+    isGroupCall,
+    peer,
+    socket,
+    stream,
+  ]);
 
   // * Listen If even a single user hasn't join the call.
   useEffect(() => {
-    if(!socket || !isCalling || !isGroupCall || callAccepted) return;
-
+    if (!socket || !isCalling || !isGroupCall || callAccepted) return;
 
     const timeout = setTimeout(() => {
       toast.error('No one Answered the call');
@@ -140,19 +179,25 @@ const VideoCall = () => {
     }, 30000);
 
     return () => {
-      clearTimeout(timeout)
-    }
-  }, [callAccepted, handleHangUp, isCalling, isGroupCall, socket])
+      clearTimeout(timeout);
+    };
+  }, [callAccepted, handleHangUp, isCalling, isGroupCall, socket]);
 
   // * Listen for User Joined the room event
   useEffect(() => {
     if (!socket || !peer || peer.disconnected || !stream || !isCalling) return;
 
-    const callConnected = ({ user, peerId }: { user: IUserData, peerId: string }) => {
+    const callConnected = ({
+      user,
+      peerId,
+    }: {
+      user: IUserData;
+      peerId: string;
+    }) => {
       console.log('USER ACCEPTED THE CALL :: ', user, peerId);
       // * For Group Call
-      if(isGroupCall && !callAccepted) {
-        setCallAccepted(true)
+      if (isGroupCall && !callAccepted) {
+        setCallAccepted(true);
       }
       try {
         const call = peer.call(peerId, stream, {
@@ -166,7 +211,7 @@ const VideoCall = () => {
             receiverStream
           );
 
-          if(!players[user._id]) {
+          if (!players[user._id]) {
             addPlayer({
               playerId: user._id,
               name: user.name,
@@ -178,7 +223,7 @@ const VideoCall = () => {
           }
         });
 
-        if(!players[user._id]) {
+        if (!players[user._id]) {
           call?.on('close', () => {
             console.log('Connection Closed From User:: ', user._id, user.name);
 
@@ -194,12 +239,24 @@ const VideoCall = () => {
 
     return () => {
       socket.off(CALL_CONNECTED, callConnected);
-    }
-  }, [socket, peer, isCalling, stream, addPlayer, removePlayer, isGroupCall, callAccepted, userId, userName, players])
+    };
+  }, [
+    socket,
+    peer,
+    isCalling,
+    stream,
+    addPlayer,
+    removePlayer,
+    isGroupCall,
+    callAccepted,
+    userId,
+    userName,
+    players,
+  ]);
 
   // * Listen for Incoming call on Peer
   useEffect(() => {
-    if(!peer || peer.disconnected || !isCalling || !stream) return;
+    if (!peer || peer.disconnected || !isCalling || !stream) return;
 
     const onIncomingCall = (call: MediaConnection) => {
       const { metadata } = call;
@@ -220,7 +277,7 @@ const VideoCall = () => {
             callerStream
           );
 
-          if(!players[metadata.id]) {
+          if (!players[metadata.id]) {
             addPlayer({
               playerId: metadata.id,
               muted: false,
@@ -241,32 +298,45 @@ const VideoCall = () => {
       } catch (error) {
         console.log(error);
       }
-    }
+    };
 
     peer.on('call', onIncomingCall);
-  
+
     return () => {
-      peer.off('call', onIncomingCall)
-    }
-  }, [addPlayer, callAccepted, isCalling, isGroupCall, peer, players, removePlayer, stream])
-  
+      peer.off('call', onIncomingCall);
+    };
+  }, [
+    addPlayer,
+    callAccepted,
+    isCalling,
+    isGroupCall,
+    peer,
+    players,
+    removePlayer,
+    stream,
+  ]);
+
   // * Listen for User Leaving the Room
   useEffect(() => {
-    if(!socket || !isCalling) return;
-    
+    if (!socket || !isCalling) return;
+
     const onUserHangUP = (user: IUserData) => {
       toast.success(user.name + ' left the call', { theme: 'dark' });
       console.log('USER LEFT THE CALL :: ', user);
 
       removePlayer(user._id);
-    }
+
+      if (!isGroupCall) {
+        handleHangUp();
+      }
+    };
 
     socket.on(USER_HANG_UP, onUserHangUP);
 
     return () => {
-      socket.off(USER_HANG_UP, onUserHangUP)
-    }
-  }, [socket, isCalling, removePlayer])
+      socket.off(USER_HANG_UP, onUserHangUP);
+    };
+  }, [socket, isCalling, removePlayer, isGroupCall, handleHangUp]);
 
   // * Listen for Audio and Video Toggle Events
   useEffect(() => {
@@ -293,7 +363,7 @@ const VideoCall = () => {
 
   // * Listen for Page Refresh and Notify user has left in the room
   useEffect(() => {
-    if(!socket || !isCalling || !peer) return;
+    if (!socket || !isCalling || !peer) return;
 
     const onPageReload = (event: BeforeUnloadEvent) => {
       const customMessage =
@@ -304,22 +374,20 @@ const VideoCall = () => {
 
       // Return the custom message to display it along with the default browser message
       return customMessage;
-    }
+    };
 
     window.addEventListener('beforeunload', onPageReload);
 
     window.addEventListener('pagehide', () => {
       peer?.destroy();
       // socket.emit(USER_HANG_UP, { user: 'Kalwa', roomId: 'kela' })
-    })
-
+    });
 
     return () => {
       window.removeEventListener('beforeunload', onPageReload);
-      window.removeEventListener('pagehide', () => {})
-    }
-
-  }, [isCalling, peer, socket])
+      window.removeEventListener('pagehide', () => {});
+    };
+  }, [isCalling, peer, socket]);
 
   const handleToggleAudio = () => {
     // setCtaStates((prev) => ({ ...prev, muted: !prev.muted }));
@@ -338,17 +406,13 @@ const VideoCall = () => {
   const handleLeave = () => {
     handleHangUp();
     blockNavigation.proceed && blockNavigation.proceed();
-  }
+  };
 
   const handleCancel = () => {
-    blockNavigation.state === 'blocked' && blockNavigation.reset &&  blockNavigation.reset();
-  }
-
-  const numOfPlayers = useMemo(() => Object.keys(players).length, [players]);
-
-  console.log(players);
-  
-  
+    blockNavigation.state === 'blocked' &&
+      blockNavigation.reset &&
+      blockNavigation.reset();
+  };
 
   return (
     <Modal
@@ -418,7 +482,9 @@ const VideoCall = () => {
               icon={<MdCallEnd className="text-2xl text-white" />}
             />
           </Modal.Footer>
-          {blockNavigation.state === 'blocked' && <BlockModal handleLeave={handleLeave} handleCancel={handleCancel} />}
+          {blockNavigation.state === 'blocked' && (
+            <BlockModal handleLeave={handleLeave} handleCancel={handleCancel} />
+          )}
         </>
       )}
     </Modal>
