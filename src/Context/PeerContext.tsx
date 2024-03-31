@@ -209,15 +209,3 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
 export default PeerProvider;
 
 export const usePeer = () => useContext(peerContext);
-
-// ! New Features and Bugs
-// TODO: Add Search User Functionality in Chats List - Fixed
-// TODO: Fetch Max 30 messages at a time. Implement Messages Loader on Scroll - Fixed
-// ! BUG: Fix Audio WaveForm Z-index Issue - Fixed
-// TODO: Add shouldModalCloseOnESC ? Feature for Modals. - Fixed
-// ! BUG: Fix Call Notifier on Light Mode - Fixed
-// ! BUG: Removed messages Loader Skeleton with better loader - Fixed
-// TODO: Implement User already in Call functionality. - Fixed
-// TODO: Find new Color for Other user messages - Fixed
-// TODO: Do not notify with sound when message received in active chat - Fixed
-// TODO: Removed Search with Number while creating Chats / Group (Privacy Constraint) - Fixed

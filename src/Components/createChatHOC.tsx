@@ -128,28 +128,6 @@ const createChatHOC =
           customFetch.post<IChatCreation>('/chats' + (isGroupChat ? '/group' : ''), variables),
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // const loadOptions = (inputValue: string, callback: any): void => {
-      //   customFetch
-      //     .get<IUsersResponse>('/chats/users', {
-      //       params: {
-      //         type: searchType.value,
-      //         search: inputValue,
-      //       },
-      //     })
-      //     .then(({ data }) => {
-      //       const users = data.users.map((user) => {
-      //         return {
-      //           ...user,
-      //           label: user[searchType.value as keyof IUserData] || user.name,
-      //           value: user._id,
-      //         };
-      //       });
-
-      //       callback(users);
-      //     });
-      // };
-
       // eslint-disable-next-line react-hooks/exhaustive-deps
       const loadOptionsDebounced = useCallback(
         debounce(loadOptions(searchType)),
@@ -157,7 +135,6 @@ const createChatHOC =
       );
 
       // * Add Chat Click Handler
-      // TODO: Need to Handle the edge when API returns successful for trying to create an existing chat again
       const handleAddChat = () => {
         if (!data) {
           toast.error('Please select a user.');

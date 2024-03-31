@@ -1,7 +1,5 @@
 import './App.scss';
 
-// TODO Make Login, Register, Profile Pages Lazy Load
-
 // * RQ
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const queryClient = new QueryClient({
@@ -23,9 +21,6 @@ import {
 import {
   HomeLayout,
   Error,
-  VerfiyEmail,
-  ForgotPassword,
-  ResetPassword,
   ChatsContainer,
   Chat,
   NoChatSelected,
@@ -38,7 +33,7 @@ import { loginAction } from './Pages/Auth/Login';
 import { registerAction } from './Pages/Auth/Register';
 
 // * Loader
-import { ChatLoader } from "./Pages/Chat/Chat";
+import { ChatLoader } from './Pages/Chat/Chat';
 
 const router = createBrowserRouter([
   {
@@ -58,7 +53,6 @@ const router = createBrowserRouter([
         path: '',
         element: <ChatsContainer />,
         errorElement: <ErrorElement />,
-        // loader: chatsLoader(queryClient),
         children: [
           {
             path: '',
@@ -117,17 +111,31 @@ const router = createBrowserRouter([
   },
   {
     path: '/verify-email',
-    element: <VerfiyEmail />,
+    lazy: async () => {
+      const VerifyEmailComponent = await import('./Pages/Auth/VerifyEmail');
+
+      return { Component: VerifyEmailComponent.default };
+    },
     errorElement: <Error />,
   },
   {
     path: '/forgot-password',
-    element: <ForgotPassword />,
+    lazy: async () => {
+      const ForgotPasswordComponent = await import(
+        './Pages/Auth/ForgotPassword'
+      );
+
+      return { Component: ForgotPasswordComponent.default };
+    },
     errorElement: <Error />,
   },
   {
     path: '/reset-password',
-    element: <ResetPassword />,
+    lazy: async () => {
+      const ResetPasswordComponent = await import('./Pages/Auth/ResetPassword');
+
+      return { Component: ResetPasswordComponent.default };
+    },
     errorElement: <Error />,
   },
   {
