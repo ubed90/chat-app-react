@@ -15,7 +15,6 @@ const queryClient = new QueryClient({
 //* RR 6+
 import {
   createBrowserRouter,
-  Navigate,
   RouterProvider,
 } from 'react-router-dom';
 import {
@@ -24,6 +23,7 @@ import {
   ChatsContainer,
   Chat,
   NoChatSelected,
+  Home,
 } from './Pages';
 import { AuthGuard, ErrorElement } from './Components';
 import { store } from './Store';
@@ -37,8 +37,8 @@ import { ChatLoader } from './Pages/Chat/Chat';
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <Navigate replace to="/chats" />,
+    path: '',
+    element: <Home />,
   },
   {
     path: '/chats',

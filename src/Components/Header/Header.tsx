@@ -55,8 +55,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await customFetch.post('/auth/logout');
-      dispatch(logoutUser({ msg: 'Logout Successful 🚀' }));
-      return navigate('/login');
+      return dispatch(logoutUser({ msg: 'Logout Successful 🚀' }));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response.data.message);
@@ -67,7 +66,7 @@ const Header = () => {
     <header className="border-b border-base-300">
       <nav className="navbar bg-neutral min-h-0 h-full px-4 py-4 sm:px-6">
         <section className="navbar-start">
-          <Logo />
+          <Logo url='/chats' />
         </section>
         <section className="navbar-end flex items-center justify-end gap-4">
           <div className="dropdown dropdown-end">
