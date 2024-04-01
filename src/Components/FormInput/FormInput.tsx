@@ -13,6 +13,7 @@ type FormInputProps = {
   value?: string;
   hideLabel?: boolean;
   customClasses?: string;
+  containerClasses?: string;
   handleChange?(handleChangeProps: { key: string; value: string }): void;
   marginRequired?: boolean;
 };
@@ -27,6 +28,7 @@ const Input: React.FC<FormInputProps & InputHTMLAttributes<HTMLInputElement>> = 
   errors,
   borderRadius = 'rounded-lg',
   customClasses = '',
+  containerClasses,
   required = false,
   hideLabel = false,
   handleChange = () => {},
@@ -47,7 +49,7 @@ const Input: React.FC<FormInputProps & InputHTMLAttributes<HTMLInputElement>> = 
     <div
       className={`form-control w-full relative md:col-span-full ${marginRequired && 'mb-7'} ${
         type === 'hidden' ? 'hidden' : ''
-      }`}
+      } ${containerClasses}`}
     >
       {!hideLabel && (
         <label

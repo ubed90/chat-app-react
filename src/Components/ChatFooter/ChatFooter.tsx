@@ -18,6 +18,7 @@ import { IUserData } from '../../models/user.model';
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import SendAudio from '../SendAudio';
 import { addMessage } from '../../features/chat';
+import useOnClickOutside from '../../utils/hooks/useOnClickOutside';
 
 const FILE_TYPES = {
   IMAGE: ['png', 'jpg', 'jpeg'],
@@ -64,7 +65,6 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
 
   const handleEmojiClick = (event: EmojiClickData) => {
     setContent(prevContent => prevContent + event.emoji)
-    setEmojiPicker(false);
   }
 
   const [localTyping, setLocalTyping] = useState(false);
@@ -171,13 +171,22 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
     dispatch(addMessage({ message: attachmentMessage }))
   };
 
+  // * Emoji Picker ref
+  const emojiPickerRef = useRef<HTMLDivElement>(null)
+
+  // * logic to Close Emoji Picker when clicked Outside
+  useOnClickOutside(emojiPickerRef, () => setEmojiPicker(false))
+
   return (
     <footer className="local-chat-footer p-4 border-t-[1px] border-t-accent flex items-stretch gap-4">
       {showAudioRecorder ? (
-        <SendAudio cancelRecording={toggleAudioRecorderStatus} handleFileUpload={handleFileUpload} />
+        <SendAudio
+          cancelRecording={toggleAudioRecorderStatus}
+          handleFileUpload={handleFileUpload}
+        />
       ) : (
         <>
-          <div className="dropdown dropdown-top">
+          <div className="dropdown dropdown-top z-10">
             <button className="btn btn-square btn-lg btn-neutral rounded-xl">
               <GrAttachment className="text-2xl" />
             </button>
@@ -243,13 +252,16 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
               >
                 <BsFillEmojiLaughingFill className="text-3xl text-gray-500" />
               </button>
-              <EmojiPicker
-                className="!w-[25rem] md:!w-[32rem] absolute bottom-[46rem] left-full -translate-x-full"
-                height="40rem"
-                theme={Theme.DARK}
-                open={emojiPicker}
-                onEmojiClick={handleEmojiClick}
-              />
+              <div ref={emojiPickerRef}>
+                <EmojiPicker
+                  className="!w-[25rem] md:!w-[32rem] absolute bottom-[46rem] left-full -translate-x-full"
+                  height="40rem"
+                  theme={Theme.DARK}
+                  open={emojiPicker}
+                  onEmojiClick={handleEmojiClick}
+                  searchDisabled
+                />
+              </div>
             </div>
             {content.length ? (
               <button

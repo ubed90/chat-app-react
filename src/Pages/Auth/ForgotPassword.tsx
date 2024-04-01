@@ -50,40 +50,6 @@ const ForgotPassword = () => {
     );
   };
 
-//   if (isPending)
-//     return (
-//       <section className="px-4 w-full h-full flex flex-col gap-y-8 items-center justify-center">
-//         <span className="loading loading-bars loading-lg text-accent"></span>
-//         <h5 className="text-2xl md:text-4xl text-accent">
-//           Please wait you request is being processed...
-//         </h5>
-//       </section>
-//     );
-
-//   if (isError) {
-//     return (
-//       <section className="px-4 w-full h-full flex flex-col gap-y-6 items-center justify-center">
-//         <ImSad2 className="text-7xl" />
-//         <h5 className="text-2xl md:text-4xl text-accent">
-//           {(error &&
-//             error.response &&
-//             error.response.data &&
-//             error.response.data.message) ||
-//             'There was some error processing your request...'}
-//         </h5>
-//         <p className="text-lg md:text-2xl tracking-wider">
-//           There was some error. Please try again later.
-//         </p>
-//         <Link
-//           to="/login"
-//           className="btn btn-lg btn-outline btn-wide btn-secondary rounded-xl text-2xl"
-//         >
-//           Back to Login
-//         </Link>
-//       </section>
-//     );
-//   }
-
   if (isSuccess)
     return (
       <section className="px-4 w-full h-full flex flex-col gap-y-6 items-center justify-center">

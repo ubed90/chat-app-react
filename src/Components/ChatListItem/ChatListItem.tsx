@@ -6,10 +6,10 @@ import { getOtherUserDetails } from '../../utils/getOtherUser';
 import dayjs from 'dayjs';
 import './/ChatListItem.scss';
 import { useNavigate } from 'react-router-dom';
-import { deleteNotification, setSelectedChat } from '../../features/chat';
+import { clearMessages, deleteNotification, setSelectedChat } from '../../features/chat';
 import { useQueryClient } from '@tanstack/react-query';
 
-const ChatListItem: React.FC<IChat> = (chat) => {
+let ChatListItem: React.FC<IChat> = (chat) => {
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
 
@@ -38,6 +38,7 @@ const ChatListItem: React.FC<IChat> = (chat) => {
         return newChats;
       });
     }
+    dispatch(clearMessages())
     dispatch(setSelectedChat(chat));
     queryClient.invalidateQueries({ queryKey: ['chat', chat._id] })
     return navigate(chat._id as string, { relative: 'path' });
@@ -133,5 +134,7 @@ const ChatListItem: React.FC<IChat> = (chat) => {
     </li>
   );
 };
+
+ChatListItem = React.memo(ChatListItem);
 
 export default ChatListItem;

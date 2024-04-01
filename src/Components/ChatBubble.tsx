@@ -56,7 +56,7 @@ let ChatBubble: React.FC<ChatBubbleProps> = ({
       </div>
       <div
         className={`chat-bubble rounded-xl text-2xl text-justify relative ${
-          sentByYou ? 'pr-8' : 'chat-bubble-success text-white'
+          sentByYou ? 'pr-8' : 'chat-bubble-secondary text-white'
         }`}
       >
         {message?.content}

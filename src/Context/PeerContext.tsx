@@ -1,5 +1,5 @@
 import Peer from 'peerjs';
-import { PropsWithChildren, createContext, useContext, useState } from 'react';
+import { PropsWithChildren, createContext, useContext, useEffect, useState } from 'react';
 import { IUserData } from '../models/user.model';
 
 type Caller = {
@@ -84,7 +84,7 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
           peer.reconnect();
         }
 
-        return resolve(peer.id)
+        return resolve(peer.id);
       }
 
       const myPeer = new Peer({
@@ -95,13 +95,52 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
           ? {}
           : { port: Number(import.meta.env.VITE_PEER_PORT) }),
         ...(import.meta.env.PROD ? { secure: true } : {}),
+        config: {
+          iceServers: [
+            {
+              urls: 'stun:stun.relay.metered.ca:80',
+            },
+            {
+              urls: 'turn:global.relay.metered.ca:80',
+              username: 'fc02a8dcd56db1322b8e6509',
+              credential: 'Rnuo/x5ugZ0Uxe3a',
+            },
+            {
+              urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+              username: 'fc02a8dcd56db1322b8e6509',
+              credential: 'Rnuo/x5ugZ0Uxe3a',
+            },
+            {
+              urls: 'turn:global.relay.metered.ca:443',
+              username: 'fc02a8dcd56db1322b8e6509',
+              credential: 'Rnuo/x5ugZ0Uxe3a',
+            },
+            {
+              urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+              username: 'fc02a8dcd56db1322b8e6509',
+              credential: 'Rnuo/x5ugZ0Uxe3a',
+            },
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+          ],
+        },
       });
 
       
       myPeer.on('open', (id) => {
-        console.log('PEER CREATED / RECONNECTED :: ', id);
-        setPeer(myPeer);
-        return resolve(id);
+        setPeer(prevPeer => {
+          if(prevPeer) {
+            console.log('PEER RECONNECTED :: ', id);
+            return prevPeer;
+          }
+
+          console.log('PEER CREATED :: ', id);
+          resolve(id);
+          return myPeer;
+        });
       })
 
       myPeer.on('error', (error) => {
@@ -112,8 +151,8 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   };
 
   const destroyPeer = () => {
-    console.log("PEER SET TO NULL ::");
     if(peer) {
+      console.log("PEER DISCONNECTED ::");
       peer.disconnect();
     }
   };
@@ -126,6 +165,17 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   };
 
   const handleIsGroupCall = (value: boolean) => setIsGroupCall(value);
+
+  useEffect(() => {
+
+    return () => {
+      if(peer) {
+        console.log("PEER DESTROYED :: ", peer.id);
+        peer.destroy();
+        setPeer(null)
+      }
+    }
+  }, [peer])
 
   return (
     <peerContext.Provider

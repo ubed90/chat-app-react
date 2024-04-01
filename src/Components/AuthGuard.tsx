@@ -8,7 +8,7 @@ const AuthGuard: React.FC<PropsWithChildren> = ({ children }) => {
 
     if(!user) {
         // toast.warning('Session expired. Please login again')
-        return <Navigate to='/login' replace />
+        return <Navigate to='/' replace />
     }
 
   return <>

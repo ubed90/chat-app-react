@@ -113,9 +113,9 @@ const onNewMessage =
           value: existingNotification as any,
         })
       );
-    }
 
-    notificationRef?.current?.play();
+      notificationRef?.current?.play();
+    }
   };
 
 const onNewChat =

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { RootState, store } from '../Store';
 import {
   CALL_OFFER_RECEIVED,
+  CALL_REJECTED,
   CONNECTED_EVENT,
   DELETE_CHAT_EVENT,
   DISCONNECT_EVENT,
@@ -117,6 +118,14 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
 
     const onIncomingCall = ({ caller, roomId, callType, groupName }: { caller: IUserData, roomId: string, callType: "Audio" | 'Video', groupName?: string }) => {
       console.log('INCOMING CALL REQUEST FROM :: ', caller, roomId, callType);
+
+      if(incomingCall || isVideoCall || isAudioCall) {
+        return socket?.emit(CALL_REJECTED, {
+          callerId: caller._id,
+          reason: "Receiver is Busy on another call.",
+        });
+      }
+
       handleIncomingCall(true);
       handleCaller({ caller, roomId, callType, ...(groupName ? { groupName } : {}) });
       
@@ -132,7 +141,7 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
       
       socket.off(CALL_OFFER_RECEIVED, onIncomingCall);
     };
-  }, [socket]);
+  }, [handleCaller, handleIncomingCall, handleIsGroupCall, incomingCall, isAudioCall, isVideoCall, socket]);
 
   return (
     <main className="app-grid with-header">

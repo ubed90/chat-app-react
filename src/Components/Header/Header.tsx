@@ -55,8 +55,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await customFetch.post('/auth/logout');
-      dispatch(logoutUser({ msg: 'Logout Successful 🚀' }));
-      return navigate('/login');
+      return dispatch(logoutUser({ msg: 'Logout Successful 🚀' }));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response.data.message);
@@ -67,7 +66,7 @@ const Header = () => {
     <header className="border-b border-base-300">
       <nav className="navbar bg-neutral min-h-0 h-full px-4 py-4 sm:px-6">
         <section className="navbar-start">
-          <Logo />
+          <Logo url='/chats' />
         </section>
         <section className="navbar-end flex items-center justify-end gap-4">
           <div className="dropdown dropdown-end">
@@ -141,11 +140,13 @@ const Header = () => {
             </ul>
           </div>
           <div className="dropdown dropdown-end flex">
-            <button
-              className="btn btn-ghost btn-circle"
-            >
+            <button className="btn btn-ghost btn-circle">
               {user?.profilePicture ? (
-                <div className="avatar w-12c aspect-square rounded-full overflow-hidden ring-primary ring-1">
+                <div
+                  className={`avatar w-12 aspect-square rounded-full overflow-hidden ring-primary ring-1 ${
+                    theme === Themes.LIGHT ? 'ring-white ring-2' : ''
+                  }`}
+                >
                   <img
                     src={user.profilePicture || user.profilePicture?.url}
                     className="!object-contain w-full h-full"
@@ -163,7 +164,7 @@ const Header = () => {
             </button>
             <ul
               tabIndex={0}
-              className="mt-20 z-[1] p-4 shadow menu menu-lg !text-2xl dropdown-content bg-neutral rounded-xl w-64 gap-2 text-white"
+              className="mt-20 z-[5] p-4 shadow menu menu-lg !text-2xl dropdown-content bg-neutral rounded-xl w-64 gap-2 text-white"
             >
               <li>
                 <NavLink

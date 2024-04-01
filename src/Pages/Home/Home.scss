@@ -1,0 +1,71 @@
+@use '../../assets/sass/abstracts/' as *;
+@use '../../assets/sass/base/' as *;
+
+nav, .main {
+    width: min(95%, 90rem);
+    margin-inline: auto;
+}
+
+.main {
+    &-right {
+        &-image {
+            animation: shake 10s ease-in-out alternate infinite;
+
+            @include respond(tab-port) {
+                width: 1000px;
+                max-width: 1000px !important;
+                transform: translateX(-5%);
+
+                animation: none;
+            }
+
+            @include respond(tab-land) {
+                transform: translateX(0);
+            }
+        }
+    }
+}
+
+.shapes {
+    z-index: -1;
+}
+
+.cube {
+    position: absolute;
+    top: 100%;
+    left: 45%;
+    width: 10px;
+    height: 10px;
+    border: solid 1px rgb(215 212 228 / 0.25);
+    transform-origin: top left;
+    transform: scale(0) rotate(0deg) translate(-50%, -50%);
+    animation: cube 8s ease-in forwards infinite;
+}
+
+.cube:nth-child(2n + 1) {
+    border-color: rgb(255 255 255 / 0.5);
+}
+
+.cube:nth-child(2) {
+    animation-delay: 1s;
+    left: 90%;
+    top: 90%;
+}
+
+.cube:nth-child(3) {
+    animation-delay: 5s;
+    left: 90%;
+    top: 10%;
+}
+
+.cube:nth-child(4) {
+    animation-delay: 7s;
+    left: 10%;
+    top: 50%;
+}
+
+.cube:nth-child(5) {
+    animation-delay: 9s;
+    left: 50%;
+    top: 10%;
+}
