@@ -39,7 +39,10 @@ type Props = {
 }
 
 let AddUserToGroup: React.FC<Props> = ({ onSuccess }) => {
-  const { selectedChat } = useSelector((state: RootState) => state.chat);
+  const selectedChat = useSelector((state: RootState) => state.chat.selectedChat);
+  const userId = useSelector(
+    (state: RootState) => state.user.user?._id
+  );
   const [selectedUser, setselectedUser] = useState<IUserData | null>(null);
 
   const handleSelect = (user: IUserData) => {
@@ -69,7 +72,7 @@ let AddUserToGroup: React.FC<Props> = ({ onSuccess }) => {
       onSuccess({ data }) {
         if (data.status !== 'success') return;
 
-        queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+        queryClient.setQueryData(['all-chats', userId], (chats: IChat[]) => {
           const newChats: IChat[] = structuredClone(chats);
 
           const chat = newChats.find((chat) => chat._id === data.chat._id);

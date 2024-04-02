@@ -1,8 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RootState, useAppDispatch } from '../../Store';
-import { addMessage, clearMessages, clearUnreadMessages, setMessages, setSelectedChat } from '../../features/chat';
+import {
+  addMessage,
+  clearMessages,
+  clearUnreadMessages,
+  setMessages,
+  setSelectedChat,
+} from '../../features/chat';
 import { LoaderFunction, useParams } from 'react-router-dom';
-import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import customFetch from '../../utils/customFetch';
 import {
   IMessageResponse,
@@ -32,29 +43,31 @@ import throttle from '../../utils/throttle';
 import { FaArrowDown } from 'react-icons/fa';
 import { Store } from '@reduxjs/toolkit';
 
+export const ChatLoader =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ChatLoader = (queryClient: QueryClient, store: Store<RootState, any>): LoaderFunction => async ({ params }) => {
-  const { id } = params;
-  const selectedChat = store.getState().chat.selectedChat;
+  (queryClient: QueryClient, store: Store<RootState, any>): LoaderFunction =>
+  async ({ params }) => {
+    const { id } = params;
+    const selectedChat = store.getState().chat.selectedChat;
 
-  if(!selectedChat) {
-    const { data } = await queryClient.ensureQueryData({
-      queryKey: ['current-chat', id],
-      queryFn: () => customFetch.get<IChatCreation>(`/chats/${id}`)
-    })
-    
-    store.dispatch(setSelectedChat(data.chat));
-  }
+    if (!selectedChat) {
+      const { data } = await queryClient.ensureQueryData({
+        queryKey: ['current-chat', id],
+        queryFn: () => customFetch.get<IChatCreation>(`/chats/${id}`),
+      });
 
-  return null;
-}
+      store.dispatch(setSelectedChat(data.chat));
+    }
+
+    return null;
+  };
 
 export type CallProps = {
   isUserOnline: boolean;
 };
 
 const Chat = () => {
-  // * User and Selected chat to seklectively show only List or Chat as per Mobile / Desktop layout
+  // * User and Selected chat to selectively show only List or Chat as per Mobile / Desktop layout
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
 
@@ -62,7 +75,10 @@ const Chat = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const messages = useSelector((state: RootState) => state.chat.messages);
 
-  const numOfMessages = useMemo(() => Object.keys(messages || {}).length, [messages]);
+  const numOfMessages = useMemo(
+    () => Object.keys(messages || {}).length,
+    [messages]
+  );
 
   const dispatch = useAppDispatch();
 
@@ -112,17 +128,9 @@ const Chat = () => {
       },
       {
         onSuccess: ({ data }) => {
-          // ! Not required since we are moving from RTK Query to Redux
-          // queryClient.setQueryData(
-          //   ['chat', selectedChat?._id],
-          //   (oldMessages: IMessage[]) => {
-          //     const newMessages = [data.newMessage, ...oldMessages];
-          //     return newMessages;
-          //   }
-          // );
           dispatch(addMessage({ message: data.newMessage }));
 
-          queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+          queryClient.setQueryData(['all-chats', user?._id], (chats: IChat[]) => {
             let newChats: IChat[] = structuredClone(chats);
 
             const chat = newChats.find(
@@ -154,16 +162,21 @@ const Chat = () => {
 
   const fetchMessages = async (page: number) => {
     if(page > 0) {
-      messageRef.current?.scrollTo({ top: -messageRef.current.scrollHeight, behavior: 'smooth' })
+      messageRef.current?.scrollTo({
+        top: -messageRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
     }
-    const { data } = await customFetch.get<IMessageResponse>(`/message/${id}/${page}`);
-    if(isOnline !== data.isOnline) {
+    const { data } = await customFetch.get<IMessageResponse>(
+      `/message/${id}/${page}`
+    );
+    if (isOnline !== data.isOnline) {
       setIsOnline(data.isOnline);
     }
     totalPages.current = data.pages;
     dispatch(setMessages({ messages: data.messages }));
     return data.messages;
-  }
+  };
 
   // * Query to fetch data dynamically when Single Chat is Loaded
   const {
@@ -175,9 +188,12 @@ const Chat = () => {
     isPlaceholderData,
     refetch: refetchMessages,
   } = useQuery({
-    queryKey: ['chat', id, page],
+    queryKey: ['chat', id, user?._id, page],
     queryFn: () => fetchMessages(page),
-    placeholderData: Object.keys(messages || []).length > 0 ? Object.values(messages || []) : []
+    placeholderData:
+      Object.keys(messages || []).length > 0
+        ? Object.values(messages || [])
+        : [],
   });
 
   // * CHeck whether the user is at the bottom or not
@@ -186,8 +202,8 @@ const Chat = () => {
   // * Ref for Message Box
   const messageRef = useRef<HTMLDivElement | null>(null);
 
-  const handleScroll = useCallback(throttle(
-    (event: React.UIEvent<HTMLElement, UIEvent>) => {
+  const handleScroll = useCallback(
+    throttle((event: React.UIEvent<HTMLElement, UIEvent>) => {
       const scrollHeight = (event.target as HTMLElement).scrollHeight;
       const scrollTop = Math.abs((event.target as HTMLElement).scrollTop);
       const clientHeight = (event.target as HTMLElement).clientHeight;
@@ -200,16 +216,24 @@ const Chat = () => {
       }
 
       // * Logic for Fetching old messages
-      const reachedTop = scrollHeight === scrollTop + clientHeight;
+      const reachedTop = scrollHeight - (scrollTop + clientHeight) <= 50;
 
-      if(reachedTop) {
-        if(page < totalPages.current) {
-          setPage(prevPage => prevPage + 1)
+      console.log(
+        'Is Top Reached ? %o, ScrollHeight: %d, ScrollTop: %d, ClientHeight: %d',
+        reachedTop,
+        scrollHeight,
+        scrollTop,
+        clientHeight
+      );
+
+      if (reachedTop) {
+        if (page < totalPages.current) {
+          setPage((prevPage) => prevPage + 1);
         }
       }
-    },
-    1000
-  ), [page])
+    }, 1000),
+    [page]
+  );
 
   // * Socket to join the current Chat room
   const { socket } = useSocket();
@@ -295,7 +319,8 @@ const Chat = () => {
 
   // * Set / Unset Available Users for One on One Chat
   useEffect(() => {
-    if (!socket || !selectedChat?._id || !user?._id || selectedChat.isGroupChat) return;
+    if (!socket || !selectedChat?._id || !user?._id || selectedChat.isGroupChat)
+      return;
 
     const handleJoinChatEvent = (props: { chatId: string; userId: string }) => {
       if (props.chatId !== selectedChat._id) return;
@@ -305,15 +330,15 @@ const Chat = () => {
         userId: user._id,
         otherUser: props.userId,
       });
-      
+
       setIsInRoom((prev) => {
-        if(!prev) {
+        if (!prev) {
           dispatch(clearUnreadMessages());
-          return true
+          return true;
         }
 
-        return prev
-      })
+        return prev;
+      });
     };
 
     // * Handle Leave Chat Event
@@ -323,7 +348,7 @@ const Chat = () => {
     }) => {
       if (props.chatId !== selectedChat._id) return;
 
-      setIsInRoom(false)
+      setIsInRoom(false);
     };
 
     // * Handle Existing Users Event
@@ -349,11 +374,17 @@ const Chat = () => {
 
       socket.off(EXISTING_USERS_EVENT, handleExistingUsersEvent);
     };
-  }, [dispatch, selectedChat?._id, selectedChat?.isGroupChat, socket, user?._id]);
+  }, [
+    dispatch,
+    selectedChat?._id,
+    selectedChat?.isGroupChat,
+    socket,
+    user?._id,
+  ]);
 
   // * Use Effect For Scroll Events of Message Container
   useEffect(() => {
-    if(isLoading || numOfMessages === 0) return;
+    if (isLoading || numOfMessages === 0) return;
 
     const messageContainer = messageRef.current;
 
@@ -361,8 +392,8 @@ const Chat = () => {
 
     return () => {
       messageContainer?.removeEventListener('scroll', handleScroll);
-    }
-  }, [handleScroll, isLoading, numOfMessages])
+    };
+  }, [handleScroll, isLoading, numOfMessages]);
 
   if (isError)
     return (
@@ -394,7 +425,8 @@ const Chat = () => {
       >
         {isLoading && numOfMessages === 0 && <MessagesLoader isFullPage />}
         {!isLoading &&
-          !messagesPending && !isFetching &&
+          !messagesPending &&
+          !isFetching &&
           !isPlaceholderData &&
           numOfMessages === 0 && (
             <div className="flex flex-col items-center">
@@ -447,7 +479,6 @@ const Chat = () => {
 };
 
 export default Chat;
-
 
 const MessagesLoader = ({ isFullPage = false }: { isFullPage?: boolean }) => (
   <div

@@ -14,7 +14,10 @@ type EditGroupNameProps = {
 }
 
 let EditGroupName: React.FC<EditGroupNameProps> = ({ onSuccess }) => {
-  const { selectedChat } = useSelector((state: RootState) => state.chat);
+  const selectedChat = useSelector(
+    (state: RootState) => state.chat.selectedChat
+  );
+  const userId = useSelector((state: RootState) => state.user.user?._id);
   const [groupName, setGroupName] = useState<string>(
     selectedChat?.name as string
   );
@@ -43,21 +46,24 @@ let EditGroupName: React.FC<EditGroupNameProps> = ({ onSuccess }) => {
         onSuccess({ data }) {
             if(data.status !== 'success') return;
 
-            queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
-              const newChats: IChat[] = structuredClone(chats);
+            queryClient.setQueryData(
+              ['all-chats', userId],
+              (chats: IChat[]) => {
+                const newChats: IChat[] = structuredClone(chats);
 
-              const chat = newChats.find(
-                (chat) => chat._id === data.chat._id
-              );
+                const chat = newChats.find(
+                  (chat) => chat._id === data.chat._id
+                );
 
-              if (!chat) return newChats;
+                if (!chat) return newChats;
 
-              chat['name'] = data.chat.name;
+                chat['name'] = data.chat.name;
 
-              dispatch(setSelectedChat(chat));
+                dispatch(setSelectedChat(chat));
 
-              return newChats;
-            });
+                return newChats;
+              }
+            );
 
             toast.success(data.message + ' 🚀')
             onSuccess && onSuccess();

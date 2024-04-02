@@ -24,7 +24,7 @@ let ChatListItem: React.FC<IChat> = (chat) => {
   const handleChatSelect = () => {
     if(chat?.notify) {
       dispatch(deleteNotification({ key: chat._id as string }));
-      queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+      queryClient.setQueryData(['all-chats', user?._id], (chats: IChat[]) => {
         const newChats: IChat[] = structuredClone(chats);
 
         const existingChat = newChats.find(

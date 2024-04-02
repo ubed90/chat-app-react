@@ -20,6 +20,7 @@ const VerifyEmail = () => {
       customFetch.post('/auth/verify-email', null, {
         params: { email, token },
       }),
+    networkMode: 'online'
   });
 
   if (isLoading)

@@ -29,7 +29,7 @@ const Header = () => {
     switch (notification.action) {
       case 'NEW_CHAT':
       case 'NEW_MESSAGE': {
-        queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+        queryClient.setQueryData(['all-chats', user?._id], (chats: IChat[]) => {
           const newChats: IChat[] = structuredClone(chats);
 
           const existingChat = newChats.find((chat) => chat._id === key);

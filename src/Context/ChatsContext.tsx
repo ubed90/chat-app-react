@@ -7,18 +7,19 @@ import {
 import { IChat, IChatResponse } from '../models/chat.model';
 import { PropsWithChildren, createContext, useContext, useEffect } from 'react';
 import customFetch from '../utils/customFetch';
-import { useAppDispatch } from '../Store';
+import { RootState, useAppDispatch } from '../Store';
 import { logoutUser } from '../features/user';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-const chatsQuery = {
-  queryKey: ['all-chats'],
+const chatsQuery = (userId: string | undefined) => ({
+  queryKey: ['all-chats', userId],
   queryFn: async () => {
     const { data } = await customFetch.get<IChatResponse>('/chats');
 
     return data.chats;
   },
-};
+});
 
 type ChatsContext = {
   chats: IChat[];
@@ -40,6 +41,8 @@ const ChatsContext = createContext<ChatsContext>({
 });
 
 export const ChatsProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  const userId = useSelector((state: RootState) => state.user.user?._id)
+
   const {
     data,
     isLoading,
@@ -47,7 +50,7 @@ export const ChatsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     isRefetching,
     error,
     refetch: fetchChats,
-  } = useQuery(chatsQuery);
+  } = useQuery(chatsQuery(userId));
 
   const navigate = useNavigate();
 
