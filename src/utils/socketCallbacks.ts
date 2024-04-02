@@ -24,16 +24,12 @@ const onNewMessage =
   ({ store, notificationRef, queryClient }: CallbackProps) =>
   ({ newMessage, chat }: { newMessage: IMessage; chat: IChat }) => {
     const id = store.getState().chat.selectedChat?._id;
+    const userId = store.getState().user.user?._id;
 
     if (id && id === newMessage.chat) {
-      // ! Since we are moving from RTK Query to Redux this is not required.
-      // queryClient.setQueryData(['chat', id], (oldMessages: IMessage[]) => {
-      //   const newMessages = [newMessage, ...oldMessages];
-      //   return newMessages;
-      // });
       store.dispatch(addMessage({ message: newMessage }));
 
-      queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+      queryClient.setQueryData(['all-chats', userId], (chats: IChat[]) => {
         const newChats: IChat[] = structuredClone(chats);
 
         const chat = newChats.find((chat) => chat._id === newMessage.chat);
@@ -79,19 +75,7 @@ const onNewMessage =
         ...(chat.isGroupChat ? { isGroupChat: true, chatName: chat.name } : {}),
       };
 
-      // ! I guess we dont require this coz we are anyhow Refetching the latest messages on CLick
-      // queryClient.setQueryData(
-      //   ['chat', newMessage.chat],
-      //   (oldMessages: IMessage[] | undefined) => {
-      //     let newMessages = [newMessage];
-      //     if (oldMessages) {
-      //       newMessages = [...newMessages, ...oldMessages];
-      //     }
-      //     return newMessages;
-      //   }
-      // );
-
-      queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+      queryClient.setQueryData(['all-chats', userId], (chats: IChat[]) => {
         let newChats: IChat[] = structuredClone(chats);
 
         const chat = newChats.find((chat) => chat._id === newMessage.chat);
@@ -120,7 +104,9 @@ const onNewMessage =
 
 const onNewChat =
   ({ queryClient, store, notificationRef }: CallbackProps) => (chat: IChat) => {
-    queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+    const userId = store.getState().user.user?._id;
+
+    queryClient.setQueryData(['all-chats', userId], (chats: IChat[]) => {
       let newChats: IChat[] = structuredClone(chats);
 
       chat.notify = 'new';
@@ -158,6 +144,7 @@ const onDeleteChat =
   ) =>
   ({ deletedChat, name }: { deletedChat: IChat; name: string }) => {
     const selectedChatId = store.getState().chat.selectedChat?._id;
+    const userId = store.getState().user.user?._id;
     const notificationExists =
       store.getState()?.chat?.notification?.[deletedChat._id as string];
 
@@ -174,7 +161,7 @@ const onDeleteChat =
       store.dispatch(deleteNotification({ key: deletedChat._id as string }));
     }
 
-    queryClient.setQueryData(['all-chats'], (chats: IChat[] | undefined) => {
+    queryClient.setQueryData(['all-chats', userId], (chats: IChat[] | undefined) => {
       const allChats = structuredClone(chats)?.filter(
         (chat) => chat._id !== deletedChat._id
       );
@@ -198,6 +185,7 @@ const onRemove =
   ) =>
   (chat: IChat) => {
     const selectedChatId = store.getState().chat.selectedChat?._id;
+    const userId = store.getState().user.user?._id;
     const notificationExists =
       store.getState()?.chat?.notification?.[chat._id as string];
 
@@ -214,7 +202,7 @@ const onRemove =
       store.dispatch(deleteNotification({ key: chat._id as string }));
     }
 
-    queryClient.setQueryData(['all-chats'], (chats: IChat[] | undefined) => {
+    queryClient.setQueryData(['all-chats', userId], (chats: IChat[] | undefined) => {
       const allChats = structuredClone(chats)?.filter(
         (chat) => chat._id !== chat._id
       );
@@ -229,8 +217,9 @@ const onGroupRename =
   (queryClient: QueryClient, store: Store<RootState, any>) =>
   ({ chatId, name }: { chatId: string; name: string }) => {    
     const id = store.getState().chat.selectedChat?._id;
+    const userId = store.getState().user.user?._id;
 
-    queryClient.setQueryData(['all-chats'], (chats: IChat[]) => {
+    queryClient.setQueryData(['all-chats', userId], (chats: IChat[]) => {
       const newChats: IChat[] = structuredClone(chats);
 
       const chat = newChats.find((chat) => chat._id === chatId);

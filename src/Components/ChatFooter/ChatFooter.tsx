@@ -160,14 +160,6 @@ let ChatFooter: React.FC<ChatFooterProps> = ({ sendMessage, isPending }) => {
     };
 
     // * Pushing the Dummy Message to Query
-    // ! Not required in latest Redux implementation
-    // queryClient.setQueryData(
-    //   ['chat', selectedChat?._id],
-    //   (oldMessages: IMessage[]) => {
-    //     const newMessages = [attachmentMessage, ...oldMessages];
-    //     return newMessages;
-    //   }
-    // );
     dispatch(addMessage({ message: attachmentMessage }))
   };
 
