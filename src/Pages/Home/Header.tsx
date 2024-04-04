@@ -18,28 +18,29 @@ const Header = () => {
           {user ? (
             <li>
               <Link
-                className="flex items-center gap-2 text-2xl px-4 py-3 transition rounded-lg bg-accent bg-opacity-20"
+                className="flex items-center gap-2 text-2xl px-4 py-3 transition rounded-lg bg-[#1db8ab] text-white bg-opacity-20"
                 to="/chats"
               >
-                <FaRegUserCircle className="text-3xl text-accent" /> {user.name}
+                <FaRegUserCircle className="text-3xl text-[#1db8ab]" />{' '}
+                {user.name}
               </Link>
             </li>
           ) : (
             <>
               <li>
                 <Link
-                  className="flex items-center gap-2 text-2xl px-4 py-3 transition rounded-lg hover:bg-accent hover:bg-opacity-20"
+                  className="flex items-center gap-2 text-2xl px-4 py-3 transition rounded-lg hover:bg-[#1db8ab] text-white hover:bg-opacity-20"
                   to="/login"
                 >
-                  <IoLogInSharp className="text-3xl text-accent" /> Login
+                  <IoLogInSharp className="text-3xl text-[#1db8ab]" /> Login
                 </Link>
               </li>
               <li>
                 <Link
-                  className="flex items-center gap-2 text-2xl px-4 py-3 rounded-lg bg-accent bg-opacity-20"
+                  className="flex items-center gap-2 text-2xl px-4 py-3 rounded-lg bg-[#1db8ab] text-white bg-opacity-20"
                   to="/register"
                 >
-                  <LuUserPlus className="text-3xl text-accent" /> Register
+                  <LuUserPlus className="text-3xl text-[#1db8ab]" /> Register
                 </Link>
               </li>
             </>
