@@ -1,30 +1,56 @@
-# React + TypeScript + Vite
+![ChatsUP Image](https://live.staticflickr.com/65535/53640771865_de40c6bfd6_k.jpg)
+# ChatsUP
+- [ChatsUP](https://chats-up.onrender.com/) is Fast and Lightweight chat app for the web 🌎. Instantly connect with friends and family using this feature-packed chat application!. 
+- This repository serves as FrontEnd of [ChatsUP](https://chats-up.onrender.com/). For running the app locally you need to setup the Backend as well. [ChatsUP Backend](https://github.com/ubed90/chat-app-node-socket)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+## FrontEnd Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Pre-Requisites
+- [NodeJS](https://nodejs.org/dist/v20.12.2/node-v20.12.2.pkg) Version >= 18 Installed
 
-## Expanding the ESLint configuration
+- [MongoDB](https://www.mongodb.com/products/self-managed/community-edition)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- Backend setup locally - [Link](https://github.com/ubed90/chat-app-node-socket)
 
-- Configure the top-level `parserOptions` property like this:
+- Create a FireBase account and web project and get the credentials - [Steps](https://medium.com/@codersalman/firebase-for-web-a-step-by-step-tutorial-bf4da59c0a02)
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+### SETUP
+- Clone the Repository 
+```bash
+git clone https://github.com/ubed90/chat-app-react.git
+```
+- Open your terminal in root of the repository and install the dependencies
+```bash
+npm install
+or
+yarn
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- Rename the [.env.example](https://github.com/ubed90/chat-app-react/blob/main/.env.example) at the root of the project to ```.env```.
+
+- Add the Firebase environment variables which we got from the prerequisites to ```.env```
+
+- Run the project (Note: Make sure backend is running locally)
+```bash
+npm run dev
+or
+yarn dev
+```
+
+- Open your browser and visit
+```bash
+http://localhost:5173/
+```
+
+## Steps to Contribute
+- Fork the repository
+- Create a new branch
+- Make your changes <br /> - Make your code changes and ensure they adhere to the project's coding style and conventions.
+- Push your branch
+- Create a pull request with meaningful description.
+
+## Feature Requests for Contribution
+- Move Notifications to backend so that they persist on refresh
+- Reply a Message feature
+- Group messages Sent, Read and Delivered feature
