@@ -1,3 +1,9 @@
+/**
+ * ! Socket Context responsible to expose socket connection all over the application
+ * ! Also exposes one function which will disconnect the socket from server
+ * ? Pretty Self Explanatory stuff
+ */
+
 import socketio, { Socket } from "socket.io-client";
 import { getUserFromLocalStorage } from "../utils/localStorage";
 import { PropsWithChildren, createContext, useContext, useEffect, useState } from "react";

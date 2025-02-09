@@ -1,3 +1,5 @@
+// ! Pretty Self Explanatory - Root Level Application Routes
+
 import './App.scss';
 
 // * RQ

@@ -1,3 +1,10 @@
+/**
+ * ? This page loads when any chat is selected.
+ * ? Uses React Query to load the Messages of the selected chat asynchronously
+ * ? Listens for various sockets events responsible for AC / VC functionality.
+ * ! Uses RR V6 Loaders to load the Chat Messages when Page is refreshed on the same page.
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RootState, useAppDispatch } from '../../Store';
 import {
@@ -43,6 +50,18 @@ import throttle from '../../utils/throttle';
 import { FaArrowDown } from 'react-icons/fa';
 import { Store } from '@reduxjs/toolkit';
 
+/**
+ * @param queryClient 
+ * @param store 
+ * @returns LoaderFunction
+ * 
+ * ? RR V6 - Loader responsible when the user refreshes being on the chat page
+ * ! It fetches the ID of the selected chat from the route params
+ * ! Also fetches the currently selected chat from the Store
+ * ! If Currently selected Chat is not available means the page is refreshed while being on the selected chat page
+ * ! In that case It will fetch the chat data and set the currently selected chat and React Query will take on.🚀
+ * ? HotFix though needs to be refactored to tackle this.
+ */
 export const ChatLoader =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (queryClient: QueryClient, store: Store<RootState, any>): LoaderFunction =>
@@ -71,10 +90,10 @@ const Chat = () => {
   const { user } = useSelector((state: RootState) => state.user);
   const { selectedChat } = useSelector((state: RootState) => state.chat);
 
-  // * New Redux Way to Handle Messages
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // * Currently Selected Chat Messages which is a Kind of Map
   const messages = useSelector((state: RootState) => state.chat.messages);
 
+  // * Lookup for Messages
   const numOfMessages = useMemo(
     () => Object.keys(messages || {}).length,
     [messages]
@@ -85,10 +104,10 @@ const Chat = () => {
   // * Only use is to clean the selected chat state when component is unmounted
   const { id } = useParams();
 
-  // * Is User Online STate
+  // * Is User Online STate - Only for One on One Chats
   const [isOnline, setIsOnline] = useState<boolean>(false);
 
-  // * AVailable Users
+  // * Available Users
   const [isInRoom, setIsInRoom] = useState<boolean>(false);
 
   const handleStatus = (status: boolean) => {

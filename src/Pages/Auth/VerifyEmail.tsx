@@ -7,8 +7,10 @@ import { MdVerified } from 'react-icons/md';
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
 
+  // ? These are being sent from Server. 🙂 Refer Backend Endpoint if want to know more.
   const { email, token } = Object.fromEntries(searchParams.entries());
 
+  // ? Using React Query for making call to server for account verification as page loads
   const {
     data: response,
     error,
@@ -20,6 +22,7 @@ const VerifyEmail = () => {
       customFetch.post('/auth/verify-email', null, {
         params: { email, token },
       }),
+    // ! BASICALLY NOT TO CACHE THIS QUERY. 
     networkMode: 'online'
   });
 

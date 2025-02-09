@@ -14,7 +14,7 @@ import { RootState, useAppDispatch } from '../../Store';
 import { loginUser } from '../../features/user';
 import { useSelector } from 'react-redux';
 
-// * Register Action
+// ? Making use of React Router 6's Form Actions
 export const registerAction: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
@@ -122,6 +122,11 @@ const Register = () => {
           >
             {({ errors }) => (
               <>
+                {/* 
+                  -> Making use of Render Props Pattern here 
+                  -> CustomForm component exposes Form Errors which are calculated using a Custom Validator Function passed to the Form
+                  -> We can use the Error's exposed from this Component to change UI 😎  
+                */}
                 <FormInput
                   name="name"
                   placeholder="eg. John Doe"

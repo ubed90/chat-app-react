@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import customFetch from '../../utils/customFetch';
 import { IUserData } from '../../models/user.model';
 
+// ? Making use of React Router 6's Form Actions for Login
 export const loginAction =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (store: Store<RootState , any>): ActionFunction =>
@@ -50,6 +51,7 @@ const Login = () => {
     }
   }
 
+  // TODO: For Reverse Guarding, Should be Removed using a Loader / ReverseGuard Component
   if(user) return <Navigate to='/chats' />;
 
   return (
@@ -60,6 +62,11 @@ const Login = () => {
         <CustomForm method="POST" buttonText="Login" className="grid">
           {() => (
             <>
+            {/* 
+              -> Making use of Render Props Pattern here 
+              -> CustomForm component exposes Form Errors which are calculated using a Custom Validator Function passed to the Form
+              -> We can use the Error's exposed from this Component to change UI 😎  
+            */}
               <FormInput
                 name="email"
                 placeholder="Enter your email"

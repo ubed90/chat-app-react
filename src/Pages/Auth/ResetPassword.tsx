@@ -6,6 +6,8 @@ import { AxiosError } from 'axios';
 import { FormInput, CustomBtn } from '../../Components';
 import { toast } from 'react-toastify';
 
+// ? Reset Password component leveraging React Query Mutation
+// ? Pretty Self Explanatory
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
 
@@ -70,7 +72,7 @@ const ResetPassword = () => {
       <section className="px-4 w-full h-full flex flex-col gap-y-6 items-center justify-center">
         <MdVerified className="text-7xl text-accent" />
         <h5 className="text-2xl md:text-4xl text-accent">
-          {response.message || 'Voila! Your password is reset suucessfully.'}
+          {response.message || 'Voila! Your password reset is successful.'}
         </h5>
         <Link
           to="/login"

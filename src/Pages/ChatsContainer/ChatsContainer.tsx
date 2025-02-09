@@ -7,8 +7,11 @@ import MobileLayout from "./MobileLayout"
 
 const ChatsContainer = () => {
 
+  // ! Custom Hook for Detecting Window Size on the Go.
   const { width } = useWindowSize();
 
+  // ! There's Two Layouts Specifically for Mobile and then Tabs + Desktops
+  // ? Desktop One pretty straightforward.
   return (
     <ChatsProvider>
       {width <= 768 && <MobileLayout />}

@@ -40,6 +40,10 @@ const ChatsContext = createContext<ChatsContext>({
   isRefetching: false,
 });
 
+/**
+ * ! Chat Context Responsible for fetching chats after successful login
+ * ? Uses React Query to omit UseEffect and fetch data asynchronously
+ */
 export const ChatsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const userId = useSelector((state: RootState) => state.user.user?._id)
 

@@ -1,3 +1,7 @@
+/**
+ * ! Peer Context Responsible for Creation and Destruction of Peer, Required for Audio/Video Call.
+ * ? Exposes Various Variables and Methods which are responsible for management of Incoming and Outgoing Call under the hood.
+ */
 import Peer from 'peerjs';
 import { PropsWithChildren, createContext, useContext, useEffect, useState } from 'react';
 import { IUserData } from '../models/user.model';
@@ -54,15 +58,22 @@ const peerContext = createContext<PeerContext>({
 });
 
 const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  // ? Peer variable indicates whether connection is established or not
   const [peer, setPeer] = useState<Peer | null>(null);
+  // ? Indicates whether the user is call initiator or receiver
   const [isCaller, setIsCaller] = useState(false);
+  // ? Indicates whether the call is Video or Audio
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [isAudioCall, setIsAudioCall] = useState(false);
+  // ? Sets the User object of the person who is being called as receiver
   const [receiver, setReceiver] = useState<IUserData | null>(null);
+  // ? Indicates there is an incoming call
   const [incomingCall, setIncomingCall] = useState(false);
+  // ? Sets the incoming caller user object as Caller
   const [caller, setCaller] = useState<Caller | null>(null);
+  // ? Indicates whether the current call is Group Call or Not
   const [isGroupCall, setIsGroupCall] = useState(false)
-
+  // ? Indicated the current ongoing stream
   const [stream, setStream] = useState<MediaStream | null>(null);
 
   const handleStream = (stream: MediaStream | null) => {
@@ -78,7 +89,12 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const handleReceiver = (receiver: IUserData | null) => setReceiver(receiver);
 
   const handlePeer = () => {
+    // ? Willingly made to return a promise so that we can block further execution if Peer creation is blocked due to any reason
     return new Promise<string>((resolve, reject) => {
+      /**
+       * ? If Peer is already available will resolve the connected Peer
+       * ? If Peer is available but is disconnected it will just initiate the reconnection.
+       */
       if (peer) {
         if(peer.disconnected) {
           peer.reconnect();
@@ -87,6 +103,7 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
         return resolve(peer.id);
       }
 
+      // ? Peer Creation
       const myPeer = new Peer({
         debug: 2,
         host: '/',
@@ -129,10 +146,15 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
         },
       });
 
-      
+      // ! Fires when Peer is created successfully
       myPeer.on('open', (id) => {
-        setPeer(prevPeer => {
-          if(prevPeer) {
+        /**
+         * ? Using a setter function, because This listener is fired even Peer is Reconnected 🥲
+         * ? So thats why we are using a setter function to check if previous peer exists then we will return that or else we will return the newly created Peer.
+         * ! This will prevent unnecessary Connection and Disconnection of Peer.
+         */
+        setPeer((prevPeer) => {
+          if (prevPeer) {
             console.log('PEER RECONNECTED :: ', id);
             return prevPeer;
           }
@@ -143,6 +165,7 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
         });
       })
 
+      // ! Fires when Peer creation fails, which in turn fails the promise.
       myPeer.on('error', (error) => {
         console.log('Error Creating Peer :: ', error);
         return reject(error)
@@ -166,6 +189,7 @@ const PeerProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   const handleIsGroupCall = (value: boolean) => setIsGroupCall(value);
 
+  // ? This UseEffect is used to destroy the Connected Peer when User is logged out or component is unmounted.
   useEffect(() => {
 
     return () => {

@@ -1,3 +1,5 @@
+// ! Self Explanatory - Landing Page of the Site
+
 import Header from "./Header"
 import landing from "../../assets/chats-up-landing.png";
 import "./Home.scss";

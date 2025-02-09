@@ -7,7 +7,12 @@ import { getOtherUserDetails } from '../../utils/getOtherUser';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 
-
+/**
+ * ! Chats List Component Responsible for Display Of Chats.
+ * ? Provider Search Functionality as well
+ * ? Provides Ability to Create One on One / Group Chat using a + Menu
+ * @returns 
+ */
 const Chats = () => {
   const { chats, isLoading, isRefetching } = useChatsContext();
 

@@ -1,5 +1,6 @@
 import { MdChat } from 'react-icons/md';
 
+// * This Page is Shown when No chat is Selected
 const NoChatSelected = () => {
   return (
     <div className="w-full h-full grid place-items-center">

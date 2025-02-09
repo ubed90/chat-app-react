@@ -8,6 +8,7 @@ import { MdVerified } from 'react-icons/md';
 import { AxiosError } from 'axios';
 
 const ForgotPassword = () => {
+  // ? Using React Query Mutations for requesting Change Password. Pretty Self Explanatory
   const {
     mutate: sendForgotPasswordRequest,
     isPending,

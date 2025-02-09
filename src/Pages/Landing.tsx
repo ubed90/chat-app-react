@@ -27,7 +27,9 @@ import { AudioCall, VideoCall, CallNotifier } from '../Components';
 import { IUserData } from '../models/user.model';
 import notificationSound from "../assets/sounds/notification.mp3";
 
+// ! Main Component Where the Logic Starts
 const Landing: React.FC<PropsWithChildren> = ({ children }) => {
+  // * To Check whether Socket Connection is successful or not.
   const { socket, disconnect } = useSocket();
   const { user } = useSelector((state: RootState) => state.user);
   const queryClient = useQueryClient();
@@ -47,6 +49,7 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
 
   const navigate = useNavigate();
 
+  // ! Effect Accounting for global Socket Event Listeners
   useEffect(() => {
     if (!socket || !user) return;
 
@@ -113,6 +116,7 @@ const Landing: React.FC<PropsWithChildren> = ({ children }) => {
     };
   }, [disconnect, navigate, queryClient, socket, user]);
 
+  // ! Effect Accounting for Incoming AC / VC Call Socket Listener 
   useEffect(() => {
     if (!socket) return;
 
