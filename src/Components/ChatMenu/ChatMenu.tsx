@@ -18,7 +18,7 @@ const ChatMenu: React.FC<ChatMenuProps & PropsWithChildren> = ({ position }) => 
   }
 
   return (
-    <ul className={`chat-menu absolute ${position} ${open && 'open'}`}>
+    <ul className={`chat-menu fixed md:absolute ${position} ${open && 'open'}`}>
       <CreateGroupChat />
       <CreateChat />
       <li className="chat-menu-item">

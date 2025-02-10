@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const baseURL = import.meta.env.DEV
-  ? import.meta.env.VITE_SERVER_URI + '/api/v1'
+  ? import.meta.env.VITE_SERVER_URI_DEV + '/api/v1'
   : '/api/v1';
 
 const customFetch = axios.create({

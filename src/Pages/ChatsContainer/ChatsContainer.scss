@@ -40,6 +40,10 @@
 
         &.openChat {
             transform: translateX(-100%);
+
+            .left {
+                overflow-y: hidden;
+            }
         }
     }
 }

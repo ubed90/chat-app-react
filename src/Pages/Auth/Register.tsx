@@ -31,7 +31,7 @@ export const registerAction: ActionFunction = async ({ request }) => {
     }
     return { isError: false, message: response.message };
   } catch (error: any) {
-    toast.error(error.response.data.message);
+    toast.error(error?.response?.data?.message || error.message);
     return { isError: true };
   }
 };

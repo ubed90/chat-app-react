@@ -12,7 +12,7 @@ import { store } from "../Store";
 const getSocket = () => {
   const user = getUserFromLocalStorage() || store.getState()?.user?.user;
 
-  return socketio(import.meta.env.VITE_WS_URI, {
+  return socketio(import.meta.env.PROD ? import.meta.env.VITE_WS_URI : import.meta.env.VITE_WS_URI_DEV, {
     ...(import.meta.env.PROD ? {} : { withCredentials: true }),
     auth: { token: user?.token },
   });

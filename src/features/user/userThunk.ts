@@ -20,7 +20,7 @@ const loginUserThunk = async (
 
         return data;
     } catch (error: any) {
-        return thunkAPI.rejectWithValue(error.response.data.message)
+      return thunkAPI.rejectWithValue(error?.response?.data?.message || error?.message)
     }
 };
 
